@@ -1,0 +1,2 @@
+id,active,name,group_id/id,model_id/id,perm_create,perm_read,perm_write,perm_unlink
+res_company_location_global,True,res_company_location global,,base_idu.model_res_company_location,0,1,0,0

@@ -1,0 +1,48 @@
+{
+    "name" : "Plan de Mejoramiento IDU",
+    "version" : "odoo9.0-rev-2016022800",
+    "author" : "Instituto de Desarrollo Urbano - STRT I+D+I",
+    "category" : "idu", 
+    "description" : """Módulo para la gestión y seguimiento de 
+        los planes de mejoramiento
+    """,
+    "depends" : [
+        'base',
+        'base_idu',
+        'project_portafolio_idu',
+        'document',
+    ],
+    "data" : [
+        'security/plan_mejoramiento.xml',
+        'security/ir.model.access.csv',
+        'wizard/crear_progreso_de_tarea.xml',
+        'views/plan_mejoramiento_idu_view.xml',
+        'views/project_view.xml',
+        'wizard/abrir_registro_avances_view.xml',
+        'wizard/plan_mejoramiento_export_xls_view.xml',
+        'data/plan_mejoramiento.tipo_calificacion.csv',
+        'data/sequences.xml',
+        'data/message_type.xml',
+        'data/plan_mejoramiento_idu_data.xml',
+        'workflow/plan_mejoramiento_workflow.xml',
+    ],
+    "test": [
+        'tests/001_test_data_usuarios.yml',
+        'tests/002_test_data_plan.yml',
+        'tests/003_test_data_hallazgo.yml',
+        'tests/004_test_data_accion.yml',
+        'tests/005_test_data_avances.yml',
+        'tests/006_test_data_calificacion.yml',
+        #'tests/007_test_data_task.yml',
+    ],
+    "demo": [
+        'tests/001_test_data_usuarios.yml',
+        'tests/002_test_data_plan.yml',
+        'tests/003_test_data_hallazgo.yml',
+        'tests/004_test_data_accion.yml',
+        'tests/005_test_data_avances.yml',
+        'tests/006_test_data_calificacion.yml',
+        #'tests/007_test_data_task.yml',
+    ],
+    "installable" : True,
+}

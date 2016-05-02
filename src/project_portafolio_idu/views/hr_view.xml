@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+<data>
+    
+    <!--
+    =================================================================
+    hr.department
+    =================================================================
+    -->
+
+    <record model="ir.ui.view" id="department_search">
+        <field name="name">hr.department.search.project</field>
+        <field name="model">hr.department</field>
+        <field name="inherit_id" ref="hr.view_department_filter" />
+        <field name="arch" type="xml">
+            <field name="manager_id" position="after">
+                <field name="proyecto_gerente_id" />
+                <field name="proyecto_programador_id" />
+            </field>
+        </field>
+    </record>
+    <record model="ir.ui.view" id="department_form">
+        <field name="name">hr.department.form.project</field>
+        <field name="model">hr.department</field>
+        <field name="inherit_id" ref="hr.view_department_form" />
+        <field name="arch" type="xml">
+            <field name="manager_id" position="after">
+                <field name="proyecto_gerente_id" />
+                <field name="proyecto_programador_id" />
+            </field>
+        </field>
+    </record>
+</data>
+</openerp>

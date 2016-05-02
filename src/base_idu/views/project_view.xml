@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<openerp>
+<data>
+    <record id="base.menu_main_pm" model="ir.ui.menu">
+      <field name="active" eval="False"/>
+    </record>
+    <menuitem id="proyectos_nav"
+        name="ZIPA: Gestión de Proyectos"
+        groups="project.group_project_user"
+        sequence="10"
+    />
+    <menuitem id="proyectos_menu"
+        name="Proyectos"
+        parent="proyectos_nav"
+        sequence="10"
+    />
+    <menuitem id="proyectos_conf_menu" parent="proyectos_nav"
+        name="Configuración"
+        groups="project.group_project_manager"
+        sequence="30"
+    />
+    <menuitem id="proyectos_admin_menu" parent="proyectos_nav"
+        name="Administración"
+        groups="base.group_configuration"
+        sequence="100"
+    />
+</data>
+</openerp>

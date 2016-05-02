@@ -1,0 +1,100 @@
+-
+  CREAR ORIGEN DE PLAN DE MEJORAMIENTO
+-
+  !record {model: plan_mejoramiento.origen, id: id_origen_01}:
+    name: 'Auditoria y/o evaluación de procesos'
+-
+  !record {model: plan_mejoramiento.origen, id: id_origen_02}:
+    name: 'Auditoria Especial'
+-
+  Crear Proceso Origen Plan de Mejoramiento
+-
+  !record {model: plan_mejoramiento.proceso, id: id_proceso_01}:
+    name: 'Gestión del Talento Humano'
+-
+  !record {model: plan_mejoramiento.proceso, id: id_proceso_02}:
+    name: 'Inventarios'
+-
+  CREAR PLANES DE OCI
+-
+  PLAN 01
+-
+  !record {model: plan_mejoramiento.plan, id: id_pmi_01}:
+    name: 'Plan M. INTERNO PMI 1'
+    radicado_orfeo: 'A001'
+    tipo: 'interno'
+    dependencia_id: id_department_strt
+    origen_id: id_origen_01
+    proceso_id: id_proceso_01
+-
+  !record {model: plan_mejoramiento.plan, id: id_pmi_01}:
+    user_id: id_user_oci
+-
+  !assert {model: plan_mejoramiento.plan, id: id_pmi_01, string: id_pmi_01}:
+    - user_id.id == ref('id_user_oci')
+    - edt_raiz_id.user_id.id == ref('id_user_oci')
+    - project_id.user_id.id == ref('id_user_oci')
+    - edt_raiz_id.name == name
+    - project_id.name == name
+    - proyecto_tipo == 'plan_mejoramiento'
+-
+  PLAN 02
+-
+  !record {model: plan_mejoramiento.plan, id: id_pmb_02}:
+    name: 'Plan M. BOGOTA PMB 02'
+    radicado_orfeo: 'A002'
+    tipo: 'contraloria_bog'
+    dependencia_id: id_department_juridica
+-
+  !record {model: plan_mejoramiento.plan, id: id_pmb_02}:
+    user_id: id_user_oci
+-
+  !assert {model: plan_mejoramiento.plan, id: id_pmb_02, string: id_pmb_02}:
+    - user_id.id == ref('id_user_oci')
+    - edt_raiz_id.user_id.id == ref('id_user_oci')
+    - project_id.user_id.id == ref('id_user_oci')
+    - edt_raiz_id.name == name
+    - project_id.name == name
+    - proyecto_tipo == 'plan_mejoramiento'
+-
+  PLANES DE OCI_02
+-
+  PLAN 03
+-
+  !record {model: plan_mejoramiento.plan, id: id_pmi_03}:
+    name: 'Plan M. INTERNO PMI 03'
+    radicado_orfeo: 'A003'
+    tipo: 'interno'
+    dependencia_id: id_department_dg
+    origen_id: id_origen_02
+    proceso_id: id_proceso_02
+-
+  !record {model: plan_mejoramiento.plan, id: id_pmi_03}:
+    user_id: id_user_oci_02
+-
+  !assert {model: plan_mejoramiento.plan, id: id_pmi_03, string: id_pmi_03}:
+    - user_id.id == ref('id_user_oci_02')
+    - edt_raiz_id.user_id.id == ref('id_user_oci_02')
+    - project_id.user_id.id == ref('id_user_oci_02')
+    - edt_raiz_id.name == name
+    - project_id.name == name
+    - proyecto_tipo == 'plan_mejoramiento'
+-
+  PLAN 04
+-
+  !record {model: plan_mejoramiento.plan, id: id_pmi_04}:
+    name: 'Plan M. GENRAL PMG 04'
+    radicado_orfeo: 'A004'
+    tipo: 'contraloria_gral'
+    dependencia_id: id_department_dg
+-
+  !record {model: plan_mejoramiento.plan, id: id_pmi_04}:
+    user_id: id_user_oci_02
+-
+  !assert {model: plan_mejoramiento.plan, id: id_pmi_04, string: id_pmi_04}:
+    - user_id.id == ref('id_user_oci_02')
+    - edt_raiz_id.user_id.id == ref('id_user_oci_02')
+    - project_id.user_id.id == ref('id_user_oci_02')
+    - edt_raiz_id.name == name
+    - project_id.name == name
+    - proyecto_tipo == 'plan_mejoramiento'

@@ -1,0 +1,33 @@
+id,nombre,tipo,radicado_orfeo,fecha_creacion,dependencia,Auditor,origen,sub_origen,proceso_origen,name_user,email_user,area_user,rol_user
+1,Gestión del Talento Humano,interno,,27/06/13,STRH,ccrussis1,gestión,,Gestión del Talento Humano,Consuelo Mercedes Russi Suárez,consuelo.russi@idu.gov.co,OCI,1
+2,Gestión Administrativa y Financiera,interno,,20/09/13,DTAF,pjbuitra1,gestión,,Gestión Financiera,Juan Pedo Buitrago Echeverry,juan.buitrago@idu.gov.co,OCI,1
+3,Mapa de Riesgos de Corrupción,interno,,01/08/14,OAP,pcbaraja1,gestión,,Planeación Estratégica,Camilo Oswaldo Barajas Sierra,camilo.barajas@idu.gov.co,OCI,1
+4,Contrato de obra 2128 de 2013 - Contrato de interventoria 2051 de 2013,interno,,12/11/14,DTM,pfayalar1,gestión,,Gestión Contractual,Fabio Luis Ayala Rodríguez,fabio.ayala@idu.gov.co,OCI,1
+5,Gestión Contractual,interno,,23/10/14,DTD,ccrussis1,gestión,,Gestión Contractual,Consuelo Mercedes Russi Suárez,consuelo.russi@idu.gov.co,OCI,1
+6,Auditoria al sistema KACTUS,interno,,23/01/15,STRH,phpulido1,gestión,,Gestión del Talento Humano,Héctor Pulido Moreno,hector.pulido@idu.gov.co,OCI,1
+7,Auditoria al contrato 914 de 2013,interno,,28/02/15,STRT,phpulido1,gestión,,Gestión Contractual,Héctor Pulido Moreno,hector.pulido@idu.gov.co,OCI,1
+8,Auditoría al sistema de información ORFEO,interno,,29/05/15,STRF,phpulido1,gestión,,Gestión Documental,Héctor Pulido Moreno,hector.pulido@idu.gov.co,OCI,1
+9,Proceso de Gestión Contractual,interno,,14/09/15,DTGC,peussaga1,gestión,,Gestión Contractual,Eileen Dianny Ussa Garzón,eileen.ussa@idu.gov.co,OCI,1
+10,Contrato 135 de 2007,interno,,26/06/15,DTC,pwherrer1,gestión,,Ejecución de Obras,Wilson Guillermo Herrera Reyes,wilson.herrera@idu.gov.co,OCI,1
+11,Cto 1636 Dde 2013  Estaciones Autonorte,interno,,01/06/15,STEST,plleiva1,gestión,,Ejecución de Obras,Luis Fernando Leiva Sánchez,luis.sanchez@idu.gov.co,OCI,1
+12,Sistema de Control Interno,interno,,20/04/15,OAP,pwherrer1,gestión,,"Gestión Ambiental, Calidad y SST",Wilson Guillermo Herrera Reyes,wilson.herrera@idu.gov.co,OCI,1
+13,Gestión Contractual 2,interno,,23/10/14,DTD,ccrussis1,gestión,,Gestión Contractual,Consuelo Mercedes Russi Suárez,consuelo.russi@idu.gov.co,OCI,1
+14,Planeación Estratégica,interno,,28/12/15,OAP,cldiazra1,gestión,,Planeación Estratégica,Luz Marina Diaz Ramírez,lmarina.diaz@idu.gov.co,OCI,1
+15,Gestión Financiera 2,interno,,04/02/16,STTR,ccrussis1,gestión,,Gestión Financiera,Consuelo Mercedes Russi Suárez,consuelo.russi@idu.gov.co,OCI,1
+16,Gestión Contractual 3,interno,,03/02/16,DTD,ccrussis1,gestión,,Gestión Contractual,Consuelo Mercedes Russi Suárez,consuelo.russi@idu.gov.co,OCI,1
+17,Gestión Predial,interno,,11/11/15,DTDP,ccrussis1,gestión,,Gestión Predial,Consuelo Mercedes Russi Suárez,consuelo.russi@idu.gov.co,OCI,1
+18,Factibilidad de Proyectos,interno,,28/12/15,DTP,ccrussis1,gestión,,Factibilidad de Proyectos,Consuelo Mercedes Russi Suárez,consuelo.russi@idu.gov.co,OCI,1
+19,Factibilidad de Proyectos,interno,,06/02/15,DTP,pwherrer1,calidad,,Factibilidad de Proyectos,Wilson Guillermo Herrera Reyes,wilson.herrera@idu.gov.co,OCI,1
+20,Gestión Social y Participación Ciudadana – Preauditoría,interno,,15/01/15,OAC,phpulido1,calidad,,Gestión Social y Participación Ciudadana,Héctor Pulido Moreno,hector.pulido@idu.gov.co,OCI,1
+21,Mejoramiento continuo,interno,,16/04/15,OAP,phpulido1,calidad,,Mejoramiento continuo,Héctor Pulido Moreno,hector.pulido@idu.gov.co,OCI,1
+22,Gestión Social y Participación Ciudadana – Preauditoría,interno,,02/03/15,OTC,phpulido1,calidad,,Gestión Social y Participación Ciudadana,Héctor Pulido Moreno,hector.pulido@idu.gov.co,OCI,1
+23,Factibilidad de Proyectos,interno,,07/05/15,DTPS,pwherrer1,calidad,,Factibilidad de Proyectos,Wilson Guillermo Herrera Reyes,wilson.herrera@idu.gov.co,OCI,1
+24,"Gestión Ambiental, Calidad y S&SO",interno,,07/12/15,OAP,cldiazra1,calidad,,"Gestión Ambiental, Calidad y S&SO",Luz Marina Diaz Ramírez,lmarina.diaz@idu.gov.co,OCI,1
+25,Gestión Social y Participación Ciudadana,interno,,30/11/15,OTC,cldiazra1,calidad,,Gestión Social y Participación Ciudadana,Luz Marina Diaz Ramírez,lmarina.diaz@idu.gov.co,OCI,1
+26,Gestión Legal,interno,,30/12/15,SGJ,peussaga1,calidad,,Gestión Legal,Eileen Dianny Ussa Garzón,eileen.ussa@idu.gov.co,OCI,1
+27,Mejoramiento continuo – Autocontrol,interno,,25/05/15,OCI,cldiazra1,autocontrol,,Mejoramiento continuo,Luz Marina Diaz Ramírez,lmarina.diaz@idu.gov.co,OCI,1
+28,Ejecución de Obras – Autocontrol ,interno,,08/05/15,DTC,plleiva1,autocontrol,,Ejecución de Obras,Luis Fernando Leiva Sánchez,luis.sanchez@idu.gov.co,OCI,1
+29,Gestión del Talento Humano – Autocontrol,interno,,30/04/15,STRH,pfgaravi1,autocontrol,,Gestión del Talento Humano,Fernando Garavito Guerra,fernando.garavito@idu.gov.co,OCI,1
+30,Gestión Contractual – Autocontrol,interno,,17/09/15,DTGC,peussaga1,autocontrol,,Gestión Contractual,Eileen Dianny Ussa Garzón,eileen.ussa@idu.gov.co,OCI,1
+31,Gestión de Recursos Físicos – Autocontrol,interno,,01/02/15,STRF,ccrussis1,autocontrol,,Gestión de Recursos Físicos,Consuelo Mercedes Russi Suárez,consuelo.russi@idu.gov.co,OCI,1
+32,Gestión Legal – Autocontrol,interno,,08/04/15,DTGJ,peussaga1,autocontrol,,Gestión Legal,Eileen Dianny Ussa Garzón,eileen.ussa@idu.gov.co,OCI,1

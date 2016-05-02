@@ -1,0 +1,27 @@
+-
+  Crear Tipo Calificacion
+-
+  !record {model: plan_mejoramiento.tipo_calificacion, id: id_tipo_calificacion_interno}:
+    name: 'CUMPLIDA'
+    estado: 'terminado'
+    tipo_plan: 'interno'
+-
+  !record {model: plan_mejoramiento.tipo_calificacion, id: id_tipo_calificacion_bogota}:
+    name: 'SIN INICIAR'
+    estado: 'sin_iniciar'
+    tipo_plan: 'contraloria_bog'
+-
+  !record {model: plan_mejoramiento.tipo_calificacion, id: id_tipo_calificacion_cgeneral}:
+    name: 'VENCIDA, CUMPLIDA Y DOCUMENTADA'
+    estado: 'terminado'
+    tipo_plan: 'contraloria_gral'
+-
+  Calificar Avances
+-
+  !record {model: plan_mejoramiento.avance, id: id_avance2_oci_02}:
+    tipo_calificacion_id: id_tipo_calificacion_interno
+    porcentaje: 20
+-
+  !record {model: plan_mejoramiento.avance, id: id_avance3_oci_02}:
+    tipo_calificacion_id: id_tipo_calificacion_interno
+    porcentaje: 30

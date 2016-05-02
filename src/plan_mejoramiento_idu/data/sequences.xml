@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<openerp>
+    <data>
+        <!-- Cuentas por pagar -->
+        <record forcecreate="0" id="name_accion_seq" model="ir.sequence">
+            <field name="name">name_accion.secuencia</field>
+            <field name="code">name_accion.secuencia</field>
+            <field name="padding" eval="0"/>
+            <field name="prefix">Accion_</field>
+        </record>
+    </data>
+</openerp>

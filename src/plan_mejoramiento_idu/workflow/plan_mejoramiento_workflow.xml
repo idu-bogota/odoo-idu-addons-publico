@@ -1,0 +1,124 @@
+<openerp>
+    <data>
+    <record id="accion_workflow" model="workflow">
+            <field name="name">plan_mejoramiento.accion.workflow</field>
+            <field name="osv">plan_mejoramiento.accion</field>
+            <field name="on_create">True</field>
+    </record>
+    <!--
+    ===================================================================================
+    Actividades - Nodos
+    ===================================================================================
+     -->
+    <record id="accion_nuevo_node" model="workflow.activity">
+            <field name="wkf_id" ref="accion_workflow"/>
+            <field name="name">nuevo</field>
+            <field name="kind">dummy</field>
+            <field name="flow_start">True</field>
+    </record>
+    <record id="accion_por_aprobar_node" model="workflow.activity">
+            <field name="wkf_id" ref="accion_workflow"/>
+            <field name="name">por_aprobar</field>
+            <field name="kind">function</field>
+            <field name="action">wkf_por_aprobar()</field>
+    </record>
+    <record id="accion_rechazado_node" model="workflow.activity">
+            <field name="wkf_id" ref="accion_workflow"/>
+            <field name="name">rechazado</field>
+            <field name="kind">function</field>
+            <field name="action">wkf_rechazado()</field>
+    </record>
+    <record id="accion_aprobado_node" model="workflow.activity">
+            <field name="wkf_id" ref="accion_workflow"/>
+            <field name="name">aprobado</field>
+            <field name="kind">function</field>
+            <field name="action">wkf_aprobado()</field>
+    </record>
+    <record id="accion_en_progreso_node" model="workflow.activity">
+            <field name="wkf_id" ref="accion_workflow"/>
+            <field name="name">en_progreso</field>
+            <field name="kind">function</field>
+            <field name="action">wkf_en_progreso()</field>
+    </record>
+    <record id="accion_terminado_node" model="workflow.activity">
+            <field name="wkf_id" ref="accion_workflow"/>
+            <field name="name">terminado</field>
+            <field name="kind">function</field>
+            <field name="action">wkf_terminado()</field>
+    </record>
+    <record id="accion_cancelado_node" model="workflow.activity">
+            <field name="wkf_id" ref="accion_workflow"/>
+            <field name="name">cancelado</field>
+            <field name="kind">function</field>
+            <field name="action">wkf_cancelado()</field>
+    </record>
+    <!--
+    ===================================================================================
+    Transiciones
+    ===================================================================================
+     -->
+     <record id="nuevo_a_por_aprobar_transition" model="workflow.transition">
+            <field name="act_from" ref="accion_nuevo_node"/>
+            <field name="act_to" ref="accion_por_aprobar_node"/>
+            <field name="condition">True</field>
+            <field name="group_id" ref="plan_mejoramiento_idu.group_oci"/>
+            <field name="signal">wkf_nuevo_a_por_aprobar</field>
+    </record>
+    <record id="por_aprobar_a_aprobado_transition" model="workflow.transition">
+            <field name="act_from" ref="accion_por_aprobar_node"/>
+            <field name="act_to" ref="accion_aprobado_node"/>
+            <field name="condition">True</field>
+            <field name="group_id" ref="plan_mejoramiento_idu.group_jefe_dependencia"/>
+            <field name="signal">wkf_por_aprobar_a_aprobado</field>
+    </record>
+    <record id="por_aprobar_a_rechazado_transition" model="workflow.transition">
+            <field name="act_from" ref="accion_por_aprobar_node"/>
+            <field name="act_to" ref="accion_rechazado_node"/>
+            <field name="condition">True</field>
+            <field name="group_id" ref="plan_mejoramiento_idu.group_jefe_dependencia"/>
+            <field name="signal">wkf_por_aprobar_a_rechazado</field>
+    </record>
+    <record id="rechazado_a_por_aprobar_transition" model="workflow.transition">
+            <field name="act_from" ref="accion_rechazado_node"/>
+            <field name="act_to" ref="accion_por_aprobar_node"/>
+            <field name="condition">True</field>
+            <field name="group_id" ref="plan_mejoramiento_idu.group_oci"/>
+            <field name="signal">wkf_rechazado_a_por_aprobar</field>
+    </record>
+    <record id="aprobado_a_en_progreso_transition" model="workflow.transition">
+            <field name="act_from" ref="accion_aprobado_node"/>
+            <field name="act_to" ref="accion_en_progreso_node"/>
+            <field name="condition">True</field>
+            <field name="group_id" ref="plan_mejoramiento_idu.group_jefe_dependencia"/>
+            <field name="signal">wkf_aprobado_a_en_progreso</field>
+    </record>
+    <record id="en_progreso_a_terminado_transition" model="workflow.transition">
+            <field name="act_from" ref="accion_en_progreso_node"/>
+            <field name="act_to" ref="accion_terminado_node"/>
+            <field name="condition">True</field>
+            <field name="group_id" ref="plan_mejoramiento_idu.group_oci"/>
+            <field name="signal">wkf_en_progreso_a_terminado</field>
+    </record>
+    <record id="rechazado_a_cancelado" model="workflow.transition">
+            <field name="act_from" ref="accion_rechazado_node"/>
+            <field name="act_to" ref="accion_cancelado_node"/>
+            <field name="condition">True</field>
+            <field name="group_id" ref="plan_mejoramiento_idu.group_oci"/>
+            <field name="signal">wkf_a_cancelado</field>
+    </record>
+    <record id="aprobado_a_cancelado" model="workflow.transition">
+            <field name="act_from" ref="accion_aprobado_node"/>
+            <field name="act_to" ref="accion_cancelado_node"/>
+            <field name="condition">True</field>
+            <field name="group_id" ref="plan_mejoramiento_idu.group_oci"/>
+            <field name="signal">wkf_a_cancelado</field>
+    </record>
+    <record id="en_progreso_a_cancelado" model="workflow.transition">
+            <field name="act_from" ref="accion_en_progreso_node"/>
+            <field name="act_to" ref="accion_cancelado_node"/>
+            <field name="condition">True</field>
+            <field name="group_id" ref="plan_mejoramiento_idu.group_oci"/>
+            <field name="signal">wkf_a_cancelado</field>
+    </record>
+    </data>
+</openerp>

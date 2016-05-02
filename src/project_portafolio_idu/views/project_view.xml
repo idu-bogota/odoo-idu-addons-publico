@@ -1,0 +1,1024 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+<data>
+    <!--
+    =================================================================
+    Menú
+    =================================================================
+    -->
+
+     <menuitem id="project_portafolio_idu_menu"
+        name="Portafolio Proyectos"
+        parent="base_idu.proyectos_nav"
+        sequence="10"
+    />
+     <menuitem id="project_portafolio_idu_conf_menu" parent="base_idu.proyectos_nav"
+        name="Configuración Portafolio Proyectos"
+        groups="base.group_configuration"
+        sequence="30"
+     />
+     <menuitem id="project_portafolio_idu_admin_menu" parent="base_idu.proyectos_nav"
+        name="Administración Portafolio Proyectos"
+        groups="base.group_configuration"
+        sequence="100"
+     />
+     <menuitem id="project_portafolio_idu_dependencia_admin_menu" parent="base_idu.proyectos_nav"
+        name="Administración Portafolio Proyectos"
+        groups="project_portafolio_idu.group_project_dependencia_admin"
+        sequence="40"
+     />
+
+    <!--
+    =================================================================
+    project.programa
+    Programa de Proyectos
+    =================================================================
+    -->
+    <record model="ir.ui.view" id="programa_search">
+        <field name="name">project.programa.search</field>
+        <field name="model">project.programa</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name" />
+                <field name="user_id" />
+                <filter name="filtro_user_id"
+                    string="Filtro para Responsable"
+                    domain="[('user_id','=',uid)]"
+                />
+                <field name="descripcion" />
+                <field name="project_ids" />
+                <group string="Agrupar por...">
+                    <filter string="Responsable" context="{'group_by':'user_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+    <record model="ir.ui.view" id="programa_form">
+        <field name="name">project.programa.form</field>
+        <field name="model">project.programa</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                </header>
+                <sheet>
+                    <group>
+                        <field name="name" />
+                        <field name="user_id" />
+                        <field name="descripcion" />
+                        <field name="project_ids" />
+                    </group>
+                    <notebook>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids" widget="mail_followers" groups="base.group_user"/>
+                    <field name="message_ids" widget="mail_thread"/>
+                </div>
+            </form>
+        </field>
+    </record>
+    <record model="ir.ui.view" id="programa_tree">
+        <field name="name">project.programa.tree</field>
+        <field name="model">project.programa</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name" />
+                <field name="user_id" />
+                <field name="descripcion" />
+                <field name="project_ids" />
+            </tree>
+        </field>
+    </record>
+    <record model="ir.actions.act_window" id="programa_action">
+        <field name="name">Programas</field>
+        <field name="res_model">project.programa</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+    <menuitem id="programa_menu"
+        parent="base_idu.proyectos_conf_menu"
+        sequence="10"
+        name="Programas" action="programa_action"
+    />
+
+    <!--
+    =================================================================
+    project.portafolio
+    Portafolio de Proyectos
+    =================================================================
+    -->
+    <record model="ir.ui.view" id="portafolio_search">
+        <field name="name">project.portafolio.search</field>
+        <field name="model">project.portafolio</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name" />
+                <field name="user_id" />
+                <filter name="filtro_user_id"
+                    string="Filtro para Responsable"
+                    domain="[('user_id','=',uid)]"
+                />
+                <field name="descripcion" />
+                <field name="project_ids" />
+                <group string="Agrupar por...">
+                    <filter string="Responsable" context="{'group_by':'user_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+    <record model="ir.ui.view" id="portafolio_form">
+        <field name="name">project.portafolio.form</field>
+        <field name="model">project.portafolio</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                </header>
+                <sheet>
+                    <group>
+                        <field name="name" />
+                        <field name="user_id" />
+                        <field name="descripcion" />
+                        <field name="project_ids" />
+                    </group>
+                    <notebook>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids" widget="mail_followers" groups="base.group_user"/>
+                    <field name="message_ids" widget="mail_thread"/>
+                </div>
+            </form>
+        </field>
+    </record>
+    <record model="ir.ui.view" id="portafolio_tree">
+        <field name="name">project.portafolio.tree</field>
+        <field name="model">project.portafolio</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name" />
+                <field name="user_id" />
+                <field name="descripcion" />
+                <field name="project_ids" />
+            </tree>
+        </field>
+    </record>
+    <record model="ir.actions.act_window" id="portafolio_action">
+        <field name="name">Portafolios</field>
+        <field name="res_model">project.portafolio</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+    <menuitem id="portafolio_menu"
+        parent="base_idu.proyectos_conf_menu"
+        sequence="10"
+        name="Portafolios" action="portafolio_action"
+    />
+
+    <!--
+    =================================================================
+    project.linea_base
+    Linea Base de Proyecto
+    =================================================================
+    -->
+    <record model="ir.ui.view" id="linea_base_search">
+        <field name="name">project.linea_base.search</field>
+        <field name="model">project.linea_base</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name" />
+                <field name="project_id" />
+                <field name="es_snapshot" />
+                <group string="Agrupar por...">
+                    <filter string="Proyecto" context="{'group_by':'project_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+    <record model="ir.ui.view" id="linea_base_form">
+        <field name="name">project.linea_base.form</field>
+        <field name="model">project.linea_base</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                </header>
+                <sheet>
+                    <group>
+                        <field name="name" />
+                        <field name="project_id" />
+                        <field name="descripcion" />
+                        <field name="linea_ids" />
+                        <field name="es_snapshot" />
+                        <field name="create_uid" />
+                        <field name="create_date" />
+                    </group>
+                    <notebook>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    <record model="ir.ui.view" id="linea_base_tree">
+        <field name="name">project.linea_base.tree</field>
+        <field name="model">project.linea_base</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name" />
+                <field name="project_id" />
+                <field name="es_snapshot" />
+                <field name="create_uid" />
+                <field name="create_date" />
+            </tree>
+        </field>
+    </record>
+    <record model="ir.actions.act_window" id="linea_base_action">
+        <field name="name">Líneas Base</field>
+        <field name="res_model">project.linea_base</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+    <menuitem id="linea_base_menu"
+        parent="project_portafolio_idu_admin_menu"
+        sequence="50"
+        name="Líneas Base" action="linea_base_action"
+    />
+
+    <!--
+    =================================================================
+    project.linea_base.linea
+    Linea de Linea Base de Proyecto
+    =================================================================
+    -->
+    <record model="ir.ui.view" id="linea_base_linea_search">
+        <field name="name">project.linea_base.linea.search</field>
+        <field name="model">project.linea_base.linea</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name" />
+                <field name="numero" />
+                <field name="linea_base_id" />
+                <field name="active" />
+                <field name="res_model" />
+                <field name="res_id" />
+                <group string="Agrupar por...">
+                    <filter string="Línea Base" context="{'group_by':'linea_base_id'}"/>
+                    <filter string="Línea Padre" context="{'group_by':'parent_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+    <record model="ir.ui.view" id="linea_base_linea_form">
+        <field name="name">project.linea_base.linea.form</field>
+        <field name="model">project.linea_base.linea</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                </header>
+                <sheet>
+                    <group>
+                        <field name="numero" />
+                        <field name="name" />
+                        <field name="linea_base_id" />
+                        <field name="active" />
+                        <field name="res_model" />
+                        <field name="res_id" />
+                        <field name="fecha_inicio" />
+                        <field name="fecha_fin" />
+                        <field name="progreso" />
+                        <field name="costo" />
+                        <field name="cantidad" />
+                        <field name="create_uid" />
+                        <field name="create_date" />
+                    </group>
+                    <notebook>
+                        <page string="Jerarquía">
+                            <group>
+                                <field name="parent_id" />
+                                <field name="child_ids" />
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    <record model="ir.ui.view" id="linea_base_linea_tree">
+        <field name="name">project.linea_base.linea.tree</field>
+        <field name="model">project.linea_base.linea</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="numero" />
+                <field name="name" />
+                <field name="linea_base_id" />
+                <field name="active" />
+                <field name="res_model" />
+                <field name="res_id" />
+                <field name="fecha_inicio" />
+                <field name="fecha_fin" />
+                <field name="progreso" />
+                <field name="costo" />
+                <field name="create_uid" />
+                <field name="create_date" />
+            </tree>
+        </field>
+    </record>
+    <record model="ir.actions.act_window" id="linea_base_linea_action">
+        <field name="name">Líneas Línea Base</field>
+        <field name="res_model">project.linea_base.linea</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+    <menuitem id="linea_base_linea_menu"
+        parent="project_portafolio_idu_admin_menu"
+        sequence="50"
+        name="Líneas Línea Base" action="linea_base_linea_action"
+    />
+
+    <!--
+    =================================================================
+    project.reporte_desempeno
+    Reporte de Desempeno de Proyecto
+    =================================================================
+    -->
+    <record model="ir.ui.view" id="reporte_desempeno_search">
+        <field name="name">project.reporte_desempeno.search</field>
+        <field name="model">project.reporte_desempeno</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name" />
+                <field name="state" />
+                <filter name="filtro_state_nuevo"
+                    string="nuevo"
+                    help="Filtrar Estado nuevo"
+                    domain="[('state', '=', 'nuevo')]"
+                />
+                <filter name="filtro_state_por_revisar"
+                    string="por_revisar"
+                    help="Filtrar Estado por_revisar"
+                    domain="[('state', '=', 'por_revisar')]"
+                />
+                <filter name="filtro_state_aprobado"
+                    string="aprobado"
+                    help="Filtrar Estado aprobado"
+                    domain="[('state', '=', 'aprobado')]"
+                />
+                <filter name="filtro_state_devuelto"
+                    string="devuelto"
+                    help="Filtrar Estado devuelto"
+                    domain="[('state', '=', 'devuelto')]"
+                />
+                <field name="project_id" />
+                <field name="linea_base_id" />
+                <field name="linea_base_reporte_id" />
+                <group string="Agrupar por...">
+                    <filter string="Estado" context="{'group_by':'state'}"/>
+                    <filter string="Proyecto" context="{'group_by':'project_id'}"/>
+                    <filter string="Línea Base" context="{'group_by':'linea_base_id'}"/>
+                    <filter string="Detalle del Reporte" context="{'group_by':'linea_base_reporte_id'}"/>
+                    <filter string="Fecha" context="{'group_by':'fecha'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+    <record model="ir.ui.view" id="reporte_desempeno_form">
+        <field name="name">project.reporte_desempeno.form</field>
+        <field name="model">project.reporte_desempeno</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button string="Para Revisión" type="workflow" class="oe_highlight"
+                        name="wkf_borrador__por_revisar"
+                        states="borrador"
+                    />
+                    <button string="Devolver" type="workflow" class="oe_highlight"
+                        name="wkf_por_revisar__devuelto"
+                        groups="project.group_project_manager"
+                        states="por_revisar"
+                    />
+                    <button string="Para Revisión" type="workflow" class="oe_highlight"
+                        name="wkf_devuelto__por_revisar"
+                        states="devuelto"
+                    />
+                    <button string="Aprobado" type="workflow" class="oe_highlight"
+                        name="wkf_por_revisar__aprobado"
+                        groups="project.group_project_manager"
+                        states="por_revisar"
+                    />
+                    <field name="state" widget="statusbar" />
+                </header>
+                <sheet>
+                    <group>
+                        <field name="name" />
+                        <field name="project_id" />
+                        <field name="linea_base_id" />
+                        <field name="linea_base_reporte_id" />
+                        <field name="fecha" />
+                    </group>
+                    <notebook>
+                        <page string="Análisis de Desempeño">
+                            <field name="analisis" />
+                        </page>
+                        <page string="Análisis de Causa Raíz">
+                            <field name="causa_raiz" />
+                        </page>
+                        <page string="Plan de Contingencia">
+                            <field name="plan_contingencia" />
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    <record model="ir.ui.view" id="reporte_desempeno_tree">
+        <field name="name">project.reporte_desempeno.tree</field>
+        <field name="model">project.reporte_desempeno</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name" />
+                <field name="state" />
+                <field name="project_id" />
+                <field name="linea_base_id" />
+                <field name="linea_base_reporte_id" />
+                <field name="fecha" />
+            </tree>
+        </field>
+    </record>
+    <record model="ir.actions.act_window" id="reporte_desempeno_action">
+        <field name="name">Reportes de Desempeño</field>
+        <field name="res_model">project.reporte_desempeno</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+    <menuitem id="reporte_desempeno_menu"
+        parent="project_portafolio_idu_admin_menu"
+        sequence="10"
+        name="Reportes de Desempeño" action="reporte_desempeno_action"
+    />
+
+    <!--
+    =================================================================
+    project.reporte_desempeno.valor_ganado
+    Valor Ganado Proyecto
+    =================================================================
+    -->
+    <record model="ir.ui.view" id="reporte_desempeno_valor_ganado_search">
+        <field name="name">project.reporte_desempeno.valor_ganado.search</field>
+        <field name="model">project.reporte_desempeno.valor_ganado</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name" />
+                <field name="reporte_id" />
+                <group string="Agrupar por...">
+                    <filter string="Reporte de Desempeño" context="{'group_by':'reporte_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+    <record model="ir.ui.view" id="reporte_desempeno_valor_ganado_form">
+        <field name="name">project.reporte_desempeno.valor_ganado.form</field>
+        <field name="model">project.reporte_desempeno.valor_ganado</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                </header>
+                <sheet>
+                    <group>
+                        <field name="name" />
+                        <field name="reporte_id" />
+                        <field name="linea_base_linea_id" />
+                        <field name="active" />
+                    </group>
+                    <notebook>
+                        <page string='Indicators'>
+                            <group>
+                                <field name="cv" />
+                                <field name="sv" />
+                                <field name="cpi" />
+                                <field name="spi" />
+                                <field name="sv_t" />
+                                <field name="spi_t" />
+                            </group>
+                        </page>
+                        <page string='Values'>
+                            <group>
+                                <field name="planned_complete" />
+                                <field name="actual_complete" />
+                                <field name="bac" />
+                                <field name="ac" />
+                                <field name="es" />
+                                <field name="at" />
+                                <field name="pv" />
+                                <field name="ev" />
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    <record model="ir.ui.view" id="reporte_desempeno_valor_ganado_tree">
+        <field name="name">project.reporte_desempeno.valor_ganado.tree</field>
+        <field name="model">project.reporte_desempeno.valor_ganado</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name" />
+                <field name="reporte_id" />
+                <field name="active" />
+                <field name="planned_complete" />
+                <field name="actual_complete" />
+                <field name="cpi" />
+                <field name="spi" />
+                <field name="spi_t" />
+            </tree>
+        </field>
+    </record>
+    <record model="ir.actions.act_window" id="reporte_desempeno_valor_ganado_action">
+        <field name="name">Líneas Valor Ganado</field>
+        <field name="res_model">project.reporte_desempeno.valor_ganado</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+    <menuitem id="reporte_desempeno_valor_ganado_menu"
+        parent="project_portafolio_idu_admin_menu"
+        sequence="50"
+        name="Líneas Valor Ganado" action="reporte_desempeno_valor_ganado_action"
+    />
+
+    <!--
+    =================================================================
+    project.project
+    =================================================================
+    -->
+
+    <record model="ir.ui.view" id="project_search">
+        <field name="name">project.project.search.project</field>
+        <field name="model">project.project</field>
+        <field name="inherit_id" ref="project.view_project_project_filter" />
+        <field name="arch" type="xml">
+            <field name="partner_id" position="after">
+                <field name="dependencia_id" />
+                <field name="alcance" />
+                <field name="notas" />
+                <field name="proyecto_tipo" />
+                <filter name="filtro_proyecto_tipo_obra"
+                    string="obra"
+                    help="Filtrar Tipo de Proyecto obra"
+                    domain="[('proyecto_tipo', '=', 'obra')]"
+                />
+                <filter name="filtro_proyecto_tipo_obra_etapa"
+                    string="obra_etapa"
+                    help="Filtrar Tipo de Proyecto obra_etapa"
+                    domain="[('proyecto_tipo', '=', 'obra_etapa')]"
+                />
+                <filter name="filtro_proyecto_tipo_obra_componente"
+                    string="obra_componente"
+                    help="Filtrar Tipo de Proyecto obra_componente"
+                    domain="[('proyecto_tipo', '=', 'obra_componente')]"
+                />
+                <filter name="filtro_proyecto_tipo_funcionamiento"
+                    string="funcionamiento"
+                    help="Filtrar Tipo de Proyecto funcionamiento"
+                    domain="[('proyecto_tipo', '=', 'funcionamiento')]"
+                />
+                <filter name="filtro_proyecto_tipo_plan_mejoramiento"
+                    string="plan_mejoramiento"
+                    help="Filtrar Tipo de Proyecto plan_mejoramiento"
+                    domain="[('proyecto_tipo', '=', 'plan_mejoramiento')]"
+                />
+                <filter name="filtro_proyecto_tipo_plan_accion"
+                    string="plan_accion"
+                    help="Filtrar Tipo de Proyecto plan_accion"
+                    domain="[('proyecto_tipo', '=', 'plan_accion')]"
+                />
+                <field name="programa_id" />
+                <field name="portafolio_ids" />
+            </field>
+            <group position="inside">
+                <filter string="Dependencia" context="{'group_by':'dependencia_id'}"/>
+                <filter string="Tipo de Proyecto" context="{'group_by':'proyecto_tipo'}"/>
+                <filter string="Programa" context="{'group_by':'programa_id'}"/>
+            </group>
+        </field>
+    </record>
+    <record model="ir.ui.view" id="project_form">
+        <field name="name">project.project.form.project</field>
+        <field name="model">project.project</field>
+        <field name="inherit_id" ref="project.edit_project" />
+        <field name="arch" type="xml">
+            <xpath expr="//form" position="attributes">
+                <attribute name="create">false</attribute>
+            </xpath>
+            <div name="button_box" position="inside">
+                <button attrs="{'invisible':[('edt_raiz_id','=', False)]}"
+                    class="oe_stat_button" type="action"
+                    icon="fa-magic" name="%(wizard_crear_linea_base_action)d" string="Crear Línea Base"
+                    context="{'project_id': active_id}"
+                />
+            </div>
+            <div name="options_active" position="before">
+                <group>
+                    <field name="dependencia_id" />
+                </group>
+            </div>
+            <field name="sequence" position="after">
+                <field name="proyecto_tipo" />
+            </field>
+            <notebook position="inside">
+                <page string="Alcance y Notas">
+                    <group string="Alcance">
+                        <field name="alcance" nolabel="1" />
+                    </group>
+                    <group string="Notas">
+                        <field name="notas" nolabel="1" />
+                    </group>
+                </page>
+                <page string="Portafolio">
+                    <field name="portafolio_ids" />
+                </page>
+                <page string="Metas">
+                    <field name="meta_ids" />
+                </page>
+                <page string="Financiación">
+                    <field name="financiacion_ids" />
+                </page>
+                <page string="Solicitudes de Cambio">
+                    <field name="solicitud_cambio_ids" />
+                </page>
+                <page string="Reportes de Desempeño">
+                    <field name="reporte_desempeno_ids" />
+                </page>
+                <page string="Líneas Base">
+                    <group string="Líneas Base">
+                        <field name="linea_base_ids" nolabel="1" />
+                    </group>
+                    <group string="Histórico de Ejecución">
+                        <field name="snapshot_ids" nolabel="1" />
+                    </group>
+                </page>
+            </notebook>
+        </field>
+    </record>
+    <record model="ir.ui.view" id="project_tree">
+        <field name="name">project.project.tree.project</field>
+        <field name="model">project.project</field>
+        <field name="inherit_id" ref="project.view_project" />
+        <field name="arch" type="xml">
+            <field name="partner_id" position="replace" />
+            <field name="name" position="after">
+                <field name="dependencia_id" />
+                <field name="proyecto_tipo" />
+                <field name="programa_id" />
+                <field name="privacy_visibility" />
+            </field>
+        </field>
+    </record>
+    <record model="ir.actions.act_window" id="admin_project_action">
+        <field name="name">Proyectos</field>
+        <field name="res_model">project.project</field>
+        <field name="view_mode">tree,kanban,form</field>
+    </record>
+    <menuitem id="admin_project_menu"
+        parent="project_portafolio_idu_admin_menu"
+        sequence="10"
+        name="Proyectos" action="admin_project_action"
+    />
+    <record model="ir.actions.act_window" id="dependencia_admin_project_action">
+        <field name="name">Proyectos Dependencia</field>
+        <field name="res_model">project.project</field>
+        <field name="view_mode">tree,kanban,form</field>
+        <field name="domain">[('dependencia_id', '=', 'USER_DEPARTMENT_ID')]</field>
+    </record>
+    <menuitem id="dependencia_admin_project_menu"
+        parent="project_portafolio_idu_dependencia_admin_menu"
+        sequence="10"
+        name="Proyectos" action="dependencia_admin_project_action"
+    />
+    <!--
+    =================================================================
+    project.financiacion
+    Financiacion Proyecto
+    =================================================================
+    -->
+    <record model="ir.ui.view" id="financiacion_search">
+        <field name="name">project.financiacion.search</field>
+        <field name="model">project.financiacion</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name" />
+                <field name="project_id" />
+                <field name="fuente_financiacion_id" />
+                <field name="valor" />
+                <group string="Agrupar por...">
+                    <filter string="Proyecto" context="{'group_by':'project_id'}"/>
+                    <filter string="Fuente de financiación" context="{'group_by':'fuente_financiacion_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+    <record model="ir.ui.view" id="financiacion_form">
+        <field name="name">project.financiacion.form</field>
+        <field name="model">project.financiacion</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                </header>
+                <sheet>
+                    <group>
+                        <field name="name" />
+                        <field name="project_id" />
+                        <field name="fuente_financiacion_id" />
+                        <field name="valor" />
+                    </group>
+                    <notebook>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    <record model="ir.ui.view" id="financiacion_tree">
+        <field name="name">project.financiacion.tree</field>
+        <field name="model">project.financiacion</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name" />
+                <field name="project_id" />
+                <field name="fuente_financiacion_id" />
+                <field name="valor" />
+            </tree>
+        </field>
+    </record>
+    <record model="ir.actions.act_window" id="financiacion_action">
+        <field name="name">Financiación</field>
+        <field name="res_model">project.financiacion</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+    <menuitem id="financiacion_menu"
+        parent="project_portafolio_idu_admin_menu"
+        sequence="50"
+        name="Financiación" action="financiacion_action"
+    />
+
+    <!--
+    =================================================================
+    project.solicitud_cambio
+    Solicitud de Cambio en Proyecto
+    =================================================================
+    -->
+    <record model="ir.ui.view" id="solicitud_cambio_search">
+        <field name="name">project.solicitud_cambio.search</field>
+        <field name="model">project.solicitud_cambio</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name" />
+                <field name="state" />
+                <filter name="filtro_state_nuevo"
+                    string="nuevo"
+                    help="Filtrar Estado nuevo"
+                    domain="[('state', '=', 'nuevo')]"
+                />
+                <filter name="filtro_state_por_revisar"
+                    string="por_revisar"
+                    help="Filtrar Estado por_revisar"
+                    domain="[('state', '=', 'por_revisar')]"
+                />
+                <filter name="filtro_state_aprobado"
+                    string="aprobado"
+                    help="Filtrar Estado aprobado"
+                    domain="[('state', '=', 'aprobado')]"
+                />
+                <filter name="filtro_state_devuelto"
+                    string="devuelto"
+                    help="Filtrar Estado devuelto"
+                    domain="[('state', '=', 'devuelto')]"
+                />
+                <field name="project_id" />
+                <group string="Agrupar por...">
+                    <filter string="Estado" context="{'group_by':'state'}"/>
+                    <filter string="Proyecto" context="{'group_by':'project_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+    <record model="ir.ui.view" id="solicitud_cambio_form">
+        <field name="name">project.solicitud_cambio.form</field>
+        <field name="model">project.solicitud_cambio</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button string="Para Revisión" type="workflow" class="oe_highlight"
+                        name="wkf_nuevo__por_revisar"
+                        states="nuevo"
+                    />
+                    <button string="Devolver" type="workflow" class="oe_highlight"
+                        name="wkf_por_revisar__devuelto"
+                        groups="project.group_project_manager"
+                        states="por_revisar"
+                    />
+                    <button string="Para Revisión" type="workflow" class="oe_highlight"
+                        name="wkf_devuelto__por_revisar"
+                        states="devuelto"
+                    />
+                    <button string="Aprobado" type="workflow" class="oe_highlight"
+                        name="wkf_por_revisar__aprobado"
+                        groups="project.group_project_manager"
+                        states="por_revisar"
+                    />
+                    <field name="state" widget="statusbar" />
+                </header>
+                <sheet>
+                    <group>
+                        <field name="name" />
+                        <field name="project_id" />
+                    </group>
+                    <notebook>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids" widget="mail_followers" groups="base.group_user"/>
+                    <field name="message_ids" widget="mail_thread"/>
+                </div>
+            </form>
+        </field>
+    </record>
+    <record model="ir.ui.view" id="solicitud_cambio_tree">
+        <field name="name">project.solicitud_cambio.tree</field>
+        <field name="model">project.solicitud_cambio</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name" />
+                <field name="state" />
+                <field name="project_id" />
+            </tree>
+        </field>
+    </record>
+    <record model="ir.actions.act_window" id="solicitud_cambio_action">
+        <field name="name">Solicitudes de Cambio</field>
+        <field name="res_model">project.solicitud_cambio</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+    <menuitem id="solicitud_cambio_menu"
+        parent="base_idu.proyectos_conf_menu"
+        sequence="10"
+        name="Solicitudes de Cambio" action="solicitud_cambio_action"
+    />
+
+    <!--
+    =================================================================
+    project.task
+    =================================================================
+    -->
+
+    <record model="ir.ui.view" id="task_search">
+        <field name="name">project.task.search.project</field>
+        <field name="model">project.task</field>
+        <field name="inherit_id" ref="project.view_task_search_form" />
+        <field name="arch" type="xml">
+            <field name="project_id" position="after">
+                <field name="dependencia_id" />
+            </field>
+            <group position="inside">
+                <filter string="Dependencia" context="{'group_by':'dependencia_id'}"/>
+            </group>
+        </field>
+    </record>
+    <record model="ir.ui.view" id="task_form">
+        <field name="name">project.task.form.project</field>
+        <field name="model">project.task</field>
+        <field name="inherit_id" ref="project.view_task_form2" />
+        <field name="arch" type="xml">
+            <field name="project_id" position="before">
+                <field name="dependencia_id" invisible="1" />
+            </field>
+        </field>
+    </record>
+<!--    <record model="ir.ui.view" id="task_tree">
+        <field name="name">project.task.tree.project</field>
+        <field name="model">project.task</field>
+        <field name="inherit_id" ref="project.view_task_tree2" />
+        <field name="arch" type="xml">
+            <field name="user_id" position="after">
+                <field name="dependencia_id" />
+            </field>
+        </field>
+    </record>-->
+
+    <!--
+    =================================================================
+    project.meta
+    Meta de Proyecto
+    =================================================================
+    -->
+    <record model="ir.ui.view" id="meta_search">
+        <field name="name">project.meta.search</field>
+        <field name="model">project.meta</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="project_id" />
+                <field name="tipo_id" />
+                <group string="Agrupar por...">
+                    <filter string="Proyecto" context="{'group_by':'project_id'}"/>
+                    <filter string="Tipo" context="{'group_by':'tipo_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+    <record model="ir.ui.view" id="meta_form">
+        <field name="name">project.meta.form</field>
+        <field name="model">project.meta</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                </header>
+                <sheet>
+                    <group>
+                        <field name="project_id" />
+                        <field name="tipo_id" />
+                        <field name="cantidad" />
+                        <field name="edt_id" />
+                        <field name="progreso" />
+                    </group>
+                    <notebook>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids" widget="mail_followers" groups="base.group_user"/>
+                    <field name="message_ids" widget="mail_thread"/>
+                </div>
+            </form>
+        </field>
+    </record>
+    <record model="ir.ui.view" id="meta_tree">
+        <field name="name">project.meta.tree</field>
+        <field name="model">project.meta</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="project_id" />
+                <field name="tipo_id" />
+                <field name="cantidad" />
+            </tree>
+        </field>
+    </record>
+    <record model="ir.actions.act_window" id="meta_action">
+        <field name="name">Metas de Proyecto</field>
+        <field name="res_model">project.meta</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+    <menuitem id="meta_menu"
+        parent="project_portafolio_idu_admin_menu"
+        sequence="50"
+        name="Metas de Proyecto" action="meta_action"
+    />
+
+    <!--
+    =================================================================
+    project.meta.tipo
+    Tipificación Meta de Proyecto
+    =================================================================
+    -->
+    <record model="ir.ui.view" id="meta_tipo_search">
+        <field name="name">project.meta.tipo.search</field>
+        <field name="model">project.meta.tipo</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name" />
+                <field name="uom_id" />
+                <group string="Agrupar por...">
+                    <filter string="Unidad de Medida" context="{'group_by':'uom_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+    <record model="ir.ui.view" id="meta_tipo_form">
+        <field name="name">project.meta.tipo.form</field>
+        <field name="model">project.meta.tipo</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                </header>
+                <sheet>
+                    <group>
+                        <field name="name" />
+                        <field name="uom_id" />
+                    </group>
+                    <notebook>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    <record model="ir.ui.view" id="meta_tipo_tree">
+        <field name="name">project.meta.tipo.tree</field>
+        <field name="model">project.meta.tipo</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name" />
+                <field name="uom_id" />
+            </tree>
+        </field>
+    </record>
+    <record model="ir.actions.act_window" id="meta_tipo_action">
+        <field name="name">Tipos de Metas de Proyecto</field>
+        <field name="res_model">project.meta.tipo</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+    <menuitem id="meta_tipo_menu"
+        parent="base_idu.proyectos_conf_menu"
+        sequence="10"
+        name="Tipos de Metas de Proyecto" action="meta_tipo_action"
+    />
+
+</data>
+</openerp>

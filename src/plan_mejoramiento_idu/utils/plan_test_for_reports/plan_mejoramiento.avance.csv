@@ -1,0 +1,18 @@
+avances_id,accion_id,descripcion,fecha_corte,estado,porcentaje,tipo_calificacion
+1,1,trabajo de operaciones con maqinatia,05/09/2010,en_progreso,10,En Progreso
+2,1,se realiza esttudio de la norma 988233 par acontrol,05/10/2010,en_progreso,20,En Progreso
+3,1,evaluacion y chequeo de de pagos ,05/11/2010,en_progreso,50,En Progreso
+4,1,cumplimiento de pagos para los empleados,05/12/2010,terminado,100,Terminada
+5,4,Analisis de requerimientos,05/10/2015,en_progreso,10,Parcial
+6,4,Desarrollo de arquitectura,05/01/2016,en_progreso,40,Parcial
+7,4,Desarrollo de software,05/05/2016,en_progreso,70,Parcial
+8,4,Puesta en producción,05/08/2016,terminado,100,Cumplida
+9,5,desarrollo aplicación 01 en 50%,05/07/2016,en_progreso,50,No Cumplida
+10,5,desarrollo aplicación 01 en 80%,05/08/2016,en_progreso,80,Parcial
+11,6,desarrollo aplicación 02 en 100%,05/08/2016,en_progreso,100,Cumplida
+12,7,trabajo de operaciones con maqinatia,05/09/2010,en_progreso,10,En Progreso
+13,8,Estimación de desface presupuestal 1.1 CG1,05/01/2015,en_progreso,10,No Vencida En Plazo Cumplida Y Documentada
+14,8,Estimación de desface presupuestal 1.2 CG1,05/03/2015,en_progreso,20,No Vencida En Plazo Cumplida Y Documentada
+15,9,Estimación de accion CG 2 de desface presupuestal,05/02/2015,en_progreso,10,No Vencida En Plazo Sin Evidencia De Avance y/o Cumplimiento
+16,9,Estimación de accion CG 2 de desface presupuestal,05/05/2015,en_progreso,20,No Vencida En Plazo Sin Evidencia De Avance y/o Cumplimiento
+17,10,Estimación de accion CG 3 de desface presupuestal,05/09/2015,terminado_con_retrazo,100,"Vencida, Cumplida Y Documentada"

@@ -1,0 +1,36 @@
+-
+  Datos de prueba para res.partner
+-
+  Persona natural, calculo de name basado en nombres y apellidos
+-
+  !record {model: res.partner, id: persona_nat_1}:
+    nombres: Alberta Marina
+    apellidos: Perez Peña
+    tipo_persona: nat
+    is_company: True
+-
+  !assert {model: res.partner, id: persona_nat_1, string: verificando persona natural}:
+    - name == 'Alberta Marina Perez Peña'
+    - tipo_persona == 'nat'
+    - is_company == True
+-
+  !record {model: res.partner, id: empresa_1}:
+    name: Empresa
+    tipo_persona: jur
+-
+  !assert {model: res.partner, id: empresa_1, string: verificando empresa}:
+    - name == 'Empresa'
+    - tipo_persona == 'jur'
+    - is_company == True
+-
+  !record {model: res.partner, id: persona_nat_2}:
+    nombres: Jose Eustaquio
+    apellidos: Perez Pinto
+    tipo_persona: nat
+    parent_id: empresa_1
+    is_company: False
+-
+  !assert {model: res.partner, id: persona_nat_2, string: verificando persona natural 2}:
+    - name == 'Jose Eustaquio Perez Pinto'
+    - tipo_persona == 'nat'
+    - is_company == False

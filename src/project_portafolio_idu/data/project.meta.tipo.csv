@@ -1,0 +1,4 @@
+id,name,uom_id/id
+meta_tipo_0,Calzada,product.product_uom_km
+meta_tipo_1,Espacio Público,product.product_uom_km
+meta_tipo_2,Ciclo Rutas,product.product_uom_km

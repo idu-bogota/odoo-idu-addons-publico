@@ -1,0 +1,980 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+<data>
+    <!--
+    =================================================================
+    Menú
+    =================================================================
+    -->
+
+     <menuitem id="project_edt_idu_menu"
+        name="EDT"
+        parent="base_idu.proyectos_nav"
+        sequence="10"
+    />
+     <menuitem id="project_edt_idu_conf_menu" parent="base_idu.proyectos_nav"
+        name="Configuración EDT"
+        groups="base.group_configuration"
+        sequence="30"
+     />
+     <menuitem id="project_edt_idu_admin_menu" parent="base_idu.proyectos_nav"
+        name="Administración EDT"
+        groups="base.group_configuration"
+        sequence="100"
+     />
+
+    <!--
+    =================================================================
+    project.edt
+    EDT de Proyecto
+    =================================================================
+    -->
+    <record model="ir.ui.view" id="edt_search">
+        <field name="name">project.edt.search</field>
+        <field name="model">project.edt</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name" />
+                <field name="numero" />
+                <field name="user_id" />
+                <field name="state" />
+                <filter name="filtro_state_abierto"
+                    string="abierto"
+                    help="Filtrar Estado abierto"
+                    domain="[('state', '=', 'abierto')]"
+                />
+                <filter name="filtro_state_cerrado"
+                    string="cerrado"
+                    help="Filtrar Estado cerrado"
+                    domain="[('state', '=', 'cerrado')]"
+                />
+                <filter name="filtro_state_cancelado"
+                    string="cancelado"
+                    help="Filtrar Estado cancelado"
+                    domain="[('state', '=', 'cancelado')]"
+                />
+                <filter name="filtro_state_aplazado"
+                    string="aplazado"
+                    help="Filtrar Estado aplazado"
+                    domain="[('state', '=', 'aplazado')]"
+                />
+                <field name="project_id" />
+                <field name="project_manager_id" />
+                <field name="programador_id" />
+                <group string="Agrupar por...">
+                    <filter string="Responsable" context="{'group_by':'user_id'}"/>
+                    <filter string="Estado" context="{'group_by':'state'}"/>
+                    <filter string="Fecha Planeada de Inicio" context="{'group_by':'fecha_planeada_inicio'}"/>
+                    <filter string="Fecha Planeada de Finalización" context="{'group_by':'fecha_planeada_fin'}"/>
+                    <filter string="Fecha de Inicio" context="{'group_by':'fecha_inicio'}"/>
+                    <filter string="Fecha de Finalización" context="{'group_by':'fecha_fin'}"/>
+                    <filter string="Proyecto" context="{'group_by':'project_id'}"/>
+                    <filter string="EDT Padre" context="{'group_by':'parent_id'}"/>
+                    <filter string="Responsable Proyecto" context="{'group_by':'project_manager_id'}"/>
+                    <filter string="Programador" context="{'group_by':'programador_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+    <record model="ir.ui.view" id="edt_form">
+        <field name="name">project.edt.form</field>
+        <field name="model">project.edt</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <field name="state" widget="statusbar" />
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1 class="o_row">
+                            <field name="numero" />.
+                            <field name="name"/>
+                        </h1>
+                    </div>
+                    <field name="company_id" invisible="1" />
+                    <field name="currency_id" invisible="1" />
+                    <group col="4">
+                        <group col="2">
+                            <field name="user_id" />
+                            <field name="programador_id" />
+                            <field name="project_id" />
+                            <field name="parent_id" />
+                        </group>
+                        <group col="2">
+                            <field name="progreso" widget="progressbar" />
+                            <field name="progreso_aprobado" widget="progressbar" />
+                            <field name="fecha_estado" />
+                            <field name="retraso" widget="progressbar" />
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string='Detalles'>
+                            <group col="4">
+                                <group string="Fechas" col="2">
+                                    <field name="fecha_planeada_inicio" />
+                                    <field name="fecha_planeada_fin" />
+                                    <field name="fecha_inicio" />
+                                    <field name="fecha_fin" />
+                                </group>
+                                <group string="Costos" col="2">
+                                    <field name="costo_planeado" />
+                                    <field name="costo" />
+                                    <field name="costo_planeado_fecha"/>
+                                </group>
+                            </group>
+                        </page>
+                        <page string='Tareas'>
+                            <group>
+                                <field name="task_ids" nolabel="1" context="{'project_id': project_id, 'edt_id': active_id}">
+                                    <tree>
+                                        <field name="sequence" widget="handle" />
+                                        <field name="numero" />
+                                        <field name="name" />
+                                        <field name="progreso" />
+                                        <field name="fecha_inicio" />
+                                        <field name="fecha_fin" />
+                                    </tree>
+                                </field>
+                            </group>
+                        </page>
+                        <page string='EDT Hijas'>
+                            <group>
+                                <field name="child_ids" nolabel="1"
+                                    context="{'project_id': project_id, 'parent_id': active_id, 'programador_id': programador_id}"
+                                >
+                                    <tree>
+                                        <field name="sequence" widget="handle" />
+                                        <field name="numero" />
+                                        <field name="name" />
+                                        <field name="progreso" />
+                                        <field name="fecha_inicio" />
+                                        <field name="fecha_fin" />
+                                    </tree>
+                                </field>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    <record model="ir.ui.view" id="edt_tree">
+        <field name="name">project.edt.tree</field>
+        <field name="model">project.edt</field>
+        <field name="arch" type="xml">
+            <tree colors="darkgoldenrod:retraso &gt; 0 and retraso &lt; 33;orange:retraso &gt;= 33 and retraso &lt; 66;red:retraso &gt;= 66">
+                <field name="name" />
+                <field name="sequence" widget="handle" />
+                <field name="numero" />
+                <field name="user_id" />
+                <field name="state" />
+                <field name="fecha_planeada_inicio" />
+                <field name="fecha_planeada_fin" />
+                <field name="fecha_inicio" />
+                <field name="fecha_fin" />
+                <field name="progreso" widget="progressbar" />
+                <field name="retraso" />
+                <field name="programador_id" />
+                <field name="progreso_aprobado" widget="progressbar" />
+            </tree>
+        </field>
+    </record>
+    <record model="ir.actions.act_window" id="edt_action">
+        <field name="name">Mis EDTs</field>
+        <field name="res_model">project.edt</field>
+        <field name="domain">['|',('user_id', '=', uid),('programador_id', '=', uid)]</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+    <menuitem id="edt_menu"
+        parent="base_idu.proyectos_menu"
+        sequence="10"
+        name="Mis EDTs" action="edt_action"
+    />
+    <!-- EDT admin - arbol -->
+    <record id="arbol_edt_tree" model="ir.ui.view">
+        <field name="name">project.edt.arbol</field>
+        <field name="model">project.edt</field>
+        <field name="field_parent">child_ids</field>
+        <field name="arch" type="xml">
+            <tree colors="darkgoldenrod:retraso &gt; 0 and retraso &lt; 33;orange:retraso &gt;= 33 and retraso &lt; 66;red:retraso &gt;= 66">
+                <field name="numero" />
+                <field name="name" />
+                <field name="user_id" />
+                <field name="state" />
+                <field name="fecha_inicio" />
+                <field name="fecha_fin" />
+                <field name="progreso"/>
+                <field name="retraso" />
+            </tree>
+        </field>
+    </record>
+
+    <record model="ir.actions.act_window" id="tree_admin_edt_action">
+        <field name="name">EDT</field>
+        <field name="res_model">project.edt</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="domain">[('parent_id','=',False)]</field>
+        <field name="view_type">tree</field>
+        <field name="view_mode">tree</field>
+        <field name="view_id" ref="arbol_edt_tree"/>
+    </record>
+    <menuitem id="tree_admin_edt_menu"
+        parent="base_idu.proyectos_conf_menu"
+        sequence="10"
+        name="EDT - Árbol" action="tree_admin_edt_action"
+    />
+    <record id="listar_edt_desde_arbol" model="ir.actions.act_window">
+        <field name="name">EDT</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">project.edt</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,form</field>
+        <field name="domain">['|',('id','=',active_id),('id','child_of',active_id)]</field>
+    </record>
+    <record id="ir_deliverable_tree_open" model="ir.values">
+        <field eval="'tree_but_open'" name="key2"/>
+        <field eval="'project.edt'" name="model"/>
+        <field name="name">EDT</field>
+        <field eval="'ir.actions.act_window,%d'%listar_edt_desde_arbol" name="value"/>
+    </record>
+
+    <!-- EDT admin - listado -->
+    <record model="ir.actions.act_window" id="list_admin_edt_action">
+        <field name="name">EDT</field>
+        <field name="res_model">project.edt</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+    <menuitem id="list_admin_edt_menu"
+        parent="base_idu.proyectos_conf_menu"
+        sequence="10"
+        name="EDT - Listado" action="list_admin_edt_action"
+    />
+    <!--
+    =================================================================
+    project.task
+    =================================================================
+    -->
+
+    <record model="ir.ui.view" id="task_search">
+        <field name="name">project.task.search.project</field>
+        <field name="model">project.task</field>
+        <field name="inherit_id" ref="project.view_task_search_form" />
+        <field name="arch" type="xml">
+            <field name="project_id" position="after">
+                <field name="edt_id" />
+                <field name="progreso_metodo" />
+                <filter name="filtro_progreso_metodo_manual"
+                    string="manual"
+                    help="Filtrar Forma de cálculo del progreso manual"
+                    domain="[('progreso_metodo', '=', 'manual')]"
+                />
+                <filter name="filtro_progreso_metodo_pendientes"
+                    string="pendientes"
+                    help="Filtrar Forma de cálculo del progreso pendientes"
+                    domain="[('progreso_metodo', '=', 'pendientes')]"
+                />
+                <field name="numero" />
+                <field name="terminado" />
+            </field>
+            <group position="inside">
+                <filter string="EDT" context="{'group_by':'edt_id'}"/>
+                <filter string="Forma de cálculo del progreso" context="{'group_by':'progreso_metodo'}"/>
+                <filter string="Fecha de Inicio Planeada" context="{'group_by':'fecha_planeada_inicio'}"/>
+                <filter string="Fecha de Finalización Planeada" context="{'group_by':'fecha_planeada_fin'}"/>
+                <filter string="Terminado" context="{'group_by':'terminado'}"/>
+            </group>
+        </field>
+    </record>
+    <record model="ir.ui.view" id="task_form">
+        <field name="name">project.task.form.project</field>
+        <field name="model">project.task</field>
+        <field name="inherit_id" ref="project.view_task_form2" />
+        <field name="arch" type="xml">
+            <notebook position="inside">
+                <page string="Programación">
+                    <group col="4">
+                        <group col="2">
+                            <field name="edt_id" />
+                            <field name="fecha_planeada_inicio" />
+                            <field name="fecha_planeada_fin" />
+                            <field name="fecha_inicio" />
+                            <field name="fecha_fin" />
+                        </group>
+                        <group col="2">
+                            <field name="costo_planeado" />
+                            <field name="currency_id" invisible="1" />
+                            <field name="costo" />
+                            <field name="costo_planeado_fecha" />
+                            <field name="product_id" />
+                            <field name="cantidad_planeada" />
+                            <field name="cantidad" />
+                        </group>
+                    </group>
+                </page>
+                <page string="Avances">
+                    <group>
+                        <field name="progreso_metodo" readonly="1"/>
+                    </group>
+                    <group string="Listado de Pendientes">
+                        <field name="pendiente_ids" nolabel="1" context="{'fecha_limite': fecha_fin}">
+                            <tree editable="top">
+                                <field name="sequence" widget="handle" />
+                                <field name="name" />
+                                <field name="peso" invisible="1" />
+                                <field name="user_id" />
+                                <field name="fecha_limite" />
+                                <field name="fecha_terminacion" readonly="1" />
+                                <button name="marcar_terminado_button" type="object" icon="gtk-apply"
+                                    string="Marcar como términado"
+                                    attrs = "{'invisible': [('fecha_terminacion','!=',False)]}"
+                                />
+                            </tree>
+                        </field>
+                    </group>
+                    <group string="Registros de Progreso">
+                        <field name="registro_progreso_ids" readonly="1" nolabel="1"/>
+                    </group>
+                </page>
+            </notebook>
+            <field name="name" position="before">
+                <field name="numero" />.
+            </field>
+            <field name="name" position="after">
+                <field name="terminado" widget="toggle_button"/>
+            </field>
+            <field name="user_id" position="after">
+                <field name="revisor_id" readonly="1" />
+            </field>
+            <field name="date_deadline" position="replace">
+                <field name="progreso" widget="progressbar" />
+                <field name="fecha_estado" />
+                <field name="retraso" widget="progressbar"/>
+                <field name="progreso_aprobado" widget="progressbar"
+                    attrs="{
+                       'invisible': [('revisor_id','=',False)]
+                    }"
+                />
+            </field>
+            <button name="toggle_active" position="before">
+                <button name="registrar_avance_wizard_button" type="object"
+                    icon="fa-tasks" class="oe_stat_button"
+                    string="Registrar Avance"
+                    attrs="{
+                        'invisible': ['|',('progreso_metodo','!=','manual'),('terminado','=',True)]
+                    }"
+                />
+            </button>
+            <button name="toggle_active" position="attributes">
+                <attribute name="groups">base.group_no_one</attribute>
+            </button>
+            <field name="kanban_state" position="replace" />
+            <field name="priority" position="replace" />
+        </field>
+    </record>
+    <record model="ir.ui.view" id="task_tree">
+        <field name="name">project.task.tree.project</field>
+        <field name="model">project.task</field>
+        <field name="inherit_id" ref="project.view_task_tree2" />
+        <field name="arch" type="xml">
+            <field name="name" position="before">
+                <field name="numero" />
+            </field>
+            <field name="user_id" position="after">
+                <field name="progreso" widget="progressbar" />
+                <field name="retraso" />
+                <field name="edt_id" />
+                <field name="revisor_id" />
+            </field>
+        </field>
+    </record>
+    <record model="ir.actions.act_window" id="task_action">
+        <field name="name">Mis Tareas</field>
+        <field name="res_model">project.task</field>
+        <field name="domain">[('user_id', '=', uid)]</field>
+        <field name="view_mode">tree,form,calendar,pivot,graph,kanban</field>
+    </record>
+    <menuitem id="task_menu"
+        parent="base_idu.proyectos_menu"
+        sequence="10"
+        name="Mis Tareas" action="task_action"
+    />
+
+    <!--
+    =================================================================
+    project.project
+    =================================================================
+    -->
+    <record model="ir.ui.view" id="view_project_kanban">
+        <field name="name">project.project.kanban.edt</field>
+        <field name="model">project.project</field>
+        <field name="inherit_id" ref="project.view_project_kanban" />
+        <field name="arch" type="xml">
+            <field name="name" position="after">
+                <field name="edt_raiz_id" />
+            </field>
+            <div class="o_project_kanban_boxes" position="inside">
+                <a t-if="record.edt_raiz_id.raw_value" class="o_project_kanban_box" name="edt_arbol_view_button" type="object">
+                    <span class="o_label">EDT</span>
+                </a>
+            </div>
+        </field>
+    </record>
+    <record model="ir.ui.view" id="project_search">
+        <field name="name">project.project.search.project</field>
+        <field name="model">project.project</field>
+        <field name="inherit_id" ref="project.view_project_project_filter" />
+        <field name="arch" type="xml">
+            <field name="partner_id" position="after">
+                <field name="edt_raiz_id" />
+                <field name="programador_id" />
+                <field name="reportar_costo" />
+                <field name="reportar_cantidad" />
+            </field>
+            <group position="inside">
+                <filter string="EDT" context="{'group_by':'edt_raiz_id'}"/>
+                <filter string="Fecha de Inicio Planeada" context="{'group_by':'fecha_planeada_inicio'}"/>
+                <filter string="Fecha de Finalización Planeada" context="{'group_by':'fecha_planeada_fin'}"/>
+                <filter string="Programador del Proyecto" context="{'group_by':'programador_id'}"/>
+                <filter string="En Reporte de Avance incluir Costo de la Tarea" context="{'group_by':'reportar_costo'}"/>
+                <filter string="En Reporte de Avance incluir Cantidades" context="{'group_by':'reportar_cantidad'}"/>
+            </group>
+        </field>
+    </record>
+    <record model="ir.ui.view" id="project_form">
+        <field name="name">project.project.form.project</field>
+        <field name="model">project.project</field>
+        <field name="inherit_id" ref="project.edit_project" />
+        <field name="arch" type="xml">
+            <div name="button_box" position="inside">
+                <button attrs="{'invisible':[('edt_raiz_id','=', False)]}"
+                    class="oe_stat_button" type="object"
+                    icon="fa-tasks" name="edt_arbol_view_button" string="EDT"
+                />
+            </div>
+            <button name="edt_arbol_view_button" position="before">
+                <button name="registrar_fecha_estado_wizard_button" type="object"
+                    icon="fa-tasks" class="oe_stat_button"
+                    string="Registrar Fecha Estado"
+                />
+            </button>
+            <field name="sequence" position="after">
+                <field name="privacy_visibility" />
+                <field name="partner_id" />
+            </field>
+            <field name="privacy_visibility" position="replace" />
+            <field name="partner_id" position="replace" />
+           <div name="options_active" position="before">
+                <group>
+                    <field name="edt_raiz_id" required="1" />
+                    <field name="progreso" widget="progressbar" />
+                </group>
+            </div>
+            <field name="user_id" position="attributes">
+                <attribute name="groups"></attribute>
+            </field>
+            <field name="user_id" position="after">
+                <field name="programador_id" />
+                <field name="fecha_planeada_inicio" />
+                <field name="fecha_planeada_fin" />
+            </field>
+            <notebook position="inside">
+                <page string="EDT" groups="base.group_no_one">
+                    <field name="edt_ids" readonly="1"/>
+                </page>
+                <page string="Reportes de Avances en Tareas">
+                    <group>
+                        <field name="reportar_costo" />
+                        <field name="reportar_cantidad" />
+                    </group>
+                    <field name="reporte_avance_tarea_ids"/>
+                </page>
+            </notebook>
+        </field>
+    </record>
+    <record model="ir.ui.view" id="project_tree">
+        <field name="name">project.project.tree.project</field>
+        <field name="model">project.project</field>
+        <field name="inherit_id" ref="project.view_project" />
+        <field name="arch" type="xml">
+            <field name="name" position="after">
+                <field name="progreso" />
+                <field name="fecha_planeada_inicio" />
+                <field name="fecha_planeada_fin" />
+                <field name="programador_id" />
+            </field>
+        </field>
+    </record>
+    <record model="ir.ui.view" id="project_kanban">
+        <field name="name">project.project.kanban.project</field>
+        <field name="model">project.project</field>
+        <field name="inherit_id" ref="project.view_project_kanban" />
+        <field name="arch" type="xml">
+            <xpath expr="//kanban" position="attributes">
+                <attribute name="create">false</attribute>
+            </xpath>
+        </field>
+    </record>
+    <record model="ir.actions.act_window" id="project_action">
+        <field name="name">Mis Proyectos</field>
+        <field name="res_model">project.project</field>
+        <field name="view_mode">kanban,form</field>
+        <field name="domain">['|','|',('user_id','=',uid),('programador_id','=',uid),('message_is_follower','=',True)]</field>
+    </record>
+    <menuitem id="project_menu"
+        parent="base_idu.proyectos_menu"
+        sequence="10"
+        name="Mis Proyectos" action="project_action"
+    />
+    <!--
+    =================================================================
+    project.task.registro_progreso
+    Registro de Progreso de Tarea
+    =================================================================
+    -->
+    <record model="ir.ui.view" id="task_registro_progreso_search">
+        <field name="name">project.task.registro_progreso.search</field>
+        <field name="model">project.task.registro_progreso</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name" />
+                <field name="task_id" />
+                <field name="task_revisor_id" />
+                <field name="revisor_id" />
+                <field name="nivel_alerta" />
+                <filter name="filtro_nivel_alerta_ninguno"
+                    string="ninguno"
+                    help="Filtrar Nivel de Alerta ninguno"
+                    domain="[('nivel_alerta', '=', 'ninguno')]"
+                />
+                <filter name="filtro_nivel_alerta_bajo"
+                    string="bajo"
+                    help="Filtrar Nivel de Alerta bajo"
+                    domain="[('nivel_alerta', '=', 'bajo')]"
+                />
+                <filter name="filtro_nivel_alerta_medio"
+                    string="medio"
+                    help="Filtrar Nivel de Alerta medio"
+                    domain="[('nivel_alerta', '=', 'medio')]"
+                />
+                <filter name="filtro_nivel_alerta_alto"
+                    string="alto"
+                    help="Filtrar Nivel de Alerta alto"
+                    domain="[('nivel_alerta', '=', 'alto')]"
+                />
+                <field name="reporte_avance_id" />
+                <group string="Agrupar por...">
+                    <filter string="Fecha" context="{'group_by':'fecha'}"/>
+                    <filter string="Tarea" context="{'group_by':'task_id'}"/>
+                    <filter string="Revisor de la Tarea" context="{'group_by':'task_revisor_id'}"/>
+                    <filter string="Fecha de Aprobación" context="{'group_by':'fecha_aprobacion'}"/>
+                    <filter string="Aprobado por" context="{'group_by':'revisor_id'}"/>
+                    <filter string="Nivel de Alerta" context="{'group_by':'nivel_alerta'}"/>
+                    <filter string="Reporte de Avance" context="{'group_by':'reporte_avance_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+    <record model="ir.ui.view" id="task_registro_progreso_form">
+        <field name="name">project.task.registro_progreso.form</field>
+        <field name="model">project.task.registro_progreso</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                </header>
+                <sheet>
+                    <group>
+                        <field name="name" />
+                        <field name="fecha" />
+                        <field name="task_id" />
+                        <field name="porcentaje" />
+                        <field name="company_id" invisible="1" />
+                        <field name="currency_id" invisible="1" />
+                        <field name="costo" />
+                        <field name="fecha_aprobacion"
+            attrs="{
+                'invisible': [('fecha_aprobacion', '=', 'CHANGE ME')],
+                'required': [('fecha_aprobacion', '=', 'CHANGE ME')],
+                'readonly': [('fecha_aprobacion', '=', 'CHANGE ME')],
+            }"
+        />
+                        <field name="revisor_id"
+            attrs="{
+                'invisible': [('revisor_id', '=', 'CHANGE ME')],
+                'required': [('revisor_id', '=', 'CHANGE ME')],
+                'readonly': [('revisor_id', '=', 'CHANGE ME')],
+            }"
+        />
+                        <field name="nivel_alerta" />
+                        <field name="novedad" />
+                        <field name="cantidad" />
+                    </group>
+                    <notebook>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids" widget="mail_followers" groups="base.group_user"/>
+                    <field name="message_ids" widget="mail_thread"/>
+                </div>
+            </form>
+        </field>
+    </record>
+    <record model="ir.ui.view" id="task_registro_progreso_tree">
+        <field name="name">project.task.registro_progreso.tree</field>
+        <field name="model">project.task.registro_progreso</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name" />
+                <field name="fecha" />
+                <field name="task_id" />
+                <field name="porcentaje" />
+                <field name="costo" />
+                <field name="fecha_aprobacion"
+            attrs="{
+                'invisible': [('fecha_aprobacion', '=', 'CHANGE ME')],
+                'required': [('fecha_aprobacion', '=', 'CHANGE ME')],
+                'readonly': [('fecha_aprobacion', '=', 'CHANGE ME')],
+            }"
+        />
+                <field name="revisor_id"
+            attrs="{
+                'invisible': [('revisor_id', '=', 'CHANGE ME')],
+                'required': [('revisor_id', '=', 'CHANGE ME')],
+                'readonly': [('revisor_id', '=', 'CHANGE ME')],
+            }"
+        />
+                <field name="nivel_alerta" />
+                <field name="cantidad" />
+            </tree>
+        </field>
+    </record>
+    <record model="ir.actions.act_window" id="task_registro_progreso_action">
+        <field name="name">Registros de Progreso</field>
+        <field name="res_model">project.task.registro_progreso</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+    <menuitem id="task_registro_progreso_menu"
+        parent="project_edt_idu_admin_menu"
+        sequence="50"
+        name="Registros de Progreso" action="task_registro_progreso_action"
+    />
+
+    <!--
+    =================================================================
+    project.task.pendiente
+    Lista de Chequeo en Tarea
+    =================================================================
+    -->
+    <record model="ir.ui.view" id="task_pendiente_search">
+        <field name="name">project.task.pendiente.search</field>
+        <field name="model">project.task.pendiente</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name" />
+                <field name="task_id" />
+                <field name="task_revisor_id" />
+                <field name="fecha_limite" />
+                <field name="revisor_id" />
+                <group string="Agrupar por...">
+                    <filter string="Tarea" context="{'group_by':'task_id'}"/>
+                    <filter string="Revisor de la Tarea" context="{'group_by':'task_revisor_id'}"/>
+                    <filter string="Fecha Límite" context="{'group_by':'fecha_limite'}"/>
+                    <filter string="Fecha de terminación" context="{'group_by':'fecha_terminacion'}"/>
+                    <filter string="Fecha de Aprobación" context="{'group_by':'fecha_aprobacion'}"/>
+                    <filter string="Aprobado por" context="{'group_by':'revisor_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+    <record model="ir.ui.view" id="task_pendiente_form">
+        <field name="name">project.task.pendiente.form</field>
+        <field name="model">project.task.pendiente</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                </header>
+                <sheet>
+                    <group>
+                        <field name="name" />
+                        <field name="task_id" />
+                        <field name="peso" invisible="1" />
+                        <field name="user_id" />
+                        <field name="fecha_limite" />
+                        <field name="fecha_terminacion" />
+                        <field name="fecha_aprobacion" />
+                        <field name="revisor_id" />
+                    </group>
+                    <notebook>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids" widget="mail_followers" groups="base.group_user"/>
+                    <field name="message_ids" widget="mail_thread"/>
+                </div>
+            </form>
+        </field>
+    </record>
+    <record model="ir.ui.view" id="task_pendiente_tree">
+        <field name="name">project.task.pendiente.tree</field>
+        <field name="model">project.task.pendiente</field>
+        <field name="arch" type="xml">
+            <tree editable="top">
+                <field name="name" />
+                <field name="sequence" widget="handle" />
+                <field name="task_id" />
+                <field name="peso" invisible="1" />
+                <field name="user_id" />
+                <field name="fecha_limite" />
+                <field name="fecha_terminacion" readonly="1" />
+                <field name="fecha_aprobacion" invisible="1" />
+                <field name="revisor_id" invisible="1" />
+                <button name="marcar_terminado_button" type="object" icon="gtk-apply" string="Marcar como términado" />
+            </tree>
+        </field>
+    </record>
+    <record model="ir.actions.act_window" id="task_pendiente_action">
+        <field name="name">Mis Pendientes</field>
+        <field name="res_model">project.task.pendiente</field>
+        <field name="domain">['|',('task_id.user_id', '=', uid),('user_id', '=', uid),('fecha_terminacion','=',False)]</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+    <menuitem id="task_pendiente_menu"
+        parent="base_idu.proyectos_menu"
+        sequence="10"
+        name="Mis Pendientes" action="task_pendiente_action"
+    />
+
+    <!--
+    =================================================================
+    project.predecesor
+    Relacion de Precedencia entre Tarea/EDT
+    =================================================================
+    -->
+    <record model="ir.ui.view" id="predecesor_search">
+        <field name="name">project.predecesor.search</field>
+        <field name="model">project.predecesor</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name" />
+                <field name="origen_res_model" />
+                <filter name="filtro_origen_res_model_tarea"
+                    string="tarea"
+                    help="Filtrar Origen Modelo tarea"
+                    domain="[('origen_res_model', '=', 'tarea')]"
+                />
+                <filter name="filtro_origen_res_model_edt"
+                    string="edt"
+                    help="Filtrar Origen Modelo edt"
+                    domain="[('origen_res_model', '=', 'edt')]"
+                />
+                <field name="origen_res_id" />
+                <field name="destino_res_model" />
+                <filter name="filtro_destino_res_model_tarea"
+                    string="tarea"
+                    help="Filtrar Destino Modelo tarea"
+                    domain="[('destino_res_model', '=', 'tarea')]"
+                />
+                <filter name="filtro_destino_res_model_edt"
+                    string="edt"
+                    help="Filtrar Destino Modelo edt"
+                    domain="[('destino_res_model', '=', 'edt')]"
+                />
+                <field name="destino_res_id" />
+                <field name="tipo" />
+                <filter name="filtro_tipo_e_s"
+                    string="e_s"
+                    help="Filtrar Tipo e_s"
+                    domain="[('tipo', '=', 'e_s')]"
+                />
+                <filter name="filtro_tipo_s_s"
+                    string="s_s"
+                    help="Filtrar Tipo s_s"
+                    domain="[('tipo', '=', 's_s')]"
+                />
+                <filter name="filtro_tipo_e_e"
+                    string="e_e"
+                    help="Filtrar Tipo e_e"
+                    domain="[('tipo', '=', 'e_e')]"
+                />
+                <filter name="filtro_tipo_s_e"
+                    string="s_e"
+                    help="Filtrar Tipo s_e"
+                    domain="[('tipo', '=', 's_e')]"
+                />
+                <group string="Agrupar por...">
+                    <filter string="Origen Modelo" context="{'group_by':'origen_res_model'}"/>
+                    <filter string="Origen ID" context="{'group_by':'origen_res_id'}"/>
+                    <filter string="Destino Modelo" context="{'group_by':'destino_res_model'}"/>
+                    <filter string="Destino ID" context="{'group_by':'destino_res_id'}"/>
+                    <filter string="Tipo" context="{'group_by':'tipo'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+    <record model="ir.ui.view" id="predecesor_form">
+        <field name="name">project.predecesor.form</field>
+        <field name="model">project.predecesor</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                </header>
+                <sheet>
+                    <group>
+                        <field name="name" />
+                        <field name="progreso" />
+                        <field name="origen_res_model" />
+                        <field name="origen_res_id" />
+                        <field name="destino_res_model" />
+                        <field name="destino_res_id" />
+                        <field name="tipo" />
+                    </group>
+                    <notebook>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    <record model="ir.ui.view" id="predecesor_tree">
+        <field name="name">project.predecesor.tree</field>
+        <field name="model">project.predecesor</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name" />
+                <field name="progreso" />
+                <field name="tipo" />
+            </tree>
+        </field>
+    </record>
+    <record model="ir.actions.act_window" id="predecesor_action">
+        <field name="name">Precedencias Tarea/EDT</field>
+        <field name="res_model">project.predecesor</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+    <menuitem id="predecesor_menu"
+        parent="project_edt_idu_admin_menu"
+        sequence="50"
+        name="Precedencias Tarea/EDT" action="predecesor_action"
+    />
+
+    <!--
+    =================================================================
+    project.task.reporte_avance
+    Reporte de Avance de Tareas
+    =================================================================
+    -->
+    <record model="ir.ui.view" id="task_reporte_avance_search">
+        <field name="name">project.task.reporte_avance.search</field>
+        <field name="model">project.task.reporte_avance</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="fecha" />
+                <field name="project_id" />
+                <field name="user_id" />
+                <field name="state" />
+                <filter name="filtro_state_borrador"
+                    string="borrador"
+                    help="Filtrar Estado borrador"
+                    domain="[('state', '=', 'borrador')]"
+                />
+                <filter name="filtro_state_por_revisar"
+                    string="por_revisar"
+                    help="Filtrar Estado por_revisar"
+                    domain="[('state', '=', 'por_revisar')]"
+                />
+                <filter name="filtro_state_terminado"
+                    string="terminado"
+                    help="Filtrar Estado terminado"
+                    domain="[('state', '=', 'terminado')]"
+                />
+                <group string="Agrupar por...">
+                    <filter string="Fecha de Corte" context="{'group_by':'fecha'}"/>
+                    <filter string="Proyecto" context="{'group_by':'project_id'}"/>
+                    <filter string="Usuario" context="{'group_by':'user_id'}"/>
+                    <filter string="Estado" context="{'group_by':'state'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+    <record model="ir.ui.view" id="task_reporte_avance_form">
+        <field name="name">project.task.reporte_avance.form</field>
+        <field name="model">project.task.reporte_avance</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button string="Marcar como Terminado" type="workflow" class="oe_highlight"
+                        name="wkf_borrador__por_revisar"
+                        groups="project.group_project_user"
+                        states="borrador"
+                    />
+                    <field name="state" widget="statusbar" />
+                </header>
+                <sheet>
+                    <group>
+                        <field name="id" invisible="1" />
+                        <field name="fecha" />
+                        <field name="project_id"
+                            attrs="{
+                                'readonly': [('id', '!=', False)],
+                            }"
+                            options="{'no_create': True, 'no_edit': True}"
+                        />
+                        <field name="user_id" />
+                    </group>
+                    <notebook>
+                        <page string='Avances en Tareas'>
+                            <group>
+                                <field name="avances_por_revisar" />
+                                <field name="avances_aprobados" />
+                                <field name="registro_progreso_ids" nolabel="1" colspan="4">
+                                    <tree editable="bottom" options="{'create': false, 'create_edit': false}">
+                                        <field name="task_id" readonly="1" />
+                                        <field name="name" />
+                                        <field name="porcentaje"/>
+                                        <field name="costo" />
+                                        <field name="nivel_alerta" />
+                                        <field name="novedad" widget="char" />
+                                    </tree>
+                                </field>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids" widget="mail_followers" groups="base.group_user"/>
+                    <field name="message_ids" widget="mail_thread"/>
+                </div>
+            </form>
+        </field>
+    </record>
+    <record model="ir.ui.view" id="task_reporte_avance_tree">
+        <field name="name">project.task.reporte_avance.tree</field>
+        <field name="model">project.task.reporte_avance</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="fecha" />
+                <field name="project_id"
+            attrs="{
+                'invisible': [('project_id', '=', 'CHANGE ME')],
+                'required': [('project_id', '=', 'CHANGE ME')],
+                'readonly': [('project_id', '=', 'CHANGE ME')],
+            }"
+        />
+                <field name="user_id" />
+                <field name="state" />
+                <field name="avances_por_revisar" />
+                <field name="avances_aprobados" />
+            </tree>
+        </field>
+    </record>
+    <record model="ir.actions.act_window" id="task_reporte_avance_action">
+        <field name="name">Reportes de Avance</field>
+        <field name="res_model">project.task.reporte_avance</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+    <menuitem id="task_reporte_avance_menu"
+        parent="base_idu.proyectos_menu"
+        sequence="10"
+        name="Reportes de Avance" action="task_reporte_avance_action"
+    />
+
+</data>
+</openerp>

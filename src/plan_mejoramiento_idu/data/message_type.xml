@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<openerp>
+    <data>
+        <record id="notificacion_calificacion" model="mail.message.subtype">
+            <field name="name">Notificación de Calificación</field>
+            <field name="res_model">plan_mejoramiento.avance</field>
+            <field name="default" eval="True"/>
+            <field name="hidden" eval="False"/>
+            <field name="description">Avance de la acción ha sido calificada por el auditor responsable.</field>
+        </record>
+    </data>
+</openerp>

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+<data>
+    <record model="ir.ui.view" id="edt_wizard_fecha_estado_form">
+        <field name="name">project.edt.wizard.fecha_estado.form</field>
+        <field name="model">project.edt.wizard.fecha_estado</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <field name="project_id" />
+                        <field name="fecha_estado" />
+                    </group>
+                    <footer>
+                        <button name="actualizar_fecha_estado" string="Registrar Fecha" type="object" class="oe_highlight" /> o
+                        <button string="Cancelar" class="oe_link" special="cancel" />
+                    </footer>
+                </sheet>
+            </form>
+        </field>
+    </record>
+</data>
+</openerp>

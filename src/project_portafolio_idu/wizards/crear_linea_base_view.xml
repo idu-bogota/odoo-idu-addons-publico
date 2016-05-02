@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+<data>
+
+    <record model="ir.ui.view" id="wizard_crear_linea_base_form">
+        <field name="name">project.portafolio.wizard.crear_linea_base.form</field>
+        <field name="model">project.portafolio.wizard.crear_linea_base</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                </header>
+                <sheet>
+                    <p>A continuación se creará una copia de la línea base para futuras referencias</p>
+                    <group>
+                        <field name="name"/>
+                        <field name="project_id"/>
+                    </group>
+                    <footer>
+                        <button name="crear_linea_base" string="Crear Línea Base" type="object" class="oe_highlight" /> o
+                        <button name="crear_snapshot" string="Crear copia de la Ejecución" type="object"/> o
+                        <button string="Cancelar" class="oe_link" special="cancel" />
+                    </footer>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    <record model="ir.actions.act_window" id="wizard_crear_linea_base_action">
+        <field name="name">Crear Línea Base</field>
+        <field name="res_model">project.portafolio.wizard.crear_linea_base</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+</data>
+</openerp>

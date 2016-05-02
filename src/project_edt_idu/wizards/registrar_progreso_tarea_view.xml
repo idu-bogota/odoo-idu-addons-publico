@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+<data>
+    <record model="ir.ui.view" id="edt_wizard_registrar_progreso_tarea_form">
+        <field name="name">project.edt.wizard.registrar_progreso_tarea.form</field>
+        <field name="model">project.edt.wizard.registrar_progreso_tarea</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <field name="task_id" />
+                        <field name="project_id" />
+                        <field name="project_reportar_costo" invisible="1" />
+                        <field name="project_reportar_cantidad" invisible="1" />
+                        <field name="fecha" />
+                        <field name="name" />
+                        <field name="porcentaje" />
+                        <field name="costo"
+                            attrs="{
+                                'invisible': [('project_reportar_costo','=',False)],
+                                'required': [('project_reportar_costo','=',True)],
+                            }"
+                        />
+                        <field name="cantidad"
+                            attrs="{
+                                'invisible': [('project_reportar_cantidad','=',False)],
+                                'required': [('project_reportar_cantidad','=',True)],
+                            }"
+                        />
+                        <field name="uom_id" class="inline"
+                            attrs="{
+                                'invisible': [('project_reportar_cantidad','=',False)],
+                            }"
+                        />
+                        <field name="company_id" invisible="1" />
+                        <field name="currency_id" invisible="1" />
+                        <field name="nivel_alerta" />
+                        <field name="novedad"
+                            attrs="{
+                                'invisible': [('nivel_alerta','=','ninguno')],
+                                'required': [('nivel_alerta','!=','ninguno')],
+                            }"
+                        />
+                    </group>
+                    <footer>
+                        <button name="registrar_progreso" string="Registrar Progreso" type="object" class="oe_highlight" /> o
+                        <button string="Cancelar" class="oe_link" special="cancel" />
+                    </footer>
+                </sheet>
+            </form>
+        </field>
+    </record>
+</data>
+</openerp>

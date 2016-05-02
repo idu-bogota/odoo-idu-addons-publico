@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+<data>
+    <record id="reporte_desempeno_workflow" model="workflow">
+        <field name="name">project.reporte_desempeno.workflow</field>
+        <field name="osv">project.reporte_desempeno</field>
+        <field name="on_create">True</field>
+    </record>
+<!--
+    ===================================================================================
+    Activities
+    ===================================================================================
+-->
+
+    <record id="reporte_desempeno_borrador_act" model="workflow.activity">
+        <field name="wkf_id" ref="reporte_desempeno_workflow"/>
+        <field name="name">borrador</field>
+        <field name="kind">function</field>
+        <field name="action">wkf_borrador()</field>
+        <field name="flow_start" eval="True"/>
+    </record>
+
+    <record id="reporte_desempeno_aprobado_act" model="workflow.activity">
+        <field name="wkf_id" ref="reporte_desempeno_workflow"/>
+        <field name="name">aprobado</field>
+        <field name="kind">function</field>
+        <field name="action">wkf_aprobado()</field>
+        <field name="flow_stop" eval="True"/>
+    </record>
+
+    <record id="reporte_desempeno_devuelto_act" model="workflow.activity">
+        <field name="wkf_id" ref="reporte_desempeno_workflow"/>
+        <field name="name">devuelto</field>
+        <field name="kind">function</field>
+        <field name="action">wkf_devuelto()</field>
+    </record>
+
+    <record id="reporte_desempeno_por_revisar_act" model="workflow.activity">
+        <field name="wkf_id" ref="reporte_desempeno_workflow"/>
+        <field name="name">por_revisar</field>
+        <field name="kind">function</field>
+        <field name="action">wkf_por_revisar()</field>
+    </record>
+
+    <!--
+    ===================================================================================
+    Transitions
+    ===================================================================================
+     -->
+
+    <record id="reporte_desempeno_borrador__por_revisar_transition" model="workflow.transition">
+        <field name="act_from" ref="reporte_desempeno_borrador_act"/>
+        <field name="act_to" ref="reporte_desempeno_por_revisar_act"/>
+        <field name="condition">True</field>
+        <field name="signal">wkf_borrador__por_revisar</field></record>
+
+    <record id="reporte_desempeno_por_revisar__devuelto_transition" model="workflow.transition">
+        <field name="act_from" ref="reporte_desempeno_por_revisar_act"/>
+        <field name="act_to" ref="reporte_desempeno_devuelto_act"/>
+        <field name="condition">True</field>
+        <field name="group_id" ref="project.group_project_manager"/>
+        <field name="signal">wkf_por_revisar__devuelto</field></record>
+
+    <record id="reporte_desempeno_devuelto__por_revisar_transition" model="workflow.transition">
+        <field name="act_from" ref="reporte_desempeno_devuelto_act"/>
+        <field name="act_to" ref="reporte_desempeno_por_revisar_act"/>
+        <field name="condition">True</field>
+        <field name="signal">wkf_devuelto__por_revisar</field></record>
+
+    <record id="reporte_desempeno_por_revisar__aprobado_transition" model="workflow.transition">
+        <field name="act_from" ref="reporte_desempeno_por_revisar_act"/>
+        <field name="act_to" ref="reporte_desempeno_aprobado_act"/>
+        <field name="condition">True</field>
+        <field name="group_id" ref="project.group_project_manager"/>
+        <!--<field name="signal">wkf_por_revisar__aprobado</field>-->
+    </record>
+
+</data>
+</openerp>

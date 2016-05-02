@@ -1,0 +1,56 @@
+<?xml version="1.0"?>
+<openerp>
+<data>
+    <template id="assets_backend" name="base_idu_css_assets" inherit_id="web.assets_backend">
+        <xpath expr="." position="inside">
+            <link rel="stylesheet" href="/base_idu/static/src/css/base_idu.css"/>
+            <link rel="stylesheet" href="/base_idu/static/src/lib/web_menu_hide/css/base.css"/>
+            <script type="text/javascript" src="/base_idu/static/src/lib/web_menu_hide/js/menu.js"></script>
+        </xpath>
+    </template>
+    <template id="menu_webclient_bootstrap_web_menu_hide_9" inherit_id="web.webclient_bootstrap">
+        <!-- Tomado de: https://apps.openerp.com/apps/themes/9.0/web_menu_hide_9/ -->
+        <xpath expr="//div[@class='navbar-header']" position="inside">
+            <ul class="ul_toggle_leftmenu">
+                <li class="btn-link toggle_leftmenu">
+                    <span class="fa fa-exchange fa-2"></span>
+                </li>
+            </ul>
+        </xpath>
+    </template>
+    <template id="login" inherit_id="web.login" name="Sign In - Causas para no ingresar">
+        <xpath expr="//p[@class='alert alert-danger']" position="replace">
+            <div class="alert alert-danger" t-if="error">
+                Acceso denegado!<br />
+                <strong>Usuarios de contratos de obra e interventoría</strong><br />
+                Las causas para no poder ingresar al sistema pueden ser:
+                <ul>
+                    <li>Su cuenta de usuario y clave son correctas pero su cuenta ya expiró ya que su contrato ha terminado, debe solicitar una prorroga para su cuenta.</li>
+                    <li>Su cuenta de usuario es válida pero la clave es incorrecta, puede intentar
+                    <a t-attf-href="/web/reset_password?{{ keep_query() }}" >recuperar la contraseña</a>, si no recibe un email debe verificar con el
+                    administrador que tenga asignado un correo electrónico personal válido</li>
+                </ul>
+                <strong>Funcionarios del IDU de planta y prestación de servicios</strong><br />
+                Deben utilizar la cuenta y clave que usan para acceder a sus computadores y correo electrónico, si no ingresa puede que su cuenta este desactivada y requiera solicitar la reactivación con el formato FO-TI-09. La opción de recuperar contraseña por email no esta habilitada para los funcionarios IDU.
+            </div>
+        </xpath>
+    </template>
+    <template id="auth_signup_fields" inherit_id="auth_signup.fields" name="fields despliega usuarios a los que le cambia la clave">
+        <xpath expr="//div[@class='form-group field-login']" position="replace">
+            <div class="form-group field-login">
+                <label for="login" class="control-label" t-if="not len(usuarios)">Your Email</label>
+                <input t-att-type="'text' if not len(usuarios) else 'hidden'" name="login" t-att-value="login" id="login" class="form-control" autofocus="autofocus" required="required" t-att-readonly="'readonly' if only_passwords else None"/>
+                <t t-if="len(usuarios)">
+                    <p>La contraseña va a cambiarse para estos usuarios que están registrados a su nombre:</p>
+                    <ul>
+                        <t t-foreach="usuarios" t-as="u">
+                            <li><strong><t t-esc="u.login"/></strong> válida hasta <span title="año-mes-dia"> <t t-esc="u.fecha_expiracion" /></span></li>
+                        </t>
+                    </ul>
+                </t>
+            </div>
+        </xpath>
+    </template>
+
+</data>
+</openerp>

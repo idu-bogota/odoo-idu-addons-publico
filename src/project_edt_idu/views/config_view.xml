@@ -1,0 +1,44 @@
+<?xml version="1.0"?>
+<openerp>
+<data>
+    <!--==================================================================================== -->
+    <!-- config.settings Views -->
+    <!--==================================================================================== -->
+        <record id="edt_config_form" model="ir.ui.view">
+            <field name="name">EDT Config</field>
+            <field name="model">project.edt.config</field>
+            <field name="arch" type="xml">
+                <form string="Configuración EDT" class="oe_form_configuration">
+                    <header>
+                        <button string="Apply" type="object" name="execute" class="oe_highlight"/>
+                        or
+                        <button string="Cancel" type="object" name="cancel" class="oe_link"/>
+                    </header>
+                    <separator string="Gestión de la EDT"/>
+                    <group>
+                        <label for="id" string="Configuración"/>
+                        <div>
+                            <group>
+                                <field name="jython_path"/>
+                                <field name="mpp2csv_path"/>
+                            </group>
+                        </div>
+                    </group>
+                </form>
+            </field>
+        </record>
+
+        <record id="edt_config_action" model="ir.actions.act_window">
+            <field name="name">Configuración EDT</field>
+            <field name="res_model">project.edt.config</field>
+            <field name="view_id" ref="edt_config_form"/>
+            <field name="view_mode">form</field>
+            <field name="target">inline</field>
+        </record>
+
+        <menuitem id="edt_config_menu" name="EDT" parent="base.menu_config"
+            sequence="15" action="edt_config_action"
+        />
+
+</data>
+</openerp>

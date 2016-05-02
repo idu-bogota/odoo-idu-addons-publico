@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+<data>
+<!-- Vista form -->
+    <record model="ir.ui.view" id="registrar_mensaje_wizard">
+        <field name="model">base_idu.wizard.registrar_mensaje</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group col="1">
+                       <h1><field name="titulo" nolabel="1"/></h1>
+                    </group>
+                    <group col="2">
+                       <field name="mensaje"/>
+                    </group>
+                    <footer>
+                        <button name="action_create" string="Registrar mensaje" type="object" class="oe_highlight" /> o
+                        <button string="Cancelar" class="oe_link" special="cancel" />
+                    </footer>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    <record model="ir.actions.act_window" id="action_registrar_mensaje">
+        <field name="name">Registrar Mensaje</field>
+        <field name="res_model">base_idu.wizard.registrar_mensaje</field>
+        <field name="target">new</field>
+        <field name="view_mode">form</field>
+    </record>
+</data>
+</openerp>

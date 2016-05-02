@@ -1,0 +1,180 @@
+-
+  CREAR USUARIOS y ASIGNAR GRUPO
+
+-
+  !record { model: res.partner, id: group_project_user_partner_01 }:
+    name: 'u01_group_project_user_project_edt_idu'
+    email: 'group_project_user_user_01@project_edt_idu.test.com'
+-
+  !record { model: res.users, id: group_project_user_user_01 }:
+    name: 'u01_group_project_user_project_edt_idu'
+    login: 'u01_group_project_user_project_edt_idu'
+    new_password: 'testing'
+    partner_id: group_project_user_partner_01
+    email: 'group_project_user_user_01@project_edt_idu.test.com'
+-
+  !record { model: res.partner, id: group_project_user_partner_02 }:
+    name: 'u02_group_project_user_project_edt_idu'
+    email: 'group_project_user_user_02@project_edt_idu.test.com'
+-
+  !record { model: res.users, id: group_project_user_user_02 }:
+    name: 'u02_group_project_user_project_edt_idu'
+    login: 'u02_group_project_user_project_edt_idu'
+    new_password: 'testing'
+    partner_id: group_project_user_partner_02
+    email: 'group_project_user_user_02@project_edt_idu.test.com'
+-
+  !record { model: res.partner, id: group_project_user_partner_03 }:
+    name: 'u03 group_project_user_user_03_project_edt_idu'
+    email: 'group_project_user_user_03@project_edt_idu.test.com'
+-
+  !record { model: res.users, id: group_project_user_user_03 }:
+    name: 'u03 group_project_user_user_03_project_edt_idu'
+    login: 'u03_group_project_user_project_edt_idu'
+    new_password: 'testing'
+    partner_id: group_project_user_partner_03
+    email: 'group_project_user_user_03@project_edt_idu.test.com'
+-
+  !record { model: res.partner, id: group_project_user_partner_04 }:
+    name: 'u04 group_project_user_user_04_project_edt_idu'
+    email: 'group_project_user_user_04@project_edt_idu.test.com'
+-
+  !record { model: res.users, id: group_project_user_user_04 }:
+    name: 'u04 group_project_user_user_04_project_edt_idu'
+    login: 'u04_group_project_user_project_edt_idu'
+    new_password: 'testing'
+    partner_id: group_project_user_partner_04
+    email: 'group_project_user_user_04@project_edt_idu.test.com'
+-
+  !record { model: res.partner, id: group_project_user_partner_05 }:
+    name: 'u05 group_project_user_user_05_project_edt_idu'
+    email: 'group_project_user_user_05@project_edt_idu.test.com'
+-
+  !record { model: res.users, id: group_project_user_user_05 }:
+    name: 'u05 group_project_user_user_05_project_edt_idu'
+    login: 'u05_group_project_user_project_edt_idu'
+    new_password: 'testing'
+    partner_id: group_project_user_partner_05
+    email: 'group_project_user_user_05@project_edt_idu.test.com'
+-
+  !python { model: res.groups }: |
+    self.write(cr, uid, ref("project.group_project_user"), {
+        'users':[
+            (4, ref('group_project_user_user_01')),
+            (4, ref('group_project_user_user_02')),
+            (4, ref('group_project_user_user_03')),
+            (4, ref('group_project_user_user_04')),
+            (4, ref('group_project_user_user_05')),
+        ]
+    })
+-
+  !record { model: res.partner, id: group_project_manager_partner_01 }:
+    name: 'group_project_manager_user_01_project_edt_idu'
+    email: 'group_project_manager_user_01@project_edt_idu.test.com'
+-
+  !record { model: res.users, id: group_project_manager_user_01 }:
+    name: 'group_project_manager_user_01_project_edt_idu'
+    login: 'group_project_manager_user_01_project_edt_idu'
+    new_password: 'testing'
+    partner_id: group_project_manager_partner_01
+-
+  !record { model: res.partner, id: group_project_manager_partner_02 }:
+    name: 'group_project_manager_user_02_project_edt_idu'
+    email: 'group_project_manager_user_02@project_edt_idu.test.com'
+-
+  !record { model: res.users, id: group_project_manager_user_02 }:
+    name: 'group_project_manager_user_02_project_edt_idu'
+    login: 'group_project_manager_user_02_project_edt_idu'
+    new_password: 'testing'
+    partner_id: group_project_manager_partner_02
+-
+  !python { model: res.groups }: |
+    self.write(cr, uid, ref("project.group_project_manager"), {
+        'users':[
+            (4, ref('group_project_manager_user_01')),
+            (4, ref('group_project_manager_user_02')),
+        ]
+    })
+    # All users are employee by default - delete for portal users
+    self.write(cr, uid, ref("base.group_user"), {
+        'users':[
+            (4, ref('group_project_user_user_01')),
+            (4, ref('group_project_user_user_02')),
+        ]
+    })
+
+-
+  !record { model: res.partner, id: group_project_user_externo_partner_01 }:
+    name: 'u01_group_project_user_externo_project_edt_idu'
+    email: 'group_project_user_externo_user_01@project_edt_idu.test.com'
+-
+  !record { model: res.users, id: group_project_user_externo_user_01 }:
+    name: 'u01_group_project_user_externo_project_edt_idu'
+    login: 'u01_group_project_user_externo_project_edt_idu'
+    new_password: 'testing'
+    partner_id: group_project_user_externo_partner_01
+    email: 'group_project_user_externo_user_01@project_edt_idu.test.com'
+-
+  !record { model: res.partner, id: group_project_user_externo_partner_02 }:
+    name: 'u02_group_project_user_externo_project_edt_idu'
+    email: 'group_project_user_externo_user_02@project_edt_idu.test.com'
+-
+  !record { model: res.users, id: group_project_user_externo_user_02 }:
+    name: 'u02_group_project_user_externo_project_edt_idu'
+    login: 'u02_group_project_user_externo_project_edt_idu'
+    new_password: 'testing'
+    partner_id: group_project_user_externo_partner_02
+    email: 'group_project_user_externo_user_02@project_edt_idu.test.com'
+-
+  !python { model: res.groups }: |
+    self.write(cr, uid, ref("project_edt_idu.group_project_user_externo"), {
+        'users':[
+            (4, ref('group_project_user_externo_user_01')),
+            (4, ref('group_project_user_externo_user_02')),
+        ]
+    })
+    # All users are employee by default - delete for portal users
+    self.write(cr, uid, ref("base.group_user"), {
+        'users':[
+            (4, ref('group_project_user_externo_user_01')),
+            (4, ref('group_project_user_externo_user_02')),
+        ]
+    })
+
+-
+  !record { model: res.partner, id: group_project_manager_partner_01 }:
+    name: 'u01_group_project_manager_project_edt_idu'
+    email: 'group_project_manager_user_01@project_edt_idu.test.com'
+-
+  !record { model: res.users, id: group_project_manager_user_01 }:
+    name: 'u01_group_project_manager_project_edt_idu'
+    login: 'u01_group_project_manager_project_edt_idu'
+    new_password: 'testing'
+    partner_id: group_project_manager_partner_01
+    email: 'group_project_manager_user_01@project_edt_idu.test.com'
+-
+  !record { model: res.partner, id: group_project_manager_partner_02 }:
+    name: 'u02_group_project_manager_project_edt_idu'
+    email: 'group_project_manager_user_02@project_edt_idu.test.com'
+-
+  !record { model: res.users, id: group_project_manager_user_02 }:
+    name: 'u02_group_project_manager_project_edt_idu'
+    login: 'u02_group_project_manager_project_edt_idu'
+    new_password: 'testing'
+    partner_id: group_project_manager_partner_02
+    email: 'group_project_manager_user_02@project_edt_idu.test.com'
+-
+  !python { model: res.groups }: |
+    self.write(cr, uid, ref("project.group_project_manager"), {
+        'users':[
+            (4, ref('group_project_manager_user_01')),
+            (4, ref('group_project_manager_user_02')),
+        ]
+    })
+    # All users are employee by default - delete for portal users
+    self.write(cr, uid, ref("base.group_user"), {
+        'users':[
+            (4, ref('group_project_manager_user_01')),
+            (4, ref('group_project_manager_user_02')),
+        ]
+    })

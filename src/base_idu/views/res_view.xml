@@ -1,0 +1,88 @@
+<?xml version="1.0"?>
+<openerp>
+<data>
+    <!--==================================================================================== -->
+    <!-- User Views -->
+    <!--==================================================================================== -->
+    <record id="view_users_form2" model="ir.ui.view">
+        <field name="name">res.users.form.base_idu</field>
+        <field name="model">res.users</field>
+        <field name="inherit_id" ref="base.view_users_form"/>
+        <field name="arch" type="xml">
+            <field name="partner_id" position="after">
+                <field name="employee_id" />
+                <field name="department_id"/>
+                <field name="fecha_expiracion"/>
+            </field>
+        </field>
+    </record>
+    <record model="ir.ui.view" id="users_form_simple">
+        <field name="name">res.users.form.simple.base_idu</field>
+        <field name="model">res.users</field>
+        <field name="inherit_id" ref="base.view_users_simple_form" />
+        <field name="arch" type="xml">
+            <field name="phone" position="before">
+                <field name="fecha_expiracion"/>
+                <field name="email"/>
+            </field>
+            <field name="fax" position="after">
+                <field name="groups_id"/>
+            </field>
+        </field>
+    </record>
+    <!--==================================================================================== -->
+    <!-- Partner Views -->
+    <!--==================================================================================== -->
+    <record id="view_partner_form" model="ir.ui.view">
+        <field name="name">res.partner.form.base_idu</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="arch" type="xml">
+            <field name="name" position="attributes">
+                <attribute name="attrs">{'readonly': [('tipo_persona','in',['nat'])]}</attribute>
+            </field>
+            <field name="parent_id" position="after">
+                <group name="datos_generales">
+                    <field name="tipo_persona"/>
+                    <field name="nombres" attrs="{
+                            'invisible': [('tipo_persona','in',['jur',False])],
+                            'required': [('tipo_persona','in',['nat'])]
+                        }"
+                    />
+                    <field name="apellidos" attrs="{
+                            'invisible': [('tipo_persona','in',['jur',False])],
+                            'required': [('tipo_persona','in',['nat'])]
+                        }"
+                    />
+                    <field name="identificacion_tipo" attrs="{
+                            'invisible': [('tipo_persona','in',['jur',False])],
+                            'required': [('tipo_persona','in',['nat'])]
+                        }"
+                    />
+                    <field name="identificacion_numero" placeholder="Número Documento de Identificación"/>
+                    <field name="genero" attrs="{
+                            'invisible': [('tipo_persona','in',['jur',False])]
+                        }"
+                    />
+                    <field name="parent_id" attrs="{
+                            'invisible': [('tipo_persona','in',['jur',False])]
+                        }"
+                    />
+                </group>
+            </field>
+        </field>
+    </record>
+    <record id="view_partner_search" model="ir.ui.view">
+        <field name="name">res.partner.search.base_idu</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_res_partner_filter"/>
+        <field name="arch" type="xml">
+            <field name="name" position="after">
+                <field name="email" />
+                <field name="identificacion_numero" />
+            </field>
+        </field>
+    </record>
+
+</data>
+</openerp>

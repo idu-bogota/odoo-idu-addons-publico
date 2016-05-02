@@ -1,0 +1,151 @@
+<?xml version="1.0"?>
+<openerp>
+<data>
+    <!--==================================================================================== -->
+    <!-- Task Views -->
+    <!--==================================================================================== -->
+    <!-- Inicio Filtros -->
+    <record model="ir.ui.view" id="task_search">
+        <field name="model">project.task</field>
+        <field name="arch" type="xml">
+            <search string="Plan de Mejoramiento">
+                <!-- Filtros -->
+                <filter name="mis_task" string="Mis Tareas"
+                    domain="[('user_id','=', uid)]"
+                    help="Tareas de mi Propiedad"
+                />
+                <!-- Busquedas -->
+                <separator/>
+                    <field name="edt_id" string="Accion Padre"/>
+                    <field name="stage_id" string="Estado"/>
+                    <field name="user_id" string="Responsable"/>
+                    <field name="dependencia_id" string="Dependencia"/>
+                    <field name="date_start" string="Fecha Inicio"/>
+                    <field name="date_end" string="Fecha Fin"/>
+                <!-- Agrupaciones -->
+                 <group expand="0" string="Group By...">
+                     <filter string="Acción" name="group_by_tipo"
+                        context="{'group_by':'edt_id'}"
+                    />
+                    <filter string="Fecha Inicio" name="group_by_fecha_inicio"
+                        context="{'group_by':'date_start'}"
+                    />
+                    <filter string="Fecha fin" name="group_by_fecha_fin"
+                        context="{'group_by':'date_end'}"
+                    />
+                    <filter string="Responsable" name="group_by_responsable"
+                        context="{'group_by':'user_id'}"
+                    />
+                    <filter string="Plan de Mejoramiento" name="group_by_plan"
+                        context="{'group_by':'project_id'}"
+                    />
+                    <filter string="Estado" name="group_by_estado"
+                        context="{'group_by':'stage_id'}"
+                    />
+                    <filter string="Dependecia" name="group_by_dependencia"
+                        context="{'group_by':'dependencia_id'}"
+                    />
+                </group>
+            </search>
+        </field>
+    </record>
+    <!-- Fin Filtros -->
+    <record model="ir.ui.view" id="project_task_form">
+        <field name="name">project.task.plan_mejoramiento</field>
+        <field name="model">project.task</field>
+        <field name="arch" type="xml">
+            <form string="Project" create="false">
+                <header>
+                    <field name="stage_id" widget="statusbar" clickable="True"
+                        options="{'fold_field': 'fold'}"/>
+                </header>
+                <sheet string="Task">
+                    <div class="oe_button_box">
+                       <button name="%(action_crear_tarea)d" type="action" class="oe_stat_button">
+                           <field name="progreso" widget="percentpie" string="Adicionar Progreso"/>
+                       </button>
+                    </div>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" placeholder="Task summary..." class="oe_inline" readonly="1"/>
+                            <field name="kanban_state" class="oe_inline" widget="kanban_state_selection"/>
+                        </h1>
+                    </div>
+                    <group col="4">
+                        <group col="2">
+                            <field name="project_id" string="Plan de Mejoramiento" readonly="1"/>
+                            <field name="edt_id" string="Acción" readonly="1" invisible="1"/>
+                            <field name="accion_id" readonly="1"/>
+                            <field name="dependencia_id" readonly="1"/>
+                            <field name="user_id"
+                                domain="[('department_id','=', dependencia_id)]"
+                                readonly="1"
+                            />
+                        </group>
+                        <group col="2">
+                            <field name="revisor_id" readonly="1"/>
+                            <field name="progreso" widget="progressbar"/>
+                            <field name="date_start" readonly="1"/>
+                            <field name="date_end" readonly="1"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Description">
+                            <field name="description" placeholder="Add a Description..."/>
+                            <div class="oe_clear"/>
+                        </page>
+                        <page string="Registros de Progreso">
+                            <group string="Registros de Progreso">
+                                <field name="registro_progreso_ids" readonly="1" nolabel="1">
+                                    <tree>
+                                        <field name="name"/>
+                                        <field name="fecha"/>
+                                        <field name="porcentaje"/>
+                                    </tree>
+                                </field>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids" widget="mail_followers" groups="base.group_user"/>
+                    <field name="message_ids" widget="mail_thread"/>
+                </div>
+            </form>
+        </field>
+    </record>
+    <record id="project_task_tree" model="ir.ui.view">
+        <field name="name">project.task.tree.plan_mejoramiento</field>
+        <field name="model">project.task</field>
+        <field eval="2" name="priority"/>
+        <field name="arch" type="xml">
+            <tree
+                fonts="bold:message_unread==True"
+                colors="red:date_deadline and (date_deadline&lt;current_date)" 
+                string="Tasks"
+                create="false" delete="false"
+            >
+                <field name="message_unread" invisible="1"/>
+                <field name="name"/>
+                <field name="project_id" string="Plan" />
+                <field name="edt_id" string="Acción"/>
+                <field name="user_id"/>
+                <field name="revisor_id"/>
+                <field name="date_start"/>
+                <field name="date_end"/>
+                <field name="stage_id"/>
+                <field name="date_deadline" invisible="1"/>
+            </tree>
+        </field>
+    </record>
+
+    <record model="ir.actions.act_window" id="task_action">
+        <field name="name">Tareas</field>
+        <field name="res_model">project.task</field>
+        <field name="view_mode">tree,form</field>
+        <field name="domain">[('project_id.proyecto_tipo', '=', 'plan_mejoramiento')]</field>
+        <field name="context">{'form_view_ref': 'plan_mejoramiento_idu.project_task_form','tree_view_ref': 'plan_mejoramiento_idu.project_task_tree'}</field>
+   </record>
+   <menuitem id="task_menu" parent="plan_mejoramiento_menu" name="Tareas" action="task_action" sequence="40"/>
+</data>
+</openerp>

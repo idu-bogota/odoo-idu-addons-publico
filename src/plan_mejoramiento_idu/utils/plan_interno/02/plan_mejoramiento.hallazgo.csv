@@ -1,0 +1,20 @@
+hallazgo_id,plan_id,auditor,name_hallazgo,capitulo,dependencia,descripcion,causa,efecto
+1,1,cldiazra1,Posibilidad de ,,OAC,"Posibilidad de que la imagen institucional de la entidad se deteriore, por inadecuado manejo de la relación con diferentes medios de comunicación y las consecuencias que de ello se deriven.","*Desconocimiento de la información acerca de comunicación asertiva por parte de los voceros de la entidad. 
+ *Desconocimiento sobre el manejo de información institucional por parte de los voceros ante los medios de comunicación. 
+ * Desconocimiento sobre el manejo de crisis de comunicación externa e interna por parte de los voceros.
+ * Desconocimiento y falta de claridad en el rol de los voceros de la entidad ante los medios de comunicación.",
+2,2,cldiazra1,Oportunidad de ,,STRT,Oportunidad de Mejora: Actualizar la caracterización del proceso,"Evolución de los procesos institucionales
+ Ajustes a las necesidades de la entidad
+ Modernización de la tecnología",
+3,3,cldiazra1,En el seguimien,,OCI,"En el seguimiento al Plan de Mejoramiento Interno se ha identificado que una cantidad importante de las acciones correctivas formuladas por las dependencias del IDU, presentan información inconsistente.","Recientemente no se ha depurado el plan de mejoramiento interno, realizando análisis de antigüedad y/o pertinencia de las acciones abiertas.",
+4,3,cldiazra1,Las áreas no ti,,OCI,"Las áreas no tienen claros sus compromisos en lo que tiene que ver con los Planes de Mejoramiento Internos, impactando negativamente al proceso de mejoramiento continuo.",Que la gestión de los planes de mejoramiento es dispendiosa y genera desgaste administrativo.,
+5,4,peussaga1,Efectuar seguim,,DTGJ,Efectuar seguimiento a los términos administrativos y judiciales con el fin de dar cumplimiento a los mismos.,Controles reducidos,
+6,5,plleiva1,Solicitar la so,,DTC,Solicitar la socialización y capacitación de los procedimeientos de otras áreas que se aplican en la DTC,"Falta de capacitación e inducción de los miembtros de la DTC, STEST y STESV",
+7,6,pfgaravi1,En la autoevalu,,STRH,"En la autoevaluación de algunos criterios del Planear, la STRH se autocalificó ""Casi Siempre"", entre otros:
+Plan de acción,  Acuerdos de Gestión, Evaluación del Desempeño, Indicadores, etc.","Los instrumentos, así como algunas directrices para formular el Plan de Acción, Indicadores, Acuerdos de Gestión entre otros, generalmente se emiten en la misma vigencia en que deben diligenciarse.",
+8,6,pfgaravi1,En la autoevalu,,STRH,"En la autoevaluación de algunos criterios del Hacer, la STRH se autocalificó ""Casi Siempre"", entre otros:
+2. Ejecución de actividades definidas en planes, programas, etc. 3. Gestión frente a problemas, fallas y riesgos. 4. Ejecución oportuna de procesos de contratación.",Decisiones de terceros que afectan los planes del área,
+9,6,pfgaravi1,En la autoevalu,,STRH,"En la autoevaluación de algunos criterios del Verificar, la STRH se autocalificó ""Casi Siempre"", entre otros:
+2. Seguimiento comités. 3 a, 3 b, 3 c, 3 d Seguimiento productos, planes, programas, proyectos, trámites y servicios","Se realizan seguimientos, pero no son suficientes o no se diligencian los registros correspondientes",
+10,6,pfgaravi1,En la autoevalu,,STRH,"En la autoevaluación de algunos criterios del Mejorar, la STRH se autocalificó ""Casi Siempre"", en el registro de las acciones correctivas y/o preventivas que se generan de manera autónoma","Insuficiente socialización del procedimiento de acciones correctivas y/o preventivas, y los correspondientes formatos",
+11,7,ccbernal2,Estandarizar la,,DTGC,Estandarizar la totalidad de los documentos soporte de las actividades descritas en los procedimientos del proceso de Gestión Contractual.,"Desconocimiento del procedimiento de control de documentos en el cual se establecen los parámetros para la validación, aprobación, distribución, adopción y conservación de la documentación además de un bajo seguimiento a la utilización de los formatos establecidos en el Sistema de Gestión de calidad.",

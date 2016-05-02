@@ -1,0 +1,588 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+<data>
+<!-- 
+=========================================================================
+ Groups Definition
+=========================================================================
+-->
+    <record model="ir.module.category" id="category_project_edt_idu">
+        <field name="name">EDT</field>
+        <field name="sequence">0</field>
+        <field name="visible" eval="1" />
+    </record>
+    <record id="group_project_user_externo" model="res.groups">
+        <field name="name">Project_user_externo</field>
+        <field name="category_id" ref="project_edt_idu.category_project_edt_idu"/>
+        <field name="implied_ids"
+            eval="[
+                (4, ref('base.group_user')),
+                (4, ref('project.group_project_user')),
+            ]"
+        />
+    </record>
+<!--
+=============================================================================
+ Reglas por Odoo para desactivar
+=============================================================================
+-->
+    <record id="project.task_visibility_rule" model="ir.rule">
+        <field name="active" eval="False"/>
+    </record>
+
+<!--
+=============================================================================
+ Domain Constraints
+=============================================================================
+-->
+    <!-- Domain project.group_project_user -->
+    <record id="task_pendiente_project_group_project_user_acl_create" model="ir.rule">
+        <field name="name">project.group_project_user project.task.pendiente Create</field>
+        <field name="model_id" ref="project_edt_idu.model_project_task_pendiente"/>
+        <field name="domain_force">[
+'|','|','|','|','|',
+('task_id.user_id','=',user.id),
+('task_id.revisor_id','=',user.id),
+('task_id.project_id.user_id','=',user.id),
+('task_id.project_id.programador_id','=',user.id),
+('task_id.edt_id.user_id','=',user.id),
+('task_id.edt_id.programador_id','=',user.id)
+]</field>
+        <field name="groups" eval="[(4, ref('project.group_project_user'))]"/>
+        <field name="perm_read" eval="False"/>
+        <field name="perm_create" eval="True"/>
+        <field name="perm_write" eval="False"/>
+        <field name="perm_unlink" eval="False"/>
+    </record>
+    <record id="task_pendiente_project_group_project_user_acl_write" model="ir.rule">
+        <field name="name">project.group_project_user project.task.pendiente Write</field>
+        <field name="model_id" ref="project_edt_idu.model_project_task_pendiente"/>
+        <field name="domain_force">[
+'|','|','|','|','|',
+('task_id.user_id','=',user.id),
+('task_id.revisor_id','=',user.id),
+('task_id.project_id.user_id','=',user.id),
+('task_id.project_id.programador_id','=',user.id),
+('task_id.edt_id.user_id','=',user.id),
+('task_id.edt_id.programador_id','=',user.id)
+]</field>
+        <field name="groups" eval="[(4, ref('project.group_project_user'))]"/>
+        <field name="perm_read" eval="False"/>
+        <field name="perm_create" eval="False"/>
+        <field name="perm_write" eval="True"/>
+        <field name="perm_unlink" eval="False"/>
+    </record>
+    <record id="task_pendiente_project_group_project_user_acl_delete" model="ir.rule">
+        <field name="name">project.group_project_user project.task.pendiente Delete</field>
+        <field name="model_id" ref="project_edt_idu.model_project_task_pendiente"/>
+        <field name="domain_force">[
+'|','|','|',
+('task_id.project_id.user_id','=',user.id),
+('task_id.project_id.programador_id','=',user.id),
+('task_id.edt_id.user_id','=',user.id),
+('task_id.edt_id.programador_id','=',user.id)
+]</field>
+        <field name="groups" eval="[(4, ref('project.group_project_user'))]"/>
+        <field name="perm_read" eval="False"/>
+        <field name="perm_create" eval="False"/>
+        <field name="perm_write" eval="False"/>
+        <field name="perm_unlink" eval="True"/>
+    </record>
+    <record id="task_reporte_avance_project_group_project_user_acl_read" model="ir.rule">
+        <field name="name">project.group_project_user project.task.reporte_avance Read</field>
+        <field name="model_id" ref="project_edt_idu.model_project_task_reporte_avance"/>
+        <field name="domain_force">[
+'|','|','|',
+('project_id.user_id', '=', user.id),
+('project_id.programador_id', '=', user.id),
+('message_partner_ids', 'in', [user.partner_id.id]),
+('user_id','=',user.id)
+]</field>
+        <field name="groups" eval="[(4, ref('project.group_project_user'))]"/>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_create" eval="False"/>
+        <field name="perm_write" eval="False"/>
+        <field name="perm_unlink" eval="False"/>
+    </record>
+    <record id="task_reporte_avance_project_group_project_user_acl_create" model="ir.rule">
+        <field name="name">project.group_project_user project.task.reporte_avance Create</field>
+        <field name="model_id" ref="project_edt_idu.model_project_task_reporte_avance"/>
+        <field name="domain_force">[('user_id', '=', user.id)]</field>
+        <field name="groups" eval="[(4, ref('project.group_project_user'))]"/>
+        <field name="perm_read" eval="False"/>
+        <field name="perm_create" eval="True"/>
+        <field name="perm_write" eval="False"/>
+        <field name="perm_unlink" eval="False"/>
+    </record>
+    <record id="task_reporte_avance_project_group_project_user_acl_write" model="ir.rule">
+        <field name="name">project.group_project_user project.task.reporte_avance Write</field>
+        <field name="model_id" ref="project_edt_idu.model_project_task_reporte_avance"/>
+        <field name="domain_force">[
+'|','|',
+('user_id','=',user.id),
+('project_id.user_id','=',user.id),
+('project_id.programador_id','=',user.id),
+]</field>
+        <field name="groups" eval="[(4, ref('project.group_project_user'))]"/>
+        <field name="perm_read" eval="False"/>
+        <field name="perm_create" eval="False"/>
+        <field name="perm_write" eval="True"/>
+        <field name="perm_unlink" eval="False"/>
+    </record>
+    <record id="task_registro_progreso_project_group_project_user_acl_create" model="ir.rule">
+        <field name="name">project.group_project_user project.task.registro_progreso Create</field>
+        <field name="model_id" ref="project_edt_idu.model_project_task_registro_progreso"/>
+        <field name="domain_force">[
+'|','|','|','|',
+('task_id.user_id','=',user.id),
+('task_id.project_id.user_id','=',user.id),
+('task_id.project_id.programador_id','=',user.id),
+('task_id.edt_id.user_id','=',user.id),
+('task_id.edt_id.programador_id','=',user.id)
+]</field>
+        <field name="groups" eval="[(4, ref('project.group_project_user'))]"/>
+        <field name="perm_read" eval="False"/>
+        <field name="perm_create" eval="True"/>
+        <field name="perm_write" eval="False"/>
+        <field name="perm_unlink" eval="False"/>
+    </record>
+    <record id="task_registro_progreso_project_group_project_user_acl_write" model="ir.rule">
+        <field name="name">project.group_project_user project.task.registro_progreso Write</field>
+        <field name="model_id" ref="project_edt_idu.model_project_task_registro_progreso"/>
+        <field name="domain_force">[
+'|','|','|','|','|',
+('task_id.user_id','=',user.id),
+('task_id.revisor_id','=',user.id),
+('task_id.project_id.user_id','=',user.id),
+('task_id.project_id.programador_id','=',user.id),
+('task_id.edt_id.user_id','=',user.id),
+('task_id.edt_id.programador_id','=',user.id)
+]</field>
+        <field name="groups" eval="[(4, ref('project.group_project_user'))]"/>
+        <field name="perm_read" eval="False"/>
+        <field name="perm_create" eval="False"/>
+        <field name="perm_write" eval="True"/>
+        <field name="perm_unlink" eval="False"/>
+    </record>
+    <record id="edt_project_group_project_user_acl_create" model="ir.rule">
+        <field name="name">project.group_project_user project.edt Create</field>
+        <field name="model_id" ref="project_edt_idu.model_project_edt"/>
+        <field name="domain_force">[
+'|','|','|',
+('project_id.user_id','=',user.id),
+('project_id.programador_id','=',user.id),
+('parent_id.user_id','=',user.id),
+('parent_id.programador_id','=',user.id)
+]</field>
+        <field name="groups" eval="[(4, ref('project.group_project_user'))]"/>
+        <field name="perm_read" eval="False"/>
+        <field name="perm_create" eval="True"/>
+        <field name="perm_write" eval="False"/>
+        <field name="perm_unlink" eval="False"/>
+    </record>
+    <record id="edt_project_group_project_user_acl_write" model="ir.rule">
+        <field name="name">project.group_project_user project.edt Write</field>
+        <field name="model_id" ref="project_edt_idu.model_project_edt"/>
+        <field name="domain_force">[
+'|','|','|','|','|',
+('user_id','=',user.id),
+('programador_id','=',user.id),
+('project_id.user_id','=',user.id),
+('project_id.programador_id','=',user.id),
+('parent_id.user_id','=',user.id),
+('parent_id.programador_id','=',user.id)
+]</field>
+        <field name="groups" eval="[(4, ref('project.group_project_user'))]"/>
+        <field name="perm_read" eval="False"/>
+        <field name="perm_create" eval="False"/>
+        <field name="perm_write" eval="True"/>
+        <field name="perm_unlink" eval="False"/>
+    </record>
+    <record id="edt_project_group_project_user_acl_delete" model="ir.rule">
+        <field name="name">project.group_project_user project.edt Delete</field>
+        <field name="model_id" ref="project_edt_idu.model_project_edt"/>
+        <field name="domain_force">[
+'|','|','|','|',
+('programador_id','=',user.id),
+('project_id.user_id','=',user.id),
+('project_id.programador_id','=',user.id),
+('parent_id.user_id','=',user.id),
+('parent_id.programador_id','=',user.id)
+]</field>
+        <field name="groups" eval="[(4, ref('project.group_project_user'))]"/>
+        <field name="perm_read" eval="False"/>
+        <field name="perm_create" eval="False"/>
+        <field name="perm_write" eval="False"/>
+        <field name="perm_unlink" eval="True"/>
+    </record>
+    <!-- Domain project_edt_idu.group_project_user_externo -->
+    <record id="edt_project_edt_idu_group_project_user_externo_acl_read" model="ir.rule">
+        <field name="name">project_edt_idu.group_project_user_externo project.edt Read</field>
+        <field name="model_id" ref="project_edt_idu.model_project_edt"/>
+        <field name="domain_force">[
+'|','|',
+('project_id.message_partner_ids', 'in', [user.partner_id.id]),
+('parent_id.message_partner_ids', 'in', [user.partner_id.id]),
+('user_id','=',user.id)
+]</field>
+        <field name="groups" eval="[(4, ref('project_edt_idu.group_project_user_externo'))]"/>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_create" eval="False"/>
+        <field name="perm_write" eval="False"/>
+        <field name="perm_unlink" eval="False"/>
+    </record>
+    <record id="edt_project_edt_idu_group_project_user_externo_acl_write" model="ir.rule">
+        <field name="name">project_edt_idu.group_project_user_externo project.edt Write</field>
+        <field name="model_id" ref="project_edt_idu.model_project_edt"/>
+        <field name="domain_force">[('user_id','=',user.id)]</field>
+        <field name="groups" eval="[(4, ref('project_edt_idu.group_project_user_externo'))]"/>
+        <field name="perm_read" eval="False"/>
+        <field name="perm_create" eval="False"/>
+        <field name="perm_write" eval="True"/>
+        <field name="perm_unlink" eval="False"/>
+    </record>
+    <record id="tro_progreso_project_edt_idu_group_project_user_externo_acl_read" model="ir.rule">
+        <field name="name">project_edt_idu.group_project_user_externo project.task.registro_progreso Read</field>
+        <field name="model_id" ref="project_edt_idu.model_project_task_registro_progreso"/>
+        <field name="domain_force">[
+'|','|',
+('task_id.message_partner_ids', 'in', [user.partner_id.id]),
+('task_id.project_id.message_partner_ids', 'in', [user.partner_id.id]),
+('task_id.edt_id.user_id', '=', user.id),
+]</field>
+        <field name="groups" eval="[(4, ref('project_edt_idu.group_project_user_externo'))]"/>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_create" eval="False"/>
+        <field name="perm_write" eval="False"/>
+        <field name="perm_unlink" eval="False"/>
+    </record>
+    <record id="o_progreso_project_edt_idu_group_project_user_externo_acl_create" model="ir.rule">
+        <field name="name">project_edt_idu.group_project_user_externo project.task.registro_progreso Create</field>
+        <field name="model_id" ref="project_edt_idu.model_project_task_registro_progreso"/>
+        <field name="domain_force">[
+'|',
+('task_id.user_id','=',user.id),
+('task_id.edt_id.user_id','=',user.id)
+]</field>
+        <field name="groups" eval="[(4, ref('project_edt_idu.group_project_user_externo'))]"/>
+        <field name="perm_read" eval="False"/>
+        <field name="perm_create" eval="True"/>
+        <field name="perm_write" eval="False"/>
+        <field name="perm_unlink" eval="False"/>
+    </record>
+    <record id="ro_progreso_project_edt_idu_group_project_user_externo_acl_write" model="ir.rule">
+        <field name="name">project_edt_idu.group_project_user_externo project.task.registro_progreso Write</field>
+        <field name="model_id" ref="project_edt_idu.model_project_task_registro_progreso"/>
+        <field name="domain_force">[
+'|',
+('task_id.user_id','=',user.id),
+('task_id.edt_id.user_id','=',user.id)
+]</field>
+        <field name="groups" eval="[(4, ref('project_edt_idu.group_project_user_externo'))]"/>
+        <field name="perm_read" eval="False"/>
+        <field name="perm_create" eval="False"/>
+        <field name="perm_write" eval="True"/>
+        <field name="perm_unlink" eval="False"/>
+    </record>
+    <record id="sk_pendiente_project_edt_idu_group_project_user_externo_acl_read" model="ir.rule">
+        <field name="name">project_edt_idu.group_project_user_externo project.task.pendiente Read</field>
+        <field name="model_id" ref="project_edt_idu.model_project_task_pendiente"/>
+        <field name="domain_force">[
+'|','|',
+('task_id.message_partner_ids', 'in', [user.partner_id.id]),
+('task_id.project_id.message_partner_ids', 'in', [user.partner_id.id]),
+('task_id.edt_id.user_id', '=', user.id),
+]</field>
+        <field name="groups" eval="[(4, ref('project_edt_idu.group_project_user_externo'))]"/>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_create" eval="False"/>
+        <field name="perm_write" eval="False"/>
+        <field name="perm_unlink" eval="False"/>
+    </record>
+    <record id="_pendiente_project_edt_idu_group_project_user_externo_acl_create" model="ir.rule">
+        <field name="name">project_edt_idu.group_project_user_externo project.task.pendiente Create</field>
+        <field name="model_id" ref="project_edt_idu.model_project_task_pendiente"/>
+        <field name="domain_force">[
+'|',
+('task_id.user_id','=',user.id),
+('task_id.edt_id.user_id','=',user.id)
+]</field>
+        <field name="groups" eval="[(4, ref('project_edt_idu.group_project_user_externo'))]"/>
+        <field name="perm_read" eval="False"/>
+        <field name="perm_create" eval="True"/>
+        <field name="perm_write" eval="False"/>
+        <field name="perm_unlink" eval="False"/>
+    </record>
+    <record id="k_pendiente_project_edt_idu_group_project_user_externo_acl_write" model="ir.rule">
+        <field name="name">project_edt_idu.group_project_user_externo project.task.pendiente Write</field>
+        <field name="model_id" ref="project_edt_idu.model_project_task_pendiente"/>
+        <field name="domain_force">[
+'|',
+('task_id.user_id','=',user.id),
+('task_id.edt_id.user_id','=',user.id)
+]</field>
+        <field name="groups" eval="[(4, ref('project_edt_idu.group_project_user_externo'))]"/>
+        <field name="perm_read" eval="False"/>
+        <field name="perm_create" eval="False"/>
+        <field name="perm_write" eval="True"/>
+        <field name="perm_unlink" eval="False"/>
+    </record>
+    <record id="project_project_edt_idu_group_project_user_externo_acl_read" model="ir.rule">
+        <field name="name">project_edt_idu.group_project_user_externo project.project Read</field>
+        <field name="model_id" ref="project_edt_idu.model_project_project"/>
+        <field name="domain_force">[('message_partner_ids', 'in', [user.partner_id.id])]</field>
+        <field name="groups" eval="[(4, ref('project_edt_idu.group_project_user_externo'))]"/>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_create" eval="False"/>
+        <field name="perm_write" eval="False"/>
+        <field name="perm_unlink" eval="False"/>
+    </record>
+    <record id="predecesor_project_edt_idu_group_project_user_externo_acl_read" model="ir.rule">
+        <field name="name">project_edt_idu.group_project_user_externo project.predecesor Read</field>
+        <field name="model_id" ref="project_edt_idu.model_project_predecesor"/>
+        <field name="domain_force">[
+'|','|',
+('task_id.message_partner_ids', 'in', [user.partner_id.id]),
+('task_id.project_id.message_partner_ids', 'in', [user.partner_id.id]),
+('task_id.edt_id.user_id', '=', user.id),
+]</field>
+        <field name="groups" eval="[(4, ref('project_edt_idu.group_project_user_externo'))]"/>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_create" eval="False"/>
+        <field name="perm_write" eval="False"/>
+        <field name="perm_unlink" eval="False"/>
+    </record>
+    <record id="task_project_edt_idu_group_project_user_externo_acl_read" model="ir.rule">
+        <field name="name">project_edt_idu.group_project_user_externo project.task Read</field>
+        <field name="model_id" ref="project_edt_idu.model_project_task"/>
+        <field name="domain_force">[
+'|','|','|','|',
+('project_id.message_partner_ids', 'in', [user.partner_id.id]),
+('message_partner_ids', 'in', [user.partner_id.id]),
+('edt_id.user_id', '=', user.id),
+('user_id','=',user.id),
+('revisor_id','=',user.id)
+]</field>
+        <field name="groups" eval="[(4, ref('project_edt_idu.group_project_user_externo'))]"/>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_create" eval="False"/>
+        <field name="perm_write" eval="False"/>
+        <field name="perm_unlink" eval="False"/>
+    </record>
+    <record id="task_project_edt_idu_group_project_user_externo_acl_write" model="ir.rule">
+        <field name="name">project_edt_idu.group_project_user_externo project.task Write</field>
+        <field name="model_id" ref="project_edt_idu.model_project_task"/>
+        <field name="domain_force">[
+'|',
+('user_id','=',user.id),
+('revisor_id','=',user.id)
+]</field>
+        <field name="groups" eval="[(4, ref('project_edt_idu.group_project_user_externo'))]"/>
+        <field name="perm_read" eval="False"/>
+        <field name="perm_create" eval="False"/>
+        <field name="perm_write" eval="True"/>
+        <field name="perm_unlink" eval="False"/>
+    </record>
+    <!-- Domain project.group_project_manager -->
+    <record id="task_pendiente_project_group_project_manager_acl_read" model="ir.rule">
+        <field name="name">project.group_project_manager project.task.pendiente Read</field>
+        <field name="model_id" ref="project_edt_idu.model_project_task_pendiente"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="groups" eval="[(4, ref('project.group_project_manager'))]"/>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_create" eval="False"/>
+        <field name="perm_write" eval="False"/>
+        <field name="perm_unlink" eval="False"/>
+    </record>
+    <record id="task_pendiente_project_group_project_manager_acl_create" model="ir.rule">
+        <field name="name">project.group_project_manager project.task.pendiente Create</field>
+        <field name="model_id" ref="project_edt_idu.model_project_task_pendiente"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="groups" eval="[(4, ref('project.group_project_manager'))]"/>
+        <field name="perm_read" eval="False"/>
+        <field name="perm_create" eval="True"/>
+        <field name="perm_write" eval="False"/>
+        <field name="perm_unlink" eval="False"/>
+    </record>
+    <record id="task_pendiente_project_group_project_manager_acl_write" model="ir.rule">
+        <field name="name">project.group_project_manager project.task.pendiente Write</field>
+        <field name="model_id" ref="project_edt_idu.model_project_task_pendiente"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="groups" eval="[(4, ref('project.group_project_manager'))]"/>
+        <field name="perm_read" eval="False"/>
+        <field name="perm_create" eval="False"/>
+        <field name="perm_write" eval="True"/>
+        <field name="perm_unlink" eval="False"/>
+    </record>
+    <record id="task_pendiente_project_group_project_manager_acl_delete" model="ir.rule">
+        <field name="name">project.group_project_manager project.task.pendiente Delete</field>
+        <field name="model_id" ref="project_edt_idu.model_project_task_pendiente"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="groups" eval="[(4, ref('project.group_project_manager'))]"/>
+        <field name="perm_read" eval="False"/>
+        <field name="perm_create" eval="False"/>
+        <field name="perm_write" eval="False"/>
+        <field name="perm_unlink" eval="True"/>
+    </record>
+    <record id="task_reporte_avance_project_group_project_manager_acl_read" model="ir.rule">
+        <field name="name">project.group_project_manager project.task.reporte_avance Read</field>
+        <field name="model_id" ref="project_edt_idu.model_project_task_reporte_avance"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="groups" eval="[(4, ref('project.group_project_manager'))]"/>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_create" eval="False"/>
+        <field name="perm_write" eval="False"/>
+        <field name="perm_unlink" eval="False"/>
+    </record>
+    <record id="task_reporte_avance_project_group_project_manager_acl_create" model="ir.rule">
+        <field name="name">project.group_project_manager project.task.reporte_avance Create</field>
+        <field name="model_id" ref="project_edt_idu.model_project_task_reporte_avance"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="groups" eval="[(4, ref('project.group_project_manager'))]"/>
+        <field name="perm_read" eval="False"/>
+        <field name="perm_create" eval="True"/>
+        <field name="perm_write" eval="False"/>
+        <field name="perm_unlink" eval="False"/>
+    </record>
+    <record id="task_reporte_avance_project_group_project_manager_acl_write" model="ir.rule">
+        <field name="name">project.group_project_manager project.task.reporte_avance Write</field>
+        <field name="model_id" ref="project_edt_idu.model_project_task_reporte_avance"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="groups" eval="[(4, ref('project.group_project_manager'))]"/>
+        <field name="perm_read" eval="False"/>
+        <field name="perm_create" eval="False"/>
+        <field name="perm_write" eval="True"/>
+        <field name="perm_unlink" eval="False"/>
+    </record>
+    <record id="task_reporte_avance_project_group_project_manager_acl_delete" model="ir.rule">
+        <field name="name">project.group_project_manager project.task.reporte_avance Delete</field>
+        <field name="model_id" ref="project_edt_idu.model_project_task_reporte_avance"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="groups" eval="[(4, ref('project.group_project_manager'))]"/>
+        <field name="perm_read" eval="False"/>
+        <field name="perm_create" eval="False"/>
+        <field name="perm_write" eval="False"/>
+        <field name="perm_unlink" eval="True"/>
+    </record>
+    <record id="task_registro_progreso_project_group_project_manager_acl_read" model="ir.rule">
+        <field name="name">project.group_project_manager project.task.registro_progreso Read</field>
+        <field name="model_id" ref="project_edt_idu.model_project_task_registro_progreso"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="groups" eval="[(4, ref('project.group_project_manager'))]"/>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_create" eval="False"/>
+        <field name="perm_write" eval="False"/>
+        <field name="perm_unlink" eval="False"/>
+    </record>
+    <record id="task_registro_progreso_project_group_project_manager_acl_create" model="ir.rule">
+        <field name="name">project.group_project_manager project.task.registro_progreso Create</field>
+        <field name="model_id" ref="project_edt_idu.model_project_task_registro_progreso"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="groups" eval="[(4, ref('project.group_project_manager'))]"/>
+        <field name="perm_read" eval="False"/>
+        <field name="perm_create" eval="True"/>
+        <field name="perm_write" eval="False"/>
+        <field name="perm_unlink" eval="False"/>
+    </record>
+    <record id="task_registro_progreso_project_group_project_manager_acl_write" model="ir.rule">
+        <field name="name">project.group_project_manager project.task.registro_progreso Write</field>
+        <field name="model_id" ref="project_edt_idu.model_project_task_registro_progreso"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="groups" eval="[(4, ref('project.group_project_manager'))]"/>
+        <field name="perm_read" eval="False"/>
+        <field name="perm_create" eval="False"/>
+        <field name="perm_write" eval="True"/>
+        <field name="perm_unlink" eval="False"/>
+    </record>
+    <record id="task_registro_progreso_project_group_project_manager_acl_delete" model="ir.rule">
+        <field name="name">project.group_project_manager project.task.registro_progreso Delete</field>
+        <field name="model_id" ref="project_edt_idu.model_project_task_registro_progreso"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="groups" eval="[(4, ref('project.group_project_manager'))]"/>
+        <field name="perm_read" eval="False"/>
+        <field name="perm_create" eval="False"/>
+        <field name="perm_write" eval="False"/>
+        <field name="perm_unlink" eval="True"/>
+    </record>
+    <record id="predecesor_project_group_project_manager_acl_read" model="ir.rule">
+        <field name="name">project.group_project_manager project.predecesor Read</field>
+        <field name="model_id" ref="project_edt_idu.model_project_predecesor"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="groups" eval="[(4, ref('project.group_project_manager'))]"/>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_create" eval="False"/>
+        <field name="perm_write" eval="False"/>
+        <field name="perm_unlink" eval="False"/>
+    </record>
+    <record id="predecesor_project_group_project_manager_acl_create" model="ir.rule">
+        <field name="name">project.group_project_manager project.predecesor Create</field>
+        <field name="model_id" ref="project_edt_idu.model_project_predecesor"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="groups" eval="[(4, ref('project.group_project_manager'))]"/>
+        <field name="perm_read" eval="False"/>
+        <field name="perm_create" eval="True"/>
+        <field name="perm_write" eval="False"/>
+        <field name="perm_unlink" eval="False"/>
+    </record>
+    <record id="predecesor_project_group_project_manager_acl_write" model="ir.rule">
+        <field name="name">project.group_project_manager project.predecesor Write</field>
+        <field name="model_id" ref="project_edt_idu.model_project_predecesor"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="groups" eval="[(4, ref('project.group_project_manager'))]"/>
+        <field name="perm_read" eval="False"/>
+        <field name="perm_create" eval="False"/>
+        <field name="perm_write" eval="True"/>
+        <field name="perm_unlink" eval="False"/>
+    </record>
+    <record id="predecesor_project_group_project_manager_acl_delete" model="ir.rule">
+        <field name="name">project.group_project_manager project.predecesor Delete</field>
+        <field name="model_id" ref="project_edt_idu.model_project_predecesor"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="groups" eval="[(4, ref('project.group_project_manager'))]"/>
+        <field name="perm_read" eval="False"/>
+        <field name="perm_create" eval="False"/>
+        <field name="perm_write" eval="False"/>
+        <field name="perm_unlink" eval="True"/>
+    </record>
+    <record id="edt_project_group_project_manager_acl_read" model="ir.rule">
+        <field name="name">project.group_project_manager project.edt Read</field>
+        <field name="model_id" ref="project_edt_idu.model_project_edt"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="groups" eval="[(4, ref('project.group_project_manager'))]"/>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_create" eval="False"/>
+        <field name="perm_write" eval="False"/>
+        <field name="perm_unlink" eval="False"/>
+    </record>
+    <record id="edt_project_group_project_manager_acl_create" model="ir.rule">
+        <field name="name">project.group_project_manager project.edt Create</field>
+        <field name="model_id" ref="project_edt_idu.model_project_edt"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="groups" eval="[(4, ref('project.group_project_manager'))]"/>
+        <field name="perm_read" eval="False"/>
+        <field name="perm_create" eval="True"/>
+        <field name="perm_write" eval="False"/>
+        <field name="perm_unlink" eval="False"/>
+    </record>
+    <record id="edt_project_group_project_manager_acl_write" model="ir.rule">
+        <field name="name">project.group_project_manager project.edt Write</field>
+        <field name="model_id" ref="project_edt_idu.model_project_edt"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="groups" eval="[(4, ref('project.group_project_manager'))]"/>
+        <field name="perm_read" eval="False"/>
+        <field name="perm_create" eval="False"/>
+        <field name="perm_write" eval="True"/>
+        <field name="perm_unlink" eval="False"/>
+    </record>
+    <record id="edt_project_group_project_manager_acl_delete" model="ir.rule">
+        <field name="name">project.group_project_manager project.edt Delete</field>
+        <field name="model_id" ref="project_edt_idu.model_project_edt"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="groups" eval="[(4, ref('project.group_project_manager'))]"/>
+        <field name="perm_read" eval="False"/>
+        <field name="perm_create" eval="False"/>
+        <field name="perm_write" eval="False"/>
+        <field name="perm_unlink" eval="True"/>
+    </record>
+</data>
+</openerp>

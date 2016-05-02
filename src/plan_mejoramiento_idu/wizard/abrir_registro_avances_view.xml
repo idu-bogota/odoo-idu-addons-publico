@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+<data>
+<!-- Vista form -->
+    <record model="ir.ui.view" id="abrir_registro_actividad_wizard">
+        <field name="model">plan_mejoramiento.wizard.abrir_registro_avance</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <field name="fecha_inicio"/>
+                        <field name="fecha_fin"/>
+                    </group>
+                    <footer>
+                        <button name="action_create" string="Almacenar periodo" type="object" class="oe_highlight" /> o
+                        <button string="Cancelar" class="oe_link" special="cancel" />
+                    </footer>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    <record model="ir.actions.act_window" id="action_abrir_registro_avance">
+        <field name="name">Abrir Registro de Avances Mensuales</field>
+        <field name="res_model">plan_mejoramiento.wizard.abrir_registro_avance</field>
+        <field name="target">new</field>
+        <field name="view_mode">form</field>
+    </record>
+    <menuitem id="wizard_abrir_registro_avances_menu" parent="configuracion_menu" name="Abrir Registro de Avances" action="action_abrir_registro_avance"/>
+</data>
+</openerp>

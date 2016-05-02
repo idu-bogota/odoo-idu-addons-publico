@@ -1,0 +1,109 @@
+-
+  CREAR ACCIONE DE OCI
+-
+  ACCION 01
+-
+  !record {model: plan_mejoramiento.accion, id: id_acc_01}:
+    name: 'accion Interna 01'
+    state: 'nuevo'
+    hallazgo_id: id_h_01
+    dependencia_id: id_department_strt
+    accion_tipo: 'preventivo'
+    accion_correctiva: '01 - Acción Interna Preventiva de ...'
+    objetivo: 'Objetivo de accion Interna'
+    indicador: 'tareas asignadas/tareas resueltas'
+    unidad_medida: 'tareas resueltas'
+    meta: 'lograr realizar...'
+    recurso: 'personal capacitado'
+    fecha_inicio: '2015-05-01'
+    fecha_fin: '2015-05-01'
+-
+  !record {model: plan_mejoramiento.accion, id: id_acc_01}:
+    user_id: id_user_oci
+    ejecutor_id: id_user_ejecutor_01
+-
+  !assert {model: plan_mejoramiento.accion, id: id_acc_01, string: id_acc_01}:
+    - user_id.id == ref('id_user_oci')
+    - edt_raiz_id.user_id.id == ref('id_user_oci')
+    - edt_raiz_id.name == name
+    - ejecutor_id.id == ref('id_user_ejecutor_01')
+-
+  ACCION 02
+-
+  !record {model: plan_mejoramiento.accion, id: id_acc_02}:
+    name: 'accion Interna 02'
+    state: 'nuevo'
+    hallazgo_id: id_h_02
+    dependencia_id: id_department_dtps
+    accion_tipo: 'correctivo'
+    accion_correctiva: '02 - Acción Interna Correctiva de ...'
+    objetivo: 'Objetivo de accion Interna'
+    indicador: 'tareas asignadas/tareas resueltas'
+    unidad_medida: 'tareas resueltas'
+    meta: 'lograr realizar...'
+    recurso: 'personal capacitado'
+    fecha_inicio: '2015-05-01'
+    fecha_fin: '2015-05-01'
+-
+  !record {model: plan_mejoramiento.accion, id: id_acc_02}:
+    user_id: id_user_oci
+-
+  !assert {model: plan_mejoramiento.accion, id: id_acc_02, string: id_acc_02}:
+    - user_id.id == ref('id_user_oci')
+    - edt_raiz_id.user_id.id == ref('id_user_oci')
+    - edt_raiz_id.name == name
+-
+  CREAR ACCIONE DE OCI_02
+-
+  ACCION 03
+-
+  !record {model: plan_mejoramiento.accion, id: id_acc_03}:
+    name: 'accion Interna 03'
+    state: 'nuevo'
+    hallazgo_id: id_h_03
+    dependencia_id: id_department_dtps
+    accion_tipo: 'correctivo'
+    accion_correctiva: '03 - Acción Interna Correctiva de ...'
+    objetivo: 'Objetivo de accion Interna'
+    indicador: 'tareas asignadas/tareas resueltas'
+    unidad_medida: 'tareas resueltas'
+    meta: 'lograr realizar...'
+    recurso: 'personal capacitado'
+    fecha_inicio: '2015-05-01'
+    fecha_fin: '2015-05-01'
+-
+  !record {model: plan_mejoramiento.accion, id: id_acc_03}:
+    user_id: id_user_oci_02
+-
+  !assert {model: plan_mejoramiento.accion, id: id_acc_03, string: id_acc_03}:
+    - user_id.id == ref('id_user_oci_02')
+    - edt_raiz_id.user_id.id == ref('id_user_oci_02')
+    - edt_raiz_id.name == name
+-
+  CREAR ACCIONE DE OCI
+-
+  ACCION 04 PARA TAREA
+-
+  !record {model: plan_mejoramiento.accion, id: id_acc_04_for_task}:
+    name: 'accion Interna 04 para Tareas'
+    state: 'en_progreso'
+    hallazgo_id: id_h_01
+    dependencia_id: id_department_strt
+    accion_tipo: 'preventivo'
+    accion_correctiva: '04 - Acción Interna Preventiva de ...'
+    objetivo: 'Objetivo de accion Interna'
+    indicador: 'tareas asignadas/tareas resueltas'
+    unidad_medida: 'tareas resueltas'
+    meta: 'lograr realizar...'
+    recurso: 'personal capacitado'
+    fecha_inicio: '2015-05-01'
+    fecha_fin: '2015-05-01'
+    ejecutor_id: id_user_ejecutor_01
+-
+  !record {model: plan_mejoramiento.accion, id: id_acc_04_for_task}:
+    user_id: id_user_oci
+-
+  !assert {model: plan_mejoramiento.accion, id: id_acc_04_for_task, string: id_acc_04_for_task}:
+    - user_id.id == ref('id_user_oci')
+    - edt_raiz_id.user_id.id == ref('id_user_oci')
+    - edt_raiz_id.name == name

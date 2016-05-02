@@ -1,0 +1,24 @@
+id,active,name,group_id/id,model_id/id,perm_create,perm_read,perm_write,perm_unlink
+edt_global,True,"project.edt global",,project_edt_idu.model_project_edt,0,1,0,0
+task_global,True,"project.task global",,project_edt_idu.model_project_task,0,1,0,0
+project_global,True,"project.project global",,project_edt_idu.model_project_project,0,1,0,0
+task_registro_progreso_global,True,"project.task.registro_progreso global",,project_edt_idu.model_project_task_registro_progreso,0,1,0,0
+task_pendiente_global,True,"project.task.pendiente global",,project_edt_idu.model_project_task_pendiente,0,1,0,0
+predecesor_global,True,"project.predecesor global",,project_edt_idu.model_project_predecesor,0,1,0,0
+task_reporte_avance_global,True,"project.task.reporte_avance global",,project_edt_idu.model_project_task_reporte_avance,0,1,0,0
+task_pendiente_project_group_project_user,True,"project.task.pendiente project.group_project_user",project.group_project_user,project_edt_idu.model_project_task_pendiente,1,1,1,1
+task_reporte_avance_project_group_project_user,True,"project.task.reporte_avance project.group_project_user",project.group_project_user,project_edt_idu.model_project_task_reporte_avance,1,1,1,0
+task_registro_progreso_project_group_project_user,True,"project.task.registro_progreso project.group_project_user",project.group_project_user,project_edt_idu.model_project_task_registro_progreso,1,1,1,0
+predecesor_project_group_project_user,True,"project.predecesor project.group_project_user",project.group_project_user,project_edt_idu.model_project_predecesor,1,1,1,0
+edt_project_group_project_user,True,"project.edt project.group_project_user",project.group_project_user,project_edt_idu.model_project_edt,1,1,1,1
+edt_project_edt_idu_group_project_user_externo,True,"project.edt project_edt_idu.group_project_user_externo",project_edt_idu.group_project_user_externo,project_edt_idu.model_project_edt,0,1,1,0
+task_registro_progreso_project_edt_idu_group_project_user_externo,True,"project.task.registro_progreso project_edt_idu.group_project_user_externo",project_edt_idu.group_project_user_externo,project_edt_idu.model_project_task_registro_progreso,1,1,1,0
+task_pendiente_project_edt_idu_group_project_user_externo,True,"project.task.pendiente project_edt_idu.group_project_user_externo",project_edt_idu.group_project_user_externo,project_edt_idu.model_project_task_pendiente,1,1,1,0
+project_project_edt_idu_group_project_user_externo,True,"project.project project_edt_idu.group_project_user_externo",project_edt_idu.group_project_user_externo,project_edt_idu.model_project_project,0,1,0,0
+predecesor_project_edt_idu_group_project_user_externo,True,"project.predecesor project_edt_idu.group_project_user_externo",project_edt_idu.group_project_user_externo,project_edt_idu.model_project_predecesor,0,1,0,0
+task_project_edt_idu_group_project_user_externo,True,"project.task project_edt_idu.group_project_user_externo",project_edt_idu.group_project_user_externo,project_edt_idu.model_project_task,0,1,1,0
+task_pendiente_project_group_project_manager,True,"project.task.pendiente project.group_project_manager",project.group_project_manager,project_edt_idu.model_project_task_pendiente,1,1,1,1
+task_reporte_avance_project_group_project_manager,True,"project.task.reporte_avance project.group_project_manager",project.group_project_manager,project_edt_idu.model_project_task_reporte_avance,1,1,1,1
+task_registro_progreso_project_group_project_manager,True,"project.task.registro_progreso project.group_project_manager",project.group_project_manager,project_edt_idu.model_project_task_registro_progreso,1,1,1,1
+predecesor_project_group_project_manager,True,"project.predecesor project.group_project_manager",project.group_project_manager,project_edt_idu.model_project_predecesor,1,1,1,1
+edt_project_group_project_manager,True,"project.edt project.group_project_manager",project.group_project_manager,project_edt_idu.model_project_edt,1,1,1,1

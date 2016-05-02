@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<openerp>
+<data>
+    <record id="hr.menu_hr_root" model="ir.ui.menu">
+      <field name="groups_id" eval="[ (6, 0, [ref('base.group_no_one')]) ]"/>
+    </record>
+
+    <!-- Dependencias IDU -->
+    <record id="view_department_form" model="ir.ui.view">
+        <field name="name">hr.department.form.base_idu</field>
+        <field name="model">hr.department</field>
+        <field name="inherit_id" ref="hr.view_department_form"/>
+        <field name="type">form</field>
+        <field name="arch" type="xml">
+            <field name="name" position="before">
+                <field name="abreviatura"/>
+                <field name="codigo"/>
+            </field>
+        </field>
+    </record>
+</data>
+</openerp>

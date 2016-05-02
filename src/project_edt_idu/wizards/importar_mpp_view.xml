@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+<data>
+
+    <record model="ir.ui.view" id="edt_wizard_importar_mpp_form">
+        <field name="name">project.edt.wizard.importar_mpp.form</field>
+        <field name="model">project.edt.wizard.importar_mpp</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                </header>
+                <sheet>
+                    <group>
+                        <field name="project_id"/>
+                        <field name="metodo" />
+                        <field name="asignar_recursos_mpp" />
+                        <field name="user_id" />
+                        <field name="programador_id" />
+                        <field name="revisor_id" />
+                        <field name="archivo" filename="archivo_nombre"/>
+                        <field name="archivo_nombre" invisible="1" />
+                    </group>
+                    <footer>
+                        <button name="importar_mpp" string="Importar Archivo" type="object" class="oe_highlight" /> o
+                        <button string="Cancelar" class="oe_link" special="cancel" />
+                    </footer>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    <record model="ir.actions.act_window" id="importar_mpp_action">
+        <field name="name">Importar Archivo .mpp</field>
+        <field name="res_model">project.edt.wizard.importar_mpp</field>
+        <field name="view_mode">form</field>
+    </record>
+    <menuitem id="importar_mpp_menu"
+        parent="project_edt_idu.project_edt_idu_admin_menu"
+        name="Importar .mpp" action="importar_mpp_action"
+    />
+</data>
+</openerp>

@@ -1,0 +1,58 @@
+-
+  CREAR HALLAZGOS DE OCI
+-
+  HALLAZGO 1
+-
+  !record {model: plan_mejoramiento.hallazgo, id: id_h_01}:
+    plan_id: id_pmi_01
+    name: 'Hallazgo Interno 01'
+    dependencia_id: id_department_strt
+    descripcion: 'Descripción de Hallazgo Interno 01'
+    causa: 'Causa de Hallazgo Interno Preventivo 01'
+    state: 'in_progress'
+-
+  !record {model: plan_mejoramiento.hallazgo, id: id_h_01}:
+    user_id: id_user_oci
+-
+  !assert {model: plan_mejoramiento.hallazgo, id: id_h_01, string: id_h_01}:
+    - user_id.id == ref('id_user_oci')
+    - edt_raiz_id.user_id.id == ref('id_user_oci')
+    - edt_raiz_id.name == name
+-
+  HALLAZGO 2
+-
+  !record {model: plan_mejoramiento.hallazgo, id: id_h_02}:
+    plan_id: id_pmi_01
+    name: 'Hallazgo Interno 02'
+    dependencia_id: id_department_juridica
+    descripcion: 'Descripción de Hallazgo Interno 02'
+    causa: 'Causa de Hallazgo 02'
+    state: 'in_progress'
+-
+  !record {model: plan_mejoramiento.hallazgo, id: id_h_02}:
+    user_id: id_user_oci
+-
+  !assert {model: plan_mejoramiento.hallazgo, id: id_h_02, string: id_h_02}:
+    - user_id.id == ref('id_user_oci')
+    - edt_raiz_id.user_id.id == ref('id_user_oci')
+    - edt_raiz_id.name == name
+-
+  CREAR HALLAZGOS OCI_02
+-
+  HALLAZGO 3
+-
+  !record {model: plan_mejoramiento.hallazgo, id: id_h_03}:
+    plan_id: id_pmi_03
+    name: 'Hallazgo Interno 03'
+    dependencia_id: id_department_juridica
+    descripcion: 'Descripción de Hallazgo Interno 03'
+    causa: 'Causa de Hallazgo 03'
+    state: 'done'
+-
+  !record {model: plan_mejoramiento.hallazgo, id: id_h_03}:
+    user_id: id_user_oci_02
+-
+  !assert {model: plan_mejoramiento.hallazgo, id: id_h_03, string: id_h_03}:
+    - user_id.id == ref('id_user_oci_02')
+    - edt_raiz_id.user_id.id == ref('id_user_oci_02')
+    - edt_raiz_id.name == name

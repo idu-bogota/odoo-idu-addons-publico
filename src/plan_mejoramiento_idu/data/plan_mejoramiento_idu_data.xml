@@ -1,0 +1,45 @@
+<?xml version="1.0"?>
+<openerp>
+    <data>
+        <record id="notificacion_acciones_a_vencer_30" model="ir.cron">
+            <field name="name">Mensaje Alerta Vencimiento Accion a 30 dias</field>
+            <field name="active">True</field>
+            <!-- información -->
+            <field name="interval_number">1</field>
+            <field name="interval_type">days</field>
+            <field name="numbercall">-1</field>
+            <!-- Datos Tecnicos -->
+            <field name="model" eval="'plan_mejoramiento.accion'" />
+            <field name="function" eval="'acciones_a_vencerse'"/>
+            <field name="args" eval="'(30,)'" />
+        </record>
+    </data>
+    <data>
+        <record id="notificacion_acciones_a_vencer_60" model="ir.cron">
+            <field name="name">Mensaje Alerta Vencimiento Accion a 60 dias</field>
+            <field name="active">True</field>
+            <!-- información -->
+            <field name="interval_number">1</field>
+            <field name="interval_type">days</field>
+            <field name="numbercall">-1</field>
+            <!-- Datos Tecnicos -->
+            <field name="model" eval="'plan_mejoramiento.accion'" />
+            <field name="function" eval="'acciones_a_vencerse'"/>
+            <field name="args" eval="'(60,)'" />
+        </record>
+    </data>
+    <data>
+        <record id="notificacion_acciones_a_vencer_180" model="ir.cron">
+            <field name="name">Mensaje Alerta Vencimiento Accion a 180 dias</field>
+            <field name="active">True</field>
+            <!-- información -->
+            <field name="interval_number">1</field>
+            <field name="interval_type">days</field>
+            <field name="numbercall">-1</field>
+            <!-- Datos Tecnicos -->
+            <field name="model" eval="'plan_mejoramiento.accion'" />
+            <field name="function" eval="'acciones_a_vencerse'"/>
+            <field name="args" eval="'(180,)'" />
+        </record>
+    </data>
+</openerp>

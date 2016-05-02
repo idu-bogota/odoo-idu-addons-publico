@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+<data>
+
+    <record model="ir.ui.view" id="edt_wizard_importar_mpp_form">
+        <field name="name">project.portafolio.wizard.crear_proyecto_funcionamiento.form</field>
+        <field name="model">project.portafolio.wizard.crear_proyecto_funcionamiento</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                </header>
+                <sheet>
+                    <group>
+                        <field name="name"/>
+                        <field name="metodo" />
+                        <field name="asignar_recursos_mpp" />
+                        <field name="user_id" />
+                        <field name="programador_id" />
+                        <field name="revisor_id" />
+                        <field name="archivo" filename="archivo_nombre"/>
+                        <field name="archivo_nombre" invisible="1" />
+                    </group>
+                    <footer>
+                        <button name="crear_proyecto" string="Crear Proyecto e Importar Archivo" type="object" class="oe_highlight" /> o
+                        <button string="Cancelar" class="oe_link" special="cancel" />
+                    </footer>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    <record model="ir.actions.act_window" id="crear_proyecto_funcionamiento_action">
+        <field name="name">Crear Proyecto de Funcionamiento para la Dependencia</field>
+        <field name="res_model">project.portafolio.wizard.crear_proyecto_funcionamiento</field>
+        <field name="view_mode">form</field>
+    </record>
+    <menuitem id="crear_proyecto_funcionamiento_menu"
+        parent="project_portafolio_idu_dependencia_admin_menu"
+        name="Crear Proyecto" action="crear_proyecto_funcionamiento_action"
+    />
+</data>
+</openerp>

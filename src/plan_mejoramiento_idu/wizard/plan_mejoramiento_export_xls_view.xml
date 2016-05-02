@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+<data>
+<!-- Vista form -->
+
+    <record id="plan_mejoramiento_export_xls_wizard_download" model="ir.ui.view">
+        <field name="model">plan_mejoramiento.wizard.plan_mejoramiento_export_xls</field>
+        <field name="name">plan contratacion descargar excel</field>
+        <field name="arch" type="xml">
+            <form string="Descargar a Excel Plan Mejoramiento" version="7.0">
+                <group col="2" colspan="4">
+                    <field name="data" readonly="1" width="100" filename="filename" icon="STOCK_SAVE"/>
+                </group>
+                <footer>
+                    <button special="cancel" string="Close" icon="STOCK_CLOSE"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record model="ir.ui.view" id="plan_mejoramiento_export_xls_wizard">
+        <field name="model">plan_mejoramiento.wizard.plan_mejoramiento_export_xls</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <field name="plan_tipo"/>
+                        <field name="fecha_inicio"/>
+                        <field name="fecha_fin"/>
+                        <field name="tipo_calificacion_id"/>
+                        <field name="agrupar"/>
+                    </group>
+                    <footer>
+                        <button name="generar_xls" string="Exportar a XLS" type="object" class="oe_highlight" icon="STOCK_PRINT"/> o
+                        <button string="Cancelar" class="oe_link" special="cancel" />
+                    </footer>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record model="ir.actions.act_window" id="action_plan_mejoramiento_export_xls">
+        <field name="name">Generar Reporte en Excel</field>
+        <field name="res_model">plan_mejoramiento.wizard.plan_mejoramiento_export_xls</field>
+        <field name="view_id" ref="plan_mejoramiento_export_xls_wizard"/>
+        <field name="target">new</field>
+        <field name="view_mode">form</field>
+    </record>
+    <menuitem id="wizard_plan_mejoramiento_export_xls_menu" parent="plan_mejoramiento_idu.plan_mejoramiento_menu" name="Exportar Plan Mejoramiento a XLS" action="action_plan_mejoramiento_export_xls" sequence="50"/>
+</data>
+</openerp>

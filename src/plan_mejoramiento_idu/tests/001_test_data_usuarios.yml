@@ -1,0 +1,129 @@
+-
+  DATOS BASE DE USUARIOS PARA PRUEBAS DEL PLAN DE MEJORAMIENTO
+-
+  CREAR DEPARTAMENTO
+-
+  !record {model: hr.department, id: id_department_strt}:
+    name: 'TEST_STRT - S.T. DE RECURSOS TECNOLÓGICOS'
+    abreviatura: 'TEST'
+    codigo: '1'
+-
+  !record {model: hr.department, id: id_department_juridica}:
+    name: 'TEST_SGJ - SUBDIRECCIÓN GENERAL JURIDICA'
+    abreviatura: 'TEST'
+    codigo: '2'
+-
+  !record {model: hr.department, id: id_department_dg}:
+    name: 'DG - DIRECCIÓN GENERAL'
+    abreviatura: 'DG'
+    codigo: '3'
+-
+  !record {model: hr.department, id: id_department_dtps}:
+    name: 'DTPS - DIRECCIÓN TÉCNICA DE PROCESOS SELECTIVOS'
+    abreviatura: 'DTPS'
+    codigo: '4'
+-
+  CREAR USUARIOS
+-
+  !record {model: res.users, id: id_user_oci}:
+    name: 'User OCI'
+    login: 'javier.vargas@idu.gov.co'
+    new_password: 'admin'
+-
+  !record {model: res.users, id: id_user_oci_02}:
+    name: 'User OCI 02'
+    login: 'user_oci_02@idu.gov.co'
+    new_password: 'admin'
+-
+  !record {model: res.users, id: id_user_jefe_d01}:
+    name: 'User Jefe Dependencia 01'
+    login: 'jotavargas89@gmail.com'
+    new_password: 'admin'
+-
+  !record {model: res.users, id: id_user_jefe_d02}:
+    name: 'User Jefe Dependencia 02'
+    login: 'user_jefe_d02@idu.gov.co'
+    new_password: 'admin'
+-
+  !record {model: res.users, id: id_user_ejecutor_01}:
+    name: 'User Ejecutor 01'
+    login: 'user_ejecutor_01@idu.gov.co'
+    new_password: 'admin'
+-
+  !record {model: res.users, id: id_user_ejecutor_02}:
+    name: 'User Ejecutor 02'
+    login: 'user_ejecutor_02@idu.gov.co'
+    new_password: 'admin'
+-
+  !record {model: res.users, id: id_user_analista_01}:
+    name: 'User Analista 01'
+    login: 'user_analista@idu.gov.co'
+    new_password: 'admin'
+-
+  !record {model: res.users, id: id_user_admin_01}:
+    name: 'User Admin Plan 01'
+    login: 'user_admin_plan_mejoramiento@idu.gov.co'
+    new_password: 'admin'
+-
+  CREAR EMPLEADOS
+-
+  !record {model: hr.employee, id: id_employee_oci_01}:
+    name: 'User OCI'
+    user_id: id_user_oci
+-
+  !record {model: hr.employee, id: id_employee_oci_02}:
+    name: 'User OCI 02'
+    user_id: id_user_oci_02
+-
+  !record {model: hr.employee, id: id_employee_jefe_d01}:
+    name: 'User Jefe Dependencia 01'
+    user_id: id_user_jefe_d01
+    department_id: id_department_strt
+-
+  !record {model: hr.employee, id: id_employee_jefe_d02}:
+    name: 'User Jefe Dependencia 02'
+    user_id: id_user_jefe_d02
+    department_id: id_department_juridica
+-
+  !record {model: hr.employee, id: id_employee_ejecutor_01}:
+    name: 'User Ejecutor'
+    user_id: id_user_ejecutor_01
+    department_id: id_department_strt
+-
+  !record {model: hr.employee, id: id_employee_ejecutor_02}:
+    name: 'User Ejecutor'
+    user_id: id_user_ejecutor_02
+    department_id: id_department_juridica
+-
+  !record {model: hr.employee, id: id_employee_analista_01}:
+    name: 'User Analista 01'
+    user_id: id_user_analista_01
+-
+  !record {model: hr.employee, id: id_employee_admin_01}:
+    name: 'User Admin Plan 01'
+    user_id: id_user_admin_01
+-
+  ASIGNAR USUARIO AL GRUPO
+-
+  !record {model: res.groups, id: plan_mejoramiento_idu.group_analista}:
+    users:
+      - id_user_analista_01
+-
+  !record {model: res.groups, id: plan_mejoramiento_idu.group_responsable_tareas}:
+    users:
+      - id_user_ejecutor_01
+      - id_user_ejecutor_02
+-
+  !record {model: res.groups, id: plan_mejoramiento_idu.group_oci}:
+    users:
+      - id_user_oci
+      - id_user_oci_02
+-
+  !record {model: res.groups, id: plan_mejoramiento_idu.group_jefe_dependencia}:
+    users:
+      - id_user_jefe_d01
+      - id_user_jefe_d02
+-
+  !record {model: res.groups, id: plan_mejoramiento_idu.group_admin}:
+    users:
+      - id_user_admin_01
