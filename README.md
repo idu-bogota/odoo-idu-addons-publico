@@ -10,3 +10,7 @@ Aquí se encuentra publicado el código de los módulos desarrollados en el IDU 
 
 La documentación se encuentra disponible en http://openerp.idu.gov.co/documentacion
 
+# Colaboración
+
+Cualquier inconveniente o duda puede ser realizada a través de un issue, mejoras pueden ser enviadas a través de un pull request, igualmente se recomienda que las extensiones al código se haga a través de módulos adicionales que sobreescriban o extiendan la funcionalidad para adaptarla a las necesidades.
+
