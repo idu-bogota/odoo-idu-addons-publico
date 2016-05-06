@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+<data>
+<!-- Vista form -->
+    <record model="ir.ui.view" id="actualizar_responsables_dependencias">
+        <field name="model">base_idu.wizard.actualizar_responsables_dependencias</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <div>Se van a asignar los permisos a los responsables designados en las dependencias</div>
+                    <footer>
+                        <button name="procesar" string="Procesar" type="object" class="oe_highlight" /> o
+                        <button string="Cancelar" class="oe_link" special="cancel" />
+                    </footer>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    <record model="ir.actions.act_window" id="action_actualizar_responsables_dependencias">
+        <field name="name">Actualizar responsables</field>
+        <field name="res_model">base_idu.wizard.actualizar_responsables_dependencias</field>
+        <field name="target">new</field>
+        <field name="view_mode">form</field>
+    </record>
+    <menuitem
+        id="actualizar_responsables_dependencias_menu"
+        parent="hr.menu_human_resources_configuration"
+        name="Actualizar Responsables"
+        action="action_actualizar_responsables_dependencias"
+    />
+</data>
+</openerp> 
