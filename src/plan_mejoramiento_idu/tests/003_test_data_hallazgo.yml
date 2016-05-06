@@ -16,8 +16,6 @@
 -
   !assert {model: plan_mejoramiento.hallazgo, id: id_h_01, string: id_h_01}:
     - user_id.id == ref('id_user_oci')
-    - edt_raiz_id.user_id.id == ref('id_user_oci')
-    - edt_raiz_id.name == name
 -
   HALLAZGO 2
 -
@@ -34,8 +32,6 @@
 -
   !assert {model: plan_mejoramiento.hallazgo, id: id_h_02, string: id_h_02}:
     - user_id.id == ref('id_user_oci')
-    - edt_raiz_id.user_id.id == ref('id_user_oci')
-    - edt_raiz_id.name == name
 -
   CREAR HALLAZGOS OCI_02
 -
@@ -54,5 +50,3 @@
 -
   !assert {model: plan_mejoramiento.hallazgo, id: id_h_03, string: id_h_03}:
     - user_id.id == ref('id_user_oci_02')
-    - edt_raiz_id.user_id.id == ref('id_user_oci_02')
-    - edt_raiz_id.name == name

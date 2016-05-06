@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <openerp>
 <data>
-    <menuitem id="plan_mejoramiento_nav" name="Plan Mejoramiento Institucional"
+    <menuitem id="plan_mejoramiento_nav" name="CHIE: Plan Mejoramiento Institucional"
         groups="group_analista"
     />
     <menuitem id="plan_mejoramiento_menu" name="Plan Mejoramiento"
@@ -176,11 +176,19 @@
                     domain="[('user_id','=', uid)]"
                     help="Hallazgo Asignados a Mi"
                 />
+                <filter name="mi_dependencia" string="De Mi Dependencia"
+                    domain="[('dependencia_id','=','USER_DEPARTMENT_ID')]"
+                    help="Hallazgos de Mi Dependencia"
+                />
+                <filter name="mi_dependencia_hijas" string="De Mis Dependencias Hijas"
+                    domain="[('dependencia_id','child_of','USER_CHILD_DEPARTMENT_IDS')]"
+                    help="Hallazgos de Mi Dependencia y las dependencias hijas"
+                />
                 <!-- Busquedas -->
                 <separator/>
                     <field name="name" string="Nombre"/>
                     <field name="capitulo" string="Capitulo"/>
-                    <field name="parent_id" string="Planes de Mejoramientos"/>
+                    <field name="plan_id" string="Planes de Mejoramientos"/>
                     <field name="user_id" string="Auditor"/>
                     <field name="state" string="Estado"/>
                     <field name="dependencia_id" string="Dependencia"/>
@@ -218,7 +226,7 @@
                             string='Plan de Mejoramiento'
                             required="1"
                         />
-                        <field name="edt_raiz_id" invisible="1" required="0"/>
+                        <field name="id" invisible="1" required="0"/>
                         <field name="plan_tipo"
                             string="Tipo del Plan de Mejoramiento"
                         />
@@ -246,8 +254,8 @@
                         />
                     </group>
                     <notebook>
-                        <page string="Acciones" attrs="{'invisible': [('edt_raiz_id','=',False)]}">
-                            <field name="accion_ids" context="{'parent_id': edt_raiz_id, 'hallazgo_id': active_id, 'dependencia_id': dependencia_id}"/>
+                        <page string="Acciones" attrs="{'invisible': [('id','=',False)]}">
+                            <field name="accion_ids" context="{'hallazgo_id': active_id, 'dependencia_id': dependencia_id}"/>
                         </page>
                     </notebook>
                 </sheet>
@@ -300,18 +308,28 @@
                     domain="[('plan_tipo','=','contraloria_gral')]"
                     help="Accion de Planes Ext. Contraloria General"
                 />
-                <filter name="tipo" string="Mis Acciones (Auditor)"
+                <filter name="mis_acciones_auditor" string="Mis Acciones (Auditor)"
                     domain="[('user_id','=', uid)]"
-                    help="Accion Asignados a Mi"
+                />
+                <filter name="mis_acciones_ejecutor" string="Mis Acciones (Ejecutor)"
+                    domain="[('ejecutor_id','=', uid)]"
+                />
+                <filter name="mi_dependencia" string="De Mi Dependencia"
+                    domain="[('dependencia_id','=','USER_DEPARTMENT_ID')]"
+                    help="Hallazgo de Mi Dependencia"
+                />
+                <filter name="mi_dependencia_hijas" string="De Mis Dependencias Hijas"
+                    domain="[('dependencia_id','child_of','USER_CHILD_DEPARTMENT_IDS')]"
+                    help="Hallazgo de Mi Dependencia"
                 />
                 <!-- Busquedas -->
                 <separator/>
                     <field name="state" string="Estado"/>
-                    <field name="parent_id" string="Planes de Mejoramientos"/>
+                    <field name="hallazgo_id"/>
                     <field name="accion_correctiva" string="Accion"/>
                     <field name="user_id" string="Auditor"/>
                     <field name="ejecutor_id" string="Ejecutor"/>
-                    <field name="edt_raiz_id_name" string="Código Accion"/>
+                    <field name="name"/>
                     <field name="dependencia_id" string="Dependencia"/>
                 <separator/>
                 <!-- Agrupaciones -->
@@ -375,8 +393,7 @@
                 </header>
                 <sheet>
                     <group name="detalles_hallazgo">
-                        <field name="parent_id" invisible="1"/>
-                        <field name="edt_raiz_id" invisible="1" required="0"/>
+                        <field name="id" invisible="1" required="0"/>
                         <field name="hallazgo_id"
                             string='Hallazgo'
                             required="1"
@@ -392,7 +409,7 @@
                     <group name="detalles_accion">
                         <field name="name" string="Código Acción"
                             required="0"
-                            attrs="{'invisible': [('edt_raiz_id','=',False)],}"
+                            attrs="{'invisible': [('id','=',False)],}"
                         />
                         <field name="accion_tipo"
                             attrs="{
@@ -405,7 +422,7 @@
                             readonly="1"
                         />
                        <field name="dependencia_id"/>
-                       <field name="programador_id" readonly="1" string="Jefe Dependencia"/>
+                       <field name="jefe_dependencia_id"/>
                        <field name="ejecutor_id" readonly="1"/>
                        <field name="accion_correctiva" required="1"/>
                        <field name="objetivo"
@@ -447,8 +464,8 @@
                         <field name="fecha_fin" string='Fecha Fin' required="1"/>
                     </group>
                      <notebook>
-                        <page string="Avances" attrs="{'invisible': [('edt_raiz_id','=',False)],}">
-                            <field name="avances_ids" context="{'parent_id': edt_raiz_id, 'accion_id': active_id}">
+                        <page string="Avances" attrs="{'invisible': [('id','=',False)],}">
+                            <field name="avances_ids" context="{'accion_id': active_id}">
                                 <tree>
                                     <field name="descripcion"/>
                                     <field name="fecha_corte"/>
@@ -459,14 +476,14 @@
                                 </tree>
                             </field>
                         </page>
-                        <page string="Tareas" attrs="{'invisible': [('edt_raiz_id','=',False)],}">
-                            <field name="task_ids" readonly="1" context="{'edt_id': edt_raiz_id, 'accion_id': active_id}"> <!-- para desarrollar se deja en 0 readonly -->
+                        <page string="Tareas" attrs="{'invisible': [('id','=',False)],}">
+                            <field name="task_ids" readonly="1" context="{'accion_id': active_id}">
                                 <tree editable="bottom">
                                     <field name="name"/>
                                     <field name="dependencia_id" required="1"/>
                                     <field name="user_id" domain="[('department_id','=', dependencia_id)]" required="1"/>
-                                    <field name="date_start" required="1"/>
-                                    <field name="date_end" required="1"/>
+                                    <field name="fecha_inicio" required="1"/>
+                                    <field name="fecha_fin" required="1"/>
                                     <field name="project_id" invisible="1"/>
                                     <field name="stage_id"/>
                                 </tree>
@@ -486,14 +503,13 @@
         <field name="arch" type="xml">
             <tree>
                 <field name="name" string="Código Acción"/>
-                <field name="parent_id" invisible="1"/>
                 <field name="accion_correctiva"/>
                 <field name="hallazgo_id" string="Hallazgo"/>
                 <field name="state" string="Estado"/>
                 <field name="plan_tipo" string="Tipo Plan"/>
                 <field name="user_id" string="Auditor"/>
                 <field name="dependencia_id"/>
-                <field name="programador_id" string="Jefe Dependencia"/>
+                <field name="jefe_dependencia_id"/>
                 <field name="ejecutor_id"/>
                 <field name="fecha_inicio" string="Fecha Inicio"/>
                 <field name="fecha_fin" string="Fecha Fin"/>
@@ -508,15 +524,58 @@
     <menuitem id="accion_menu" parent="plan_mejoramiento_menu" name="Acción" action="accion_action" sequence="20"/>
 
     <!-- Cambios que aplican solo para el jefe_dependencia en las Acciones-->
-    <record id="accion_form_for_oci" model="ir.ui.view">
+    <record id="accion_form_ejecutor" model="ir.ui.view">
         <field name="model">plan_mejoramiento.accion</field>
         <field name="inherit_id" ref="accion_form"/>
-        <field name="groups_id" eval="[(6, 0, [ref('plan_mejoramiento_idu.group_jefe_dependencia') ])]"/>
+        <field name="groups_id" eval="[(6, 0, [ref('plan_mejoramiento_idu.group_responsable_tareas'), ref('base_idu.group_jefe_dependencia') ])]"/>
         <field name="arch" type="xml">
-             <field name="ejecutor_id" position="attributes">
-                <attribute name="readonly">0</attribute>
+            <field name="hallazgo_id" position="attributes">
+                <attribute name="readonly">1</attribute>
+            </field>
+            <field name="name" position="attributes">
+                <attribute name="readonly">1</attribute>
+            </field>
+            <field name="accion_tipo" position="attributes">
+                <attribute name="readonly">1</attribute>
+            </field>
+            <field name="accion_correctiva" position="attributes">
+                <attribute name="readonly">1</attribute>
+            </field>
+            <field name="objetivo" position="attributes">
+                <attribute name="readonly">1</attribute>
+            </field>
+            <field name="indicador" position="attributes">
+                <attribute name="readonly">1</attribute>
+            </field>
+            <field name="unidad_medida" position="attributes">
+                <attribute name="readonly">1</attribute>
+            </field>
+            <field name="meta" position="attributes">
+                <attribute name="readonly">1</attribute>
+            </field>
+            <field name="recurso" position="attributes">
+                <attribute name="readonly">1</attribute>
+            </field>
+            <field name="fecha_inicio" position="attributes">
+                <attribute name="readonly">1</attribute>
+            </field>
+            <field name="fecha_fin" position="attributes">
+                <attribute name="readonly">1</attribute>
+            </field>
+            <field name="dependencia_id" position="attributes">
+                <attribute name="readonly">1</attribute>
             </field>
             <field name="task_ids" position="attributes">
+                <attribute name="readonly">0</attribute>
+            </field>
+        </field>
+    </record>
+    <record id="accion_form_jefe_dependencia" model="ir.ui.view">
+        <field name="model">plan_mejoramiento.accion</field>
+        <field name="inherit_id" ref="accion_form"/>
+        <field name="groups_id" eval="[(6, 0, [ref('base_idu.group_jefe_dependencia') ])]"/>
+        <field name="arch" type="xml">
+            <field name="ejecutor_id" position="attributes">
                 <attribute name="readonly">0</attribute>
             </field>
         </field>
@@ -581,7 +640,7 @@
         <field name="arch" type="xml">
             <form>
                 <header>
-                    <field name="state" widget="statusbar" clickable="1"/>
+                    <field name="state" widget="statusbar" clickable="0"/>
                 </header>
                 <sheet>
                     <group name="detalles_accion">

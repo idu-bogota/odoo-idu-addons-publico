@@ -22,14 +22,13 @@ class ImportAvance(Import):
                 if self.id_accion_css == row['accion_id']:
                     self._logger.debug("            ***[{2}] Cargando Avance: [{0}] del Hallazgo: [{1}]***".format(row['descripcion'], self.accion.name, cnt))
                     # Crear Avance
-                    self.create_avance(self.accion, row['descripcion'], row['fecha_corte'], row['estado'], row['porcentaje'], row['tipo_calificacion'],)
+                    self.create_avance(self.accion, row['descripcion'], row['fecha_corte'], row['porcentaje'], row['tipo_calificacion'],)
 
-    def create_avance(self, accion, descripcion, fecha_corte, estado, porcentaje, tipo_calificacion):
+    def create_avance(self, accion, descripcion, fecha_corte, porcentaje, tipo_calificacion):
         new_avance = self.odoo.model('plan_mejoramiento.avance').create({
             'accion_id': accion.id,
             'descripcion': descripcion,
             'fecha_corte': fecha_corte,
-            'state': estado,
             'porcentaje': porcentaje,
             'tipo_calificacion_id': None if tipo_calificacion == '' else self.find_tipo_calificacion(tipo_calificacion, accion.plan_tipo)
         })

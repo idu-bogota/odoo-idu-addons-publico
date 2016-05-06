@@ -119,7 +119,7 @@
       - id_user_oci
       - id_user_oci_02
 -
-  !record {model: res.groups, id: plan_mejoramiento_idu.group_jefe_dependencia}:
+  !record {model: res.groups, id: base_idu.group_jefe_dependencia}:
     users:
       - id_user_jefe_d01
       - id_user_jefe_d02

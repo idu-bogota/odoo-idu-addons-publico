@@ -22,9 +22,10 @@
 ##############################################################################
 
 from openerp import models, fields, api, exceptions
-from openerp.exceptions import Warning, AccessError
+from openerp.exceptions import Warning, AccessError, ValidationError
 from datetime import datetime, timedelta
 from dateutil.relativedelta import relativedelta
+from openerp.addons.base_idu.models.filtros_mixin import adiciona_keywords_en_search
 
 TIPO_PLAN_MEJORAMIENTO = [
     ('interno', 'Interno'),
@@ -117,17 +118,21 @@ class plan_mejoramiento_plan(models.Model):
 class plan_mejoramiento_hallazgo(models.Model):
     _name = 'plan_mejoramiento.hallazgo'
     _description = 'Plan Mejoramiento Hallazgo'
-    _inherits = {
-        'project.edt': 'edt_raiz_id',
-    }
+
     # Fields
+    name = fields.Char(
+        string='Nombre',
+        required=True,
+        size=255,
+    )
+    user_id = fields.Many2one(
+        'res.users',
+        'Auditor',
+        default=lambda self: self.env.user,
+    )
     descripcion = fields.Text('Descripción')
     causa = fields.Text('Causa')
     efecto = fields.Text('Efecto')
-    edt_raiz_id = fields.Many2one('project.edt', 'EDT',
-         required=True,
-         ondelete='restrict'
-    )
     plan_id = fields.Many2one(
         'plan_mejoramiento.plan',
         'Plan_id',
@@ -173,9 +178,6 @@ class plan_mejoramiento_hallazgo(models.Model):
     @api.model
     def create(self, vals):
         hallazgo = super(plan_mejoramiento_hallazgo, self).create(vals)
-        # Asocia el EDT del hallazgo con el EDT del plan
-        hallazgo.parent_id = hallazgo.plan_id.edt_raiz_id.id
-        hallazgo.project_id = hallazgo.plan_id.project_id.id
         return hallazgo
 
     @api.one
@@ -185,10 +187,10 @@ class plan_mejoramiento_hallazgo(models.Model):
                         SELECT
                             MIN(fecha_inicio)
                         FROM
-                            project_edt t
+                            plan_mejoramiento_accion t
                         WHERE
-                            t.parent_id = %s
-                     """, (hallazgo.edt_raiz_id.id,))
+                            t.hallazgo_id = %s
+                     """, (hallazgo.id,))
         date_min = self.env.cr.fetchall()[0][0]
         self.fecha_inicio = date_min
 
@@ -199,30 +201,36 @@ class plan_mejoramiento_hallazgo(models.Model):
                         SELECT
                             MAX(fecha_fin)
                         FROM
-                            project_edt t
+                            plan_mejoramiento_accion t
                         WHERE
-                            t.parent_id = %s
-                     """, (hallazgo.edt_raiz_id.id,))
+                            t.hallazgo_id = %s
+                     """, (hallazgo.id,))
         date_max = self.env.cr.fetchall()[0][0]
         self.fecha_fin = date_max
+
+    def search(self, cr, uid, args, offset=0, limit=None, order=None, context=None, count=False, xtra=None):
+        """Se sobreescribe para poder adicionar keyworkds a usar en filtros de la vista"""
+        new_args = adiciona_keywords_en_search(self, cr, uid, args, offset, limit, order, context, count, xtra)
+        return super(plan_mejoramiento_hallazgo, self).search(cr, uid, new_args, offset, limit, order, context, count)
+
 
 class plan_mejoramiento_accion(models.Model):
     _name = 'plan_mejoramiento.accion'
     _description = 'Plan Mejoramiento Accion'
-    _inherit = ['mail.thread',]
-    _inherits = {
-        'project.edt': 'edt_raiz_id',
-    }
+    _inherit = ['mail.thread', 'models.fields.security.mixin']
     _mail_post_access = 'read'
 
+    _write_fields_whitelist = {
+        'plan_mejoramiento_idu.group_responsable_tareas': ['state', 'ejecutor_id', 'avances_ids', 'task_ids'],
+    }
+    _write_fields_blacklist = {
+        'plan_mejoramiento_idu.group_oci': ['task_ids', 'avance_ids'],
+    }
+
     # Fields
-    edt_raiz_id = fields.Many2one('project.edt', 'EDT',
-         required=True,
-         ondelete='restrict'
-    )
-    edt_raiz_id_name = fields.Char(
-        related='edt_raiz_id.name',
-        store=True,
+    name = fields.Char(
+        string="Código Accion",
+        size=255,
     )
     accion_tipo = fields.Selection(
         [
@@ -286,84 +294,88 @@ class plan_mejoramiento_accion(models.Model):
         'accion_id',
         'Avances_ids'
     )
+    jefe_dependencia_id = fields.Many2one(
+        related='dependencia_id.manager_id.user_id',
+        readonly=True,
+        string='Jefe de Dependencia',
+    )
     ejecutor_id = fields.Many2one(
         'res.users',
         'Ejecutor',
         domain="[('department_id','=', dependencia_id)]"
     )
+    user_id = fields.Many2one(
+        'res.users',
+        'Auditor',
+        default=lambda self: self.env.user,
+    )
+    fecha_inicio = fields.Date(
+        'Fecha Inicio',
+         help="Fecha minima de las acciones asociada a este hallazgo",
+    )
+    fecha_fin = fields.Date(
+        'Fecha Fin',
+         help="Fecha maxima de las acciones asociada a este hallazgo",
+    )
+    task_ids = fields.One2many(
+        string='Tareas',
+        required=False,
+        comodel_name='project.task',
+        inverse_name='accion_id',
+        ondelete='restrict',
+    )
 
-    @api.onchange('fecha_fin')
-    def onchange_fecha_fin_year(self):
-        if not self.fecha_fin:
-            return
-        fecha_inicio = datetime.strptime(self.fecha_inicio, '%Y-%m-%d')
-        fecha_fin = datetime.strptime(self.fecha_fin, '%Y-%m-%d')
-        year = relativedelta(years=1)
-        tope = fecha_inicio + year
-        if fecha_fin > tope:
-            return {
-                'warning': {'message': 'No se permite que la vigencia de una acción sea superior a un año'}
-            }
+    @api.one
+    @api.constrains('fecha_inicio')
+    def _check_fecha_inicio(self):
+        self._check_fechas()
 
+    @api.one
     @api.constrains('fecha_fin')
-    def check_fecha_fin_year(self):
+    def _check_fecha_fin(self):
+        self._check_fechas()
         fecha_inicio = datetime.strptime(self.fecha_inicio, '%Y-%m-%d')
         fecha_fin = datetime.strptime(self.fecha_fin, '%Y-%m-%d')
         year = relativedelta(years=1)
         tope = fecha_inicio + year
-        if fecha_fin > tope:
-            raise Warning('No se permite que la vigencia de una acción sea superior a un año')
+        #if fecha_fin > tope:
+        #    raise ValidationError('No se permite que la vigencia de una acción sea superior a un año')
+
+    @api.one
+    def _check_fechas(self):
+        if(self.fecha_inicio and self.fecha_fin and
+           self.fecha_inicio > self.fecha_fin
+            ):
+            raise ValidationError("Fecha de inicio no puede ser posterior a la de finalización")
 
     @api.model
     def create(self, vals):
         name = self.env['ir.sequence'].next_by_code('name_accion.secuencia')
         vals.update({'name': name})
         accion = super(plan_mejoramiento_accion, self).create(vals)
-        accion.parent_id = accion.hallazgo_id.edt_raiz_id.id
-        accion.project_id = accion.hallazgo_id.project_id.id
-        accion.programador_id = self.get_jefe_dependencia(vals['dependencia_id'])
-        accion.task_ids.write({'project_id': self.project_id.id, 'revisor_id': accion.programador_id.id, 'accion_id': accion.id})
+        accion.task_ids.write({'project_id': self.hallazgo_id.plan_id.project_id.id, 'edt_id': self.hallazgo_id.plan_id.project_id.edt_raiz_id.id, 'revisor_id': accion.ejecutor_id.id, 'accion_id': accion.id})
         return accion
 
     @api.one
     def write(self, vals):
         if self.state == 'cancelado':
-            raise AccessError('No se puede editar una Acción en estado cancelado')
+            raise ValidationError('No se puede editar una Acción en estado cancelado')
 
-        es_responsable_tareas = self.env.user.has_group_v8('plan_mejoramiento_idu.group_responsable_tareas')[0]
-        if es_responsable_tareas and (self.ejecutor_id.id == self.env.user.id or self.programador_id.id == self.env.user.id):
-            if len(vals) == 1 and 'state' in vals:
-                pass
-            elif len(vals) == 1 and ('ejecutor_id' in vals or 'programador_id' in vals):
-                pass
-            elif len(vals) == 1 and 'task_ids' in vals:
-                if self.state != 'en_progreso':
-                    raise AccessError('No se permite adicionar tareas en una Acción que no esta en progreso')
-            elif len(vals) == 1 and 'avances_ids' in vals:
-                if self.state != 'en_progreso':
-                    raise AccessError('No se permite adicionar avances en una Acción que no esta en progreso')
-            else:
-                raise AccessError('No tiene permisos para editar valores en la acción')
+        if ('task_ids' in vals or 'avances_ids' in vals) and self.state != 'en_progreso':
+            raise ValidationError('No se permite adicionar tareas o avances en una Acción que no esta en progreso')
 
-        if 'dependencia_id' in vals:
-            self.programador_id = self.get_jefe_dependencia(vals['dependencia_id'])
         result = super(plan_mejoramiento_accion, self).write(vals)
-        if 'project_id' in vals or 'revisor_id' in vals or 'task_ids' in vals:
-            self.task_ids.write({'project_id': self.project_id.id, 'revisor_id': self.programador_id.id, 'accion_id': self.id})
+
+        if 'dependencia_id' in vals or 'jefe_dependencia_id' in vals or 'task_ids' in vals:
+            self.task_ids.write({'project_id': self.hallazgo_id.plan_id.project_id.id, 'edt_id': self.hallazgo_id.plan_id.project_id.edt_raiz_id.id, 'revisor_id': self.ejecutor_id.id, 'accion_id': self.id})
         return result
 
     def wkf_por_aprobar(self):
         self.state = 'por_aprobar'
         # buscar los usuarios jefe_dependencia de la accion
         enviar_a = []
-        empleados = self.env['hr.employee'].search([('department_id', '=', self.dependencia_id.id)])
-        for empleado in empleados:
-            if len(empleado.user_id) >= 1:
-                # Tiene usuario asociado
-                grupos = self.env['res.groups'].search([('users', '=', empleado.user_id.id)])
-                for grupo in grupos:
-                    if grupo.name == 'Jefe Dependencia':
-                        enviar_a.append(empleado.user_id.partner_id.id)
+        jefe_dependencia = self.dependencia_id.manager_id
+        enviar_a.append(jefe_dependencia.user_id.partner_id.id)
         # enviar Correo
         self.message_post(
             type="notification",
@@ -404,24 +416,15 @@ class plan_mejoramiento_accion(models.Model):
                 cr, uid, accion.id, context=None,
                 type="notification",
                 body="Se le informa que la acción (" + accion.accion_correctiva + ") con Código: " + accion.name + " del área " + accion.dependencia_id.name +" está a " + str(p_dias) + " días de vencerse",
-                partner_ids=[accion.programador_id.partner_id.id, accion.ejecutor_id.partner_id.id]
+                partner_ids=[accion.jefe_dependencia_id.partner_id.id, accion.ejecutor_id.partner_id.id]
             )
         return True
 
-    def get_jefe_dependencia(self, dependencia_id):
-        jefe_depen_groups_id = self.env['res.groups'].search([
-            ('name','=','Encargado en Planes de Mejoramiento como Jefe Dependencia')
-        ])
-        user = self.env['res.users'].search([
-            ('department_id','=',dependencia_id),
-            ('groups_id', 'in', jefe_depen_groups_id.id)
-        ])
-        if len(user) > 1:
-            print ""
-            raise AccessError("""Existen más de dos Jefes Dependencia para esta Área.
-                Por favor Comuniquese Con El administrador para corregir esta irregularidad.""")
-        else:
-            return user.id
+    def search(self, cr, uid, args, offset=0, limit=None, order=None, context=None, count=False, xtra=None):
+        """Se sobreescribe para poder adicionar keyworkds a usar en filtros de la vista"""
+        new_args = adiciona_keywords_en_search(self, cr, uid, args, offset, limit, order, context, count, xtra)
+        return super(plan_mejoramiento_accion, self).search(cr, uid, new_args, offset, limit, order, context, count)
+
 
 class plan_mejoramiento_avance(models.Model):
     _name = 'plan_mejoramiento.avance'
@@ -443,15 +446,6 @@ class plan_mejoramiento_avance(models.Model):
 
     # Fields
     active = fields.Boolean('Habilitado en el sistema?', default=True)
-    state = fields.Selection(
-        [
-           ('sin_iniciar', 'Sin Iniciar'),
-           ('en_progreso', 'En Progreso'),
-           ('bloqueado', 'Bloqueado'),
-           ('terminado', 'Terminado'),
-           ('terminado_con_retrazo', 'Terminado Con Retrazo'),
-        ],
-    )
     descripcion = fields.Text('Descripción', track_visibility='onchange')
     fecha_corte = fields.Date('Fecha de Corte',
         default=lambda self: self.env['ir.config_parameter'].get_param('plan_mejoramiento.activar_avances.fecha_inicio'),
@@ -489,6 +483,11 @@ class plan_mejoramiento_avance(models.Model):
         'Tipo Calificación',
         domain="[('tipo_plan','=', plan_tipo)]",
         track_visibility='onchange',
+    )
+    state = fields.Selection(
+        related='tipo_calificacion_id.estado',
+        readonly=True,
+        store=True,
     )
     aprobacion_jefe_dependencia = fields.Boolean(
         'Aprobación por Jefe de la Dependencia',
@@ -530,9 +529,9 @@ class plan_mejoramiento_avance(models.Model):
             if count_avances >= 1:
                 raise Warning('Solo se permite un avance por mes')
 
-        es_responsable_tareas = self.env.user.has_group_v8('plan_mejoramiento_idu.group_responsable_tareas')[0]
-        if es_responsable_tareas and vals.get('aprobacion_jefe_dependencia', False):
-            raise AccessError('el campo [Aprobación por Jefe de la Dependencia] solo lo puede diligenciar el usuario Jefe Dependencia')
+        es_jefe_dependencia = self.accion_id.jefe_dependencia_id.id == self.env.uid
+        if vals.get('aprobacion_jefe_dependencia', False) and not es_jefe_dependencia:
+            raise AccessError('el campo [Aprobación por Jefe de la Dependencia] solo lo puede diligenciar el usuario Jefe de la Dependencia')
 
         avance = super(plan_mejoramiento_avance, self).create(vals)
         return avance
@@ -544,12 +543,12 @@ class plan_mejoramiento_avance(models.Model):
         if len(vals) == 1 and self.tipo_calificacion_id and es_responsable_tareas:
             raise AccessError('No se permite modificar un avance que ya ha sido calificado')
         # se valida que solo el jefe_dependencia apruebe el avance
-        es_jefe_dependencia = self.env.user.has_group_v8('plan_mejoramiento_idu.group_jefe_dependencia')[0]
+        es_jefe_dependencia = self.accion_id.jefe_dependencia_id.id == self.env.uid
         if 'aprobacion_jefe_dependencia' in vals and not es_jefe_dependencia:
             raise AccessError('el campo [Aprobación por Jefe de la Dependencia] solo lo puede diligenciar el usuario Jefe Dependencia')
         # se valida que el usuario oci solo pueda realizar la calificación una vez este aprobado el avance por el usuario jefe_dependencia
         es_oci = self.env.user.has_group_v8('plan_mejoramiento_idu.group_oci')[0]
-        if ('tipo_calificacion_id' in vals or 'porcentaje'in vals) and es_oci and self.aprobacion_jefe_dependencia == False:
+        if ('tipo_calificacion_id' in vals or 'porcentaje' in vals) and es_oci and self.aprobacion_jefe_dependencia == False:
             raise AccessError('Se podrá calificar este avance hasta que el usuario Jefe Depedencia lo apruebe')
         result = super(plan_mejoramiento_avance, self).write(vals)
         return result

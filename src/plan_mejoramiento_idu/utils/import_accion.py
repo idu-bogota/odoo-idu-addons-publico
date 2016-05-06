@@ -32,6 +32,7 @@ class ImportAccion(Import):
                     if self.options.avance_openERP == "1": # parametro de la consola para definir si se crena Avances
                         import_avance = ImportAvance(self.odoo, self._logger, new_accion, row['accion_id'], self.options)
                         import_avance.open_file_avance()
+                    new_accion._send('wkf_carga_masiva')
 
     def create_accion(self, tipo, auditor, dependencia, accion, objetivo, indicador, unidad_medida, meta, recurso,
                       fecha_inicio, fecha_fin, descripcion, denominacion_medida, hallazgo,

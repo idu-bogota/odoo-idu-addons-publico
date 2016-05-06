@@ -57,7 +57,7 @@
     Transiciones
     ===================================================================================
      -->
-     <record id="nuevo_a_por_aprobar_transition" model="workflow.transition">
+    <record id="nuevo_a_por_aprobar_transition" model="workflow.transition">
             <field name="act_from" ref="accion_nuevo_node"/>
             <field name="act_to" ref="accion_por_aprobar_node"/>
             <field name="condition">True</field>
@@ -68,14 +68,14 @@
             <field name="act_from" ref="accion_por_aprobar_node"/>
             <field name="act_to" ref="accion_aprobado_node"/>
             <field name="condition">True</field>
-            <field name="group_id" ref="plan_mejoramiento_idu.group_jefe_dependencia"/>
+            <field name="group_id" ref="base_idu.group_jefe_dependencia"/>
             <field name="signal">wkf_por_aprobar_a_aprobado</field>
     </record>
     <record id="por_aprobar_a_rechazado_transition" model="workflow.transition">
             <field name="act_from" ref="accion_por_aprobar_node"/>
             <field name="act_to" ref="accion_rechazado_node"/>
             <field name="condition">True</field>
-            <field name="group_id" ref="plan_mejoramiento_idu.group_jefe_dependencia"/>
+            <field name="group_id" ref="base_idu.group_jefe_dependencia"/>
             <field name="signal">wkf_por_aprobar_a_rechazado</field>
     </record>
     <record id="rechazado_a_por_aprobar_transition" model="workflow.transition">
@@ -89,7 +89,7 @@
             <field name="act_from" ref="accion_aprobado_node"/>
             <field name="act_to" ref="accion_en_progreso_node"/>
             <field name="condition">True</field>
-            <field name="group_id" ref="plan_mejoramiento_idu.group_jefe_dependencia"/>
+            <field name="group_id" ref="base_idu.group_jefe_dependencia"/>
             <field name="signal">wkf_aprobado_a_en_progreso</field>
     </record>
     <record id="en_progreso_a_terminado_transition" model="workflow.transition">
@@ -119,6 +119,13 @@
             <field name="condition">True</field>
             <field name="group_id" ref="plan_mejoramiento_idu.group_oci"/>
             <field name="signal">wkf_a_cancelado</field>
+    </record>
+    <record id="carga_masiva_transition" model="workflow.transition">
+            <field name="act_from" ref="accion_nuevo_node"/>
+            <field name="act_to" ref="accion_aprobado_node"/>
+            <field name="condition">True</field>
+            <field name="group_id" ref="base.group_no_one"/>
+            <field name="signal">wkf_carga_masiva</field>
     </record>
     </data>
 </openerp>

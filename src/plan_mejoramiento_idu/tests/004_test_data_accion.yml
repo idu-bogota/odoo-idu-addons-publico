@@ -24,8 +24,6 @@
 -
   !assert {model: plan_mejoramiento.accion, id: id_acc_01, string: id_acc_01}:
     - user_id.id == ref('id_user_oci')
-    - edt_raiz_id.user_id.id == ref('id_user_oci')
-    - edt_raiz_id.name == name
     - ejecutor_id.id == ref('id_user_ejecutor_01')
 -
   ACCION 02
@@ -50,8 +48,6 @@
 -
   !assert {model: plan_mejoramiento.accion, id: id_acc_02, string: id_acc_02}:
     - user_id.id == ref('id_user_oci')
-    - edt_raiz_id.user_id.id == ref('id_user_oci')
-    - edt_raiz_id.name == name
 -
   CREAR ACCIONE DE OCI_02
 -
@@ -77,8 +73,6 @@
 -
   !assert {model: plan_mejoramiento.accion, id: id_acc_03, string: id_acc_03}:
     - user_id.id == ref('id_user_oci_02')
-    - edt_raiz_id.user_id.id == ref('id_user_oci_02')
-    - edt_raiz_id.name == name
 -
   CREAR ACCIONE DE OCI
 -
@@ -105,5 +99,3 @@
 -
   !assert {model: plan_mejoramiento.accion, id: id_acc_04_for_task, string: id_acc_04_for_task}:
     - user_id.id == ref('id_user_oci')
-    - edt_raiz_id.user_id.id == ref('id_user_oci')
-    - edt_raiz_id.name == name

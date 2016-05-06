@@ -2,7 +2,7 @@
 import unittest2
 import logging
 from openerp.tests import common
-from openerp.exceptions import AccessError
+from openerp.exceptions import AccessError, ValidationError
 from heapq import merge
 from datetime import *
 
@@ -113,7 +113,7 @@ class TestJefeDomains(common.TransactionCase):
         """
         jefe_d01 = self.browse_ref('plan_mejoramiento_idu.id_user_jefe_d01')
         jefe_d02 = self.browse_ref('plan_mejoramiento_idu.id_user_jefe_d02')
-        result = self.browse_ref('plan_mejoramiento_idu.id_user_jefe_d01').has_group_v8('plan_mejoramiento_idu.group_jefe_dependencia')
+        result = self.browse_ref('plan_mejoramiento_idu.id_user_jefe_d01').has_group_v8('base_idu.group_jefe_dependencia')
         self.assertTrue(result, 'has_group funciona')
 
         # PLAN
