@@ -1,1 +1,2 @@
 import registrar_mensaje
+import actualizar_responsables_dependencias

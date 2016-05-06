@@ -14,13 +14,16 @@
         'auth_ldap',
     ],
     "data" : [
+        'security/security.xml',
         'views/templates.xml',
         'views/res_view.xml',
         'views/hr_view.xml',
         'views/project_view.xml',
         'data/hr.department.csv',
         'data/base_idu_data.xml',
+        'data/hr.job.csv',
         'wizard/registrar_mensaje_view.xml',
+        'wizard/actualizar_responsables_dependencias_view.xml',
         'security/ir.model.access.csv',
     ],
     "test": [
