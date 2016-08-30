@@ -20,34 +20,22 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
+from openerp import models, fields, api, exceptions
+from openerp.exceptions import Warning
 
-from openerp import models, fields, api
-from openerp.exceptions import ValidationError
 
+class actualizar_responsable_tareas(models.TransientModel):
+    _name = 'project_edt.wizard.actualizar_responsable_tareas'
 
-class hr_department(models.Model):
-    _name = 'hr.department'
-    _inherit = ['hr.department']
-
-    # -------------------
-    # Fields
-    # -------------------
-    proyecto_gerente_id = fields.Many2one(
-        string='Coordinador de Proyectos',
-        required=False,
-        track_visibility='onchange',
-        comodel_name='res.users',
-        ondelete='restrict',
-        help='''Tiene permisos de administración de los proyectos, EDT y tareas para la dependencia''',
-    )
-    proyecto_programador_id = fields.Many2one(
-        string='Programador de Proyectos',
-        required=False,
-        track_visibility='onchange',
+    user_id = fields.Many2one(
+        string='Asignar como responsable a:',
+        required=True,
         comodel_name='res.users',
         ondelete='restrict',
     )
 
-    # -------------------
-    # methods
-    # -------------------
+    @api.multi
+    def actualizar(self):
+        tareas = self.env['project.task'].browse(self.env.context.get('active_ids'))
+        tareas.write({'user_id': self.user_id.id})
+

@@ -1,6 +1,7 @@
 # -*- encoding: utf-8 -*-
 import unittest2
 import logging
+from openerp import fields
 from openerp.tests import common
 from openerp.exceptions import ValidationError
 from datetime import *
@@ -122,6 +123,59 @@ class Test_project_task(common.TransactionCase):
         }
         task = task_model.create(vals)
         self.assertEqual(task.retraso, -10)
+
+    def test_funciones_calculo_fechas_duracion(self):
+        from ..models.project import calcular_fecha_fin, calcular_fecha_inicio, calcular_duracion_en_dias
+        # Calcular la fecha final para una duración de 10 días
+        datos_calculo_fecha_final = {
+            ('2016-01-22','2016-02-04'), # vie
+            ('2016-01-23','2016-02-04'), # sab
+            ('2016-01-24','2016-02-04'), # dom
+            ('2016-01-09','2016-01-22'), # sab
+            ('2016-01-10','2016-01-22'), # dom
+            ('2016-01-11','2016-01-22'), # lun festivo
+            ('2016-01-12','2016-01-25'), # mar
+            ('2016-01-01','2016-01-15'), # vie festivo
+        }
+        for i in datos_calculo_fecha_final:
+            calculado = fields.Date.to_string(calcular_fecha_fin(i[0], 10))
+            self.assertEqual(
+                calculado, i[1],
+                'fecha inicio: {}, fecha fin calculada: {}, fecha fin esperada: {}, duracion: 10d'.format(
+                    i[0], calculado, i[1]
+                )
+            )
+            duracion = calcular_duracion_en_dias(i[0], i[1])
+            self.assertEqual(duracion, 10,
+                'fecha inicio: {}, fecha fin: {}, duracion esperada: 10d, duracion calculada: {}'.format(
+                    i[0], i[1], duracion
+                )
+            )
+        ## Calcular fecha inicial para duración de 10d
+        datos_calculo_fecha_inicial = {
+            ('2015-12-28','2016-01-09'), # sab
+            ('2015-12-28','2016-01-10'), # dom
+            ('2015-12-28','2016-01-11'), # lun festivo
+            ('2015-12-28','2016-01-12'), # mar
+            ('2015-12-29','2016-01-13'), # mie
+        }
+        for i in datos_calculo_fecha_inicial:
+            calculado = fields.Date.to_string(calcular_fecha_inicio(i[1], 10))
+            self.assertEqual(
+                calculado, i[0],
+                'fecha fin: {}, fecha inicio calculada: {}, fecha inicio esperada: {}, duracion: 10d'.format(
+                    i[1], calculado, i[0]
+                )
+            )
+            duracion = calcular_duracion_en_dias(i[0], i[1])
+            self.assertEqual(duracion, 10,
+                'fecha inicio: {}, fecha fin: {}, duracion esperada: 10d, duracion calculada: {}'.format(
+                    i[0], i[1], duracion
+                )
+            )
+        # Inicio y fin festivo
+        duracion = calcular_duracion_en_dias('2016-01-01', '2016-01-11')
+        self.assertEqual(duracion, 7)
 
 
 if __name__ == '__main__':

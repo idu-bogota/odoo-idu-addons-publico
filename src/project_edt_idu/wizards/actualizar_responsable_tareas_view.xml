@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+<data>
+    <record model="ir.ui.view" id="actualizar_responsable_tareas_form">
+        <field name="model">project_edt.wizard.actualizar_responsable_tareas</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <separator name="string1" string="Actualizar responsable en tareas"/>
+                    <p>
+                        Seleccione el usuario que va a ser responsable de las tareas seleccionadas.
+                        <br /><br />
+                        <field name="user_id" />
+                    </p>
+                    <footer>
+                        <button string="Actualizar Responsable" name="actualizar" type="object" class="btn-primary"/> or
+                        <button string="Cancelar" special="cancel" />
+                    </footer>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <act_window
+        name="Actualizar responsable"
+        res_model="project_edt.wizard.actualizar_responsable_tareas"
+        src_model="project.task"
+        view_mode="form"
+        multi="True"
+        target="new"
+        key2="client_action_multi"
+        id="actualizar_responsable_tareas_action"
+    />
+</data>
+</openerp>

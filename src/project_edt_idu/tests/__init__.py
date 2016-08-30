@@ -1,4 +1,5 @@
 import test_project_edt
+import test_project_edt_reprogramar
 import test_project_task
 import test_project_project
 import test_project_task_registro_progreso

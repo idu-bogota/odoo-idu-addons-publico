@@ -24,6 +24,7 @@
 from openerp import models, fields, api
 from openerp.tools import config as odoo_config
 from openerp.exceptions import Warning, ValidationError
+from openerp import SUPERUSER_ID
 
 class project_edt_wizard_fecha_estado(models.TransientModel):
     _name = 'project.edt.wizard.fecha_estado'
@@ -35,12 +36,14 @@ class project_edt_wizard_fecha_estado(models.TransientModel):
         readonly=True,
         comodel_name='project.project',
         ondelete='restrict',
-        default=lambda self: self._context.get('project_id', None),)
-
+        default=lambda self: self._context.get('project_id', None),
+    )
     fecha_estado = fields.Date(
         string='Fecha de Estado',
         help="Indica la fecha sobre la cual se va a calcular el retraso",
         readonly=False,
+        required=True,
+        default=fields.Date.context_today,
     )
 
     @api.one
@@ -48,7 +51,7 @@ class project_edt_wizard_fecha_estado(models.TransientModel):
     def check_fecha_estado(self):
         if odoo_config['test_enable']:
             return True
-        hoy = fields.Date.today()
+        hoy = fields.Date.context_today(self)
         if self.fecha_estado and self.fecha_estado < hoy:
             raise ValidationError('La fecha de estado debe ser mayor o igual a la fecha de hoy')
         return True
@@ -56,6 +59,9 @@ class project_edt_wizard_fecha_estado(models.TransientModel):
     @api.multi
     def actualizar_fecha_estado(self):
         self.ensure_one()
+        if not self.project_id.usuario_actual_actua_como_gerente() and self.env.user.id != SUPERUSER_ID:
+            raise Warning('No tiene permisos para ejecutar esta acción')
+
         if self.project_id.edt_raiz_id:
             # Quita la fecha de estado para dejar los valores nulos
             edt_model = self.env['project.edt']
@@ -77,3 +83,14 @@ class project_edt_wizard_fecha_estado(models.TransientModel):
                 })
 
         return {'type': 'ir.actions.act_window_close'}
+
+    @api.model
+    def actualizar_fecha_estado_open_projects(self):
+        project_model = self.env['project.project']
+        wizard_model = self.env['project.edt.wizard.fecha_estado']
+        for p in project_model.search([('state','=','open')]):
+            try:
+                wizard_model.create({'project_id': p.id}).actualizar_fecha_estado()
+            except Exception:
+                pass
+        return True

@@ -23,9 +23,39 @@
 
 from openerp import models, fields, api
 from openerp.exceptions import ValidationError
-import datetime
+from datetime import datetime, timedelta, date
+from workalendar.america import Colombia
 import workdays
+from collections import deque
 
+
+def calcular_fecha_fin(fecha_inicio, duracion):
+    cal = Colombia()
+    if isinstance(fecha_inicio, basestring):
+        fecha_inicio = fields.Date.from_string(fecha_inicio)
+    holidays = listado_festivos(fecha_inicio.year)
+    duracion -= 1 # el parametro inicial se incluye como dia laborable y se descuenta
+    return cal.add_working_days(fecha_inicio, duracion, holidays) # suma dias sin incluir fecha inicial, por eso se resta uno
+
+def calcular_fecha_inicio(fecha_fin, duracion):
+    cal = Colombia()
+    if isinstance(fecha_fin, basestring):
+        fecha_fin = fields.Date.from_string(fecha_fin)
+    holidays = listado_festivos(fecha_fin.year)
+    duracion -= 1 # el parametro inicial se incluye como dia laborable y se descuenta
+    return cal.sub_working_days(fecha_fin, duracion, holidays) # suma dias sin incluir fecha inicial, por eso se resta uno
+
+def listado_festivos(*years):
+    years = list(set(years))
+    cal = Colombia()
+    holidays = []
+    for year in years:
+        # Festivos de colombia por año retornados en formato:
+        # [ (datetime.date(2015, 1, 1), 'New year'), ..., (datetime.date(2015, 11, 16), u"Cartagena's Independence")]
+        holidays += cal.get_calendar_holidays(year)
+    min_time = datetime.min.time()
+    holidays = [datetime.combine(i[0], min_time) for i in holidays] # Genera listado con solo las fechas (convertidas a datetime) sin el nombre del festivo
+    return list(set(holidays)) # Elimina redundancias
 
 def calcular_duracion_en_dias(date1, date2, return_dates=False):
     if not date1 or not date2:
@@ -33,19 +63,28 @@ def calcular_duracion_en_dias(date1, date2, return_dates=False):
     formato = '%Y-%m-%d %H:%M:%S'
     if len(date1) == 10:
         formato = '%Y-%m-%d'
-    fecha_inicio = datetime.datetime.strptime(date1, formato)
-    fecha_fin = datetime.datetime.strptime(date2, formato)
-    duracion = workdays.networkdays(fecha_inicio, fecha_fin)
+    fecha_inicio = datetime.strptime(date1, formato)
+    fecha_fin = datetime.strptime(date2, formato)
+    holidays = listado_festivos(fecha_inicio.year, fecha_fin.year)
+    if date1 == date2:
+        if return_dates:
+            return fecha_inicio, fecha_fin, 0, holidays
+        return 0
+    duracion = workdays.networkdays(fecha_inicio, fecha_fin, holidays)
+    if fecha_inicio.weekday() >= 5 or fecha_inicio in holidays : # no es dia laboral (no sabado/domingo, ni festivo)
+        duracion += 1 # como se ignoró en workdays.networkdays, entonces lo sumamos como lo hace project en fechas manuales
+    if fecha_fin.weekday() >= 5 or fecha_fin in holidays : # no es dia laboral (no sabado/domingo, ni festivo)
+        duracion += 1 # como se ignoró en workdays.networkdays, entonces lo sumamos como lo hace project en fechas manuales
+
     if return_dates:
-        return fecha_inicio, fecha_fin, duracion
+        return fecha_inicio, fecha_fin, duracion, holidays
     return duracion
 
 def calcular_duracion_en_dias_fecha_estado(date1, date2):
     """Calculo de duración utilizado para cuando se utiliza una fecha de estado para pronosticar
     valores de progreso y costo a una fecha"""
-    fecha_inicio, fecha_fin, duracion = calcular_duracion_en_dias(date1, date2, True)
-    if fecha_fin.weekday() < 5: # no es sabado/domingo
-        duracion = duracion - 1 # Para ajustarse a como lo hace en ms-project
+    fecha_inicio, fecha_fin, duracion, holidays = calcular_duracion_en_dias(date1, date2, True)
+    duracion -= 1 # Toma la fecha final con hora inicio de jornada, osea que no cuenta como dia completo de trabajo
     return duracion
 
 
@@ -135,10 +174,12 @@ class project_edt(models.Model):
     fecha_inicio = fields.Date(
         string='Fecha de Inicio',
         required=False,
+        help="Se asigna basado en las fechas de las tareas y EDT hijas",
     )
     fecha_fin = fields.Date(
         string='Fecha de Finalización',
         required=False,
+        help="Se asigna basado en las fechas de las tareas y EDT hijas",
     )
     duracion_dias = fields.Integer(
         string='Duración',
@@ -221,7 +262,7 @@ class project_edt(models.Model):
         track_visibility='onchange',
         comodel_name='res.users',
         ondelete='restrict',
-        default=lambda self: self._context.get('programador_id', None),
+        default=lambda self: self._context.get('programador_id', self._context.get('uid')),
     )
     progreso_aprobado = fields.Integer(
         string='Progreso Aprobado',
@@ -250,6 +291,23 @@ class project_edt(models.Model):
         store=True,
         compute="_compute_retraso",
         help='''Costo planeado a la fecha de estado''',
+    )
+    predecesor_ids = fields.One2many(
+        string="Predecesoras",
+        comodel_name='project.predecesor',
+        inverse_name='destino_res_id',
+        domain=lambda self: [('destino_res_model', '=', 'e')],
+    )
+    sucesor_ids = fields.One2many(
+        string="Sucesoras",
+        comodel_name='project.predecesor',
+        inverse_name='origen_res_id',
+        domain=lambda self: [('origen_res_model', '=', 'e')],
+    )
+    usuario_actual_puede_reprogramar = fields.Boolean(
+        string="",
+        compute='_compute_usuario_actual_puede_reprogramar',
+        default=True,
     )
     # -------------------
     # methods
@@ -523,9 +581,9 @@ class project_edt(models.Model):
         result = self.env.cr.fetchall()
         if len(result):
             if result[0][0]:
-                fecha_inicio = datetime.datetime.strptime(result[0][0], '%Y-%m-%d').date()
+                fecha_inicio = datetime.strptime(result[0][0], '%Y-%m-%d').date()
             if result[0][1]:
-                fecha_fin = datetime.datetime.strptime(result[0][1], '%Y-%m-%d').date()
+                fecha_fin = datetime.strptime(result[0][1], '%Y-%m-%d').date()
         return (fecha_inicio, fecha_fin)
 
     def _obtener_rango_fecha_edt(self):
@@ -546,9 +604,9 @@ class project_edt(models.Model):
         result = self.env.cr.fetchall()
         if len(result):
             if result[0][0]:
-                fecha_inicio = datetime.datetime.strptime(result[0][0], '%Y-%m-%d').date()
+                fecha_inicio = datetime.strptime(result[0][0], '%Y-%m-%d').date()
             if result[0][1]:
-                fecha_fin = datetime.datetime.strptime(result[0][1], '%Y-%m-%d').date()
+                fecha_fin = datetime.strptime(result[0][1], '%Y-%m-%d').date()
         return (fecha_inicio, fecha_fin)
 
     @api.one
@@ -571,6 +629,8 @@ class project_edt(models.Model):
         tomando como base los valores ya calculados por objeto
         """
         # print '_compute_ejecucion_esperada_a_fecha_estado', self._name, self.id, self.numero
+        if not self.duracion_planeada_dias:
+            return 0,0
         costo = 0
         costo_planeado_fecha = 0
         progreso_esperado = 0
@@ -619,6 +679,25 @@ class project_edt(models.Model):
                 self._recorrer_arbol_postorder(child, resultado)
         resultado.append(edt)
         return resultado
+
+    @api.one
+    def _compute_usuario_actual_puede_reprogramar(self):
+        res = False
+        if self.project_id and self.project_id.usuario_actual_actua_como_gerente():
+            res = True
+        else:
+            user_id = self.env.user.id
+            autorizado_ids = [1]# superadmin
+            autorizado_ids.append(self.user_id.id)
+            autorizado_ids.append(self.programador_id.id)
+            parent = self.parent_id
+            while parent:
+                autorizado_ids.append(parent.programador_id.id)
+                autorizado_ids.append(parent.user_id.id)
+                parent = parent.parent_id
+            if user_id and user_id in autorizado_ids:
+                res = True
+        self.usuario_actual_puede_reprogramar = res
 
 
 class project_task(models.Model):
@@ -706,15 +785,27 @@ class project_task(models.Model):
         readonly=True,
         track_visibility='onchange',
     )
+    date_start = fields.Datetime(
+        string='Fecha y hora real de inicio',
+        readonly=False,
+    )
+    date_end = fields.Datetime(
+        string='Fecha y hora real de finalización',
+        readonly=False,
+    )
     fecha_inicio = fields.Date(
         string='Fecha de Inicio',
         required=True,
-        default=fields.Date.today,
+        default=fields.Date.context_today,
+        help='Fecha de inicio proyectada',
+        track_visibility='onchange',
     )
     fecha_fin = fields.Date(
         string='Fecha de Finalización',
         required=True,
-        default=fields.Date.today,
+        default=fields.Date.context_today,
+        track_visibility='onchange',
+        help='Fecha de finalización proyectada basado en fecha inicial y duración en días',
     )
     duracion_planeada_dias = fields.Integer(
         string='Duración Planeada',
@@ -727,8 +818,14 @@ class project_task(models.Model):
         string='Duración',
         help='Duración Actual en Días',
         required=False,
-        compute='_compute_duracion',
+        compute='_compute_duracion_dias',
+        inverse='_compute_duracion_dias_inverse',
         store=True,
+    )
+    duracion_dias_manual = fields.Integer(
+        string='Duración (asignada manualmente)',
+        help='Asignado para importar masivamente y conservarlo como el número a utilizar en los cálculos',
+        required=False,
     )
     pendiente_ids = fields.One2many(
         string='Lista de Pendientes',
@@ -767,11 +864,11 @@ class project_task(models.Model):
         readonly=True,
         default=0,
     )
-    terminado = fields.Boolean(
-        string='Terminado',
+    requiere_adjunto = fields.Boolean(
+        string='Requiere Adjunto para Finalizar',
         required=False,
         track_visibility='onchange',
-        help='''La tarea fue marcada como terminada''',
+        help='''Si activo esta tarea requiere que se adicione un adjunto para poder marcar la tarea como terminada''',
         default=False,
     )
     cantidad_planeada = fields.Float(
@@ -816,6 +913,24 @@ class project_task(models.Model):
         help='''Costo planeado a la fecha de estado.''',
         readonly=True,
     )
+    predecesor_ids = fields.One2many(
+        string="Predecesoras",
+        comodel_name='project.predecesor',
+        inverse_name='destino_res_id',
+        domain=lambda self: [('destino_res_model', '=', 't')],
+    )
+    sucesor_ids = fields.One2many(
+        string="Sucesoras",
+        comodel_name='project.predecesor',
+        inverse_name='origen_res_id',
+        domain=lambda self: [('origen_res_model', '=', 't')],
+    )
+    usuario_actual_puede_reprogramar = fields.Boolean(
+        string="",
+        compute='_compute_usuario_actual_puede_reprogramar',
+        default=True,
+    )
+
     # -------------------
     # methods
     # -------------------
@@ -823,6 +938,9 @@ class project_task(models.Model):
     def create(self, vals):
         # print self._name, vals.get('numero'), self.env.context
         es_carga_masiva = self.env.context.get('carga_masiva', False)
+        if not es_carga_masiva and vals.get('date_start'):
+            vals['date_start'] = False # Solo así pude quitar el valor por defecto del campo.
+
         task = super(project_task, self).create(vals)
         if not es_carga_masiva and ('fecha_inicio' in vals or 'fecha_fin' in vals):
             # Asignar fechas planeadas de inicio y fin  apartir de las fechas dadas
@@ -937,11 +1055,6 @@ class project_task(models.Model):
                 'warning': {'message': e.name}
             }
 
-    @api.onchange('terminado')
-    def _onchange_terminado(self):
-        # https://www.odoo.com/documentation/8.0/howtos/backend.html#onchange
-        pass
-
     @api.multi
     def registrar_avance_wizard_button(self):
         view = self.env.ref('project_edt_idu.edt_wizard_registrar_progreso_tarea_form')
@@ -957,14 +1070,134 @@ class project_task(models.Model):
                     (False, 'form')],
         }
 
+    @api.one
+    def reprogramar_tarea_button(self):
+        self.sudo().reprogramar_fechas_reales_sucesoras()
+        self.message_post(
+            type="note",
+            body="Reprogramación de tareas a partir de fechas inicial {}, final {} y {} días de duración".format(
+                self.fecha_inicio, self.fecha_fin, self.duracion_dias
+            ),
+        )
+
+    @api.multi
+    def reprogramar_tarea_wizard_button(self):
+        view = self.env.ref('project_edt_idu.edt_wizard_reprogramar_tarea_form')
+        return {
+            'type': 'ir.actions.act_window',
+            'view_type': 'form',
+            'view_mode': 'form',
+            'res_model': 'project.edt.wizard.reprogramar_tarea',
+            'context': { 'task_id': self.id },
+            'view_id': view.id,
+            'target': 'new',
+            'views': [(view.id, 'form'),
+                    (False, 'form')],
+        }
+
+    @api.one
+    def registrar_hoy_inicio_tarea_button(self):
+        hoy = fields.Date.from_string(fields.Date.context_today(self))
+        cal = Colombia()
+        fecha_fin = calcular_fecha_fin(hoy, self.duracion_dias)
+        self.write({
+            'date_start': fields.Datetime.to_string(datetime.now()),
+            'fecha_inicio': hoy,
+            'fecha_fin': fields.Date.to_string(fecha_fin),
+        })
+        progreso_model = self.env['project.task.registro_progreso']
+        record = progreso_model.create({
+            'name': 'Se registra el inicio de ejecución de la tarea',
+            'fecha_inicio': hoy,
+            'task_id': self.id,
+            'porcentaje': 0,
+        })
+        if self.project_id.reprogramar_tareas_automaticamente:
+            self.reprogramar_tarea_button()
+
+    @api.one
+    def reprogramar_fechas_reales_sucesoras(self):
+        sucesora_model = self.env['project.predecesor']
+        all_tasks = { self.id: self } # Mantiene el listado de todas las tareas a ser reprogramadas
+        visited_tasks = { self.id: True } # Mantiene el listado de tareas visitadas
+        tasks = deque([ self.id ]) # Mantiene la cola de tareas a ir procesando recorriendo el arbol en anchura
+        # Generar el listado de todas las tareas recorriendo el arbol de sucesoras
+        while tasks:
+            task_id = tasks.popleft()
+            sucesoras = sucesora_model.search([
+                ('origen_res_model','=','t'),
+                ('destino_res_model','=','t'),
+                ('origen_res_id','=',task_id),
+            ])
+            siguiente_nivel_sucesoras = { x: None for x in sucesoras.mapped('destino_res_id') if x not in all_tasks }
+            all_tasks.update(siguiente_nivel_sucesoras)
+            for x in siguiente_nivel_sucesoras.keys():
+                tasks.append(x) # adiciona las sucesoras para ser procesadas en el while
+        # Cargar todas las tareas:
+        for t in self.browse(all_tasks.keys()):
+            all_tasks[t.id] = t
+        # Recorrer el arbol para reprogramar
+        def ya_esta_en_cola(elemento, cola):
+            # Indica si el elemento ya esta en cola
+            # Si al adicionarse al set el elemento, el set no crece, es porque ya esta en la cola
+            elementos = set(cola)
+            _elemento = set([elemento])
+            return _elemento.issubset(elementos)
+
+        tasks = deque([ self.id ])
+        while tasks:
+            task_id = tasks.popleft()
+            task = all_tasks[task_id]
+            if task.reprogramar(visited_tasks, all_tasks):
+                visited_tasks[task_id] = True
+                for sucesora_task_id in task.sucesor_ids.filtered(lambda x: x.destino_res_model == 't').mapped('destino_res_id'):
+                    if not ya_esta_en_cola(sucesora_task_id, tasks):
+                        tasks.append(sucesora_task_id) # adiciona las sucesoras para ser procesadas en el while
+            else:
+                if not ya_esta_en_cola(task_id, tasks):
+                    tasks.append(task_id) # Dependencia pendiente de ser reprogramada, intentar posteriormente
+
+    def reprogramar(self, visited_tasks, all_tasks):
+        fechas = (None, None)
+        if visited_tasks.get(self.id):
+            return True
+        for p in self.predecesor_ids.filtered(lambda x: x.origen_res_model == 't'):
+            # Revisa si la predecesora va a ser reprogramada (all_tasks) y si ya fue reprograda
+            tarea_id = p.origen_res_id
+            if all_tasks.get(tarea_id, False) and not visited_tasks.get(tarea_id, False):
+                return False # si no es así se ignora la tarea por el momento, para que sea tomada más adelante
+            tarea_origen = all_tasks.get(tarea_id)
+            if not tarea_origen:
+                tarea_origen = p.get_origen_object()
+            fecha_inicio, fecha_final = p.get_fechas_reprogramacion_sucesora(tarea_origen, self)
+            if fechas[1] == None or fecha_final > fechas[1]: # Tome la fecha que retraza más el cronograma
+                fechas = (fecha_inicio, fecha_final)
+        self.write({
+            'fecha_inicio': fields.Date.to_string(fechas[0]),
+            'fecha_fin': fields.Date.to_string(fechas[1]),
+        })
+        return True
+
+    # Sobreescribir comportamiento de módulo original de odoo
+    # No enviar notificaciones para cambio de estado, de dueño, etc
+    # Solo guardar cambio de valor
+    def _track_subtype(self, cr, uid, ids, init_values, context=None):
+        return False
+
     # -------------------
     # Campos Computados
     # -------------------
     @api.one
     @api.depends('fecha_inicio', 'fecha_fin')
-    def _compute_duracion(self):
+    def _compute_duracion_dias(self):
         # print '_compute_duracion', self._name, self.id, self.numero
-        self.duracion_dias = calcular_duracion_en_dias(self.fecha_inicio, self.fecha_fin)
+        if self.duracion_dias_manual:
+            self.duracion_dias = self.duracion_dias_manual
+        else:
+            self.duracion_dias = calcular_duracion_en_dias(self.fecha_inicio, self.fecha_fin)
+
+    def _compute_duracion_dias_inverse(self):
+        self.duracion_dias_manual = self.duracion_dias
 
     @api.one
     @api.depends('fecha_planeada_inicio', 'fecha_planeada_fin')
@@ -981,7 +1214,11 @@ class project_task(models.Model):
             edt_num = self.edt_id.numero
             cnt_edts = len(self.edt_id.child_ids)
             children = self.edt_id.task_ids.sorted(key=lambda r: r.sequence).mapped('id')
-            position = cnt_edts + children.index(self.id) + 1
+            try:
+                position = cnt_edts + children.index(self.id) + 1
+            except:
+                position = cnt_edts + len(children) + 1
+
             self.numero =  "{0}.{1}".format(edt_num, position)
         elif self.project_id:
             children = self.project_id.task_ids.sorted(key=lambda r: r.sequence).mapped('id')
@@ -1009,7 +1246,7 @@ class project_task(models.Model):
 
         # Traer el último project.task.registro_progreso de esta tarea organizado por fecha
         self.env.cr.execute("""
-            SELECT porcentaje, costo, cantidad, id, fecha
+            SELECT porcentaje, costo, cantidad, fecha_inicio, fecha_fin, terminado, id, fecha
             FROM project_task_registro_progreso
             WHERE task_id = {0}
             AND active = 't'
@@ -1019,9 +1256,15 @@ class project_task(models.Model):
         resultados = self.env.cr.fetchall()
         #print 'TAREA', self.id, resultados
         if len(resultados):
-            vals['progreso'] = resultados[0][0]
+            vals['progreso'] = resultados[0][0] if not resultados[0][5] else 100
             vals['costo'] = resultados[0][1]
             vals['cantidad'] = resultados[0][2]
+            if resultados[0][3]:
+                vals['fecha_inicio'] = resultados[0][3]
+            if resultados[0][4]:
+                vals['fecha_fin'] = resultados[0][4]
+            if resultados[0][5]: # terminado
+                vals['date_end'] = vals['fecha_fin'] + ' 23:59:59' if resultados[0][4] else fiels.Datetime.to_string(fields.Datetime.now())
 
         self.with_context({'no_crear_registro_progreso': True}).write(vals)
 
@@ -1031,7 +1274,7 @@ class project_task(models.Model):
         # Crear un project.task.registro_progreso con fecha de hoy o que venga del contexto
         datos = {
             'task_id': self.id,
-            'name': 'Avance cargado masivamente el {0}'.format(datetime.date.today().strftime('%d, %b %Y')),
+            'name': 'Avance cargado masivamente el {0}'.format(date.today().strftime('%d, %b %Y')),
         }
         for field_t, field_rp in {'progreso': 'porcentaje', 'costo': 'costo', 'cantidad': 'cantidad'}.iteritems():
             datos[field_rp] = vals.get(field_t, 0)
@@ -1051,6 +1294,8 @@ class project_task(models.Model):
         self.costo_planeado_fecha = costo_planeado_fecha
 
     def _compute_progreso_esperado(self, fecha_estado):
+        if not self.duracion_planeada_dias:
+            return 0,0
         progreso_esperado = 0
         progreso_diario = 100/float(self.duracion_planeada_dias)
         dias_esperados = calcular_duracion_en_dias_fecha_estado(self.fecha_planeada_inicio, fecha_estado)
@@ -1069,6 +1314,20 @@ class project_task(models.Model):
         # print '_compute_progreso_esperado', self._name, self.id, self.numero, progreso_esperado, costo_planeado_fecha
         return progreso_esperado, costo_planeado_fecha
 
+    @api.one
+    def _compute_usuario_actual_puede_reprogramar(self):
+        res = False
+        if self.project_id and self.project_id.usuario_actual_actua_como_gerente():
+            res = True
+        elif (self.edt_id and
+            self.edt_id.usuario_actual_puede_reprogramar or
+            (self.edt_id.project_id and self.edt_id.project_id.usuario_actual_actua_como_gerente())
+        ):
+            res = True
+        elif not self.project_id and not self.edt_id:
+            res = True
+        self.usuario_actual_puede_reprogramar = res
+
 
 class project_project(models.Model):
     _name = 'project.project'
@@ -1083,6 +1342,10 @@ class project_project(models.Model):
         track_visibility='onchange',
         comodel_name='project.edt',
         ondelete='restrict',
+    )
+    fecha_estado = fields.Date(
+        related='edt_raiz_id.fecha_estado',
+        readonly=True,
     )
     edt_ids = fields.One2many(
         string='EDT Asociadas',
@@ -1149,6 +1412,12 @@ class project_project(models.Model):
         required=False,
         default=False,
     )
+    reprogramar_tareas_automaticamente = fields.Boolean(
+        string='Reprogramar Tareas Automáticamente',
+        help='Al registrar el avance de una tarea y marcarla como terminada, las tareas sucesoras se reprograman utilizando el día actual como fecha de finalización real',
+        required=False,
+        default=True,
+    )
 
     # -------------------
     # methods
@@ -1157,7 +1426,7 @@ class project_project(models.Model):
     def edt_arbol_view_button(self):
         model, view_id = self.env['ir.model.data'].get_object_reference('project_edt_idu', 'arbol_edt_tree')
         return {
-            'name': self.name,
+            'name': 'EDTs',
             'res_model': 'project.edt',
             'domain': [('id', '=', self.edt_raiz_id.id)],
             'type': 'ir.actions.act_window',
@@ -1167,10 +1436,50 @@ class project_project(models.Model):
         }
 
     @api.multi
-    def get_tareas_atrasadas(self):
+    def get_tareas_atrasadas(self,criteria):
         self.ensure_one()
         task_model = self.env['project.task']
-        return task_model.search([('project_id','=',self.id),('retraso','>',0)])
+        if criteria == 1:
+            return task_model.search([('project_id','=',self.id),('retraso','>',0)])
+        else:
+            return task_model.search([('project_id','=',self.id),('retraso','>',0),('user_id','=',self._context.get('uid',False))])
+
+    @api.multi
+    def get_tareas_semana_actual(self):
+        self.ensure_one()
+        task_model = self.env['project.task']
+        start_week =  format(datetime.now() - timedelta(days=datetime.now().weekday()),'%Y-%m-%d')
+        end_week = format(datetime.strptime(start_week, '%Y-%m-%d') + timedelta(days=6),'%Y-%m-%d')
+        return task_model.search([
+            ('project_id','=',self.id),
+            ('fecha_planeada_inicio','<=',end_week),
+            ('fecha_planeada_fin','>=',start_week),
+        ])
+
+    @api.multi
+    def get_tareas_semana_siguiente(self):
+        self.ensure_one()
+        task_model = self.env['project.task']
+        start_week =  format((datetime.now() - timedelta(days=datetime.now().weekday())) + timedelta(days=7),'%Y-%m-%d')
+        end_week = format(datetime.strptime(start_week, '%Y-%m-%d') + timedelta(days=6),'%Y-%m-%d')
+        return task_model.search([
+            ('project_id','=',self.id),
+            ('fecha_planeada_inicio','<=',end_week),
+            ('fecha_planeada_fin','>=',start_week),
+        ])
+
+    @api.multi
+    def usuario_actual_actua_como_gerente(self):
+        """Retorna True a los usuarios que pueden acceder a las funcionalidades que requieren un perfil de gerente para el proyecto"""
+        self.ensure_one()
+        autorizado_ids = []
+        user_id = self.env.user.id
+        autorizado_ids.append(1) # superadmin
+        autorizado_ids.append(self.user_id.id)
+        autorizado_ids.append(self.programador_id.id)
+        if user_id and user_id in autorizado_ids:
+            return True
+        return False
 
     @api.multi
     def registrar_fecha_estado_wizard_button(self):
@@ -1186,7 +1495,6 @@ class project_project(models.Model):
             'views': [(view.id, 'form'),
                     (False, 'form')],
         }
-
 
 class project_task_registro_progreso(models.Model):
     _name = 'project.task.registro_progreso'
@@ -1207,7 +1515,7 @@ class project_task_registro_progreso(models.Model):
         string='Fecha',
         required=True,
         track_visibility='onchange',
-        default=fields.Date.today,
+        default=fields.Date.context_today,
     )
     task_id = fields.Many2one(
         string='Tarea',
@@ -1226,7 +1534,7 @@ class project_task_registro_progreso(models.Model):
         ondelete='restrict',
     )
     porcentaje = fields.Integer(
-        string='Porcentaje',
+        string='Porcentaje Acumulado',
         required=True,
         track_visibility='onchange',
     )
@@ -1286,7 +1594,30 @@ class project_task_registro_progreso(models.Model):
         required=False,
         track_visibility='onchange',
     )
-
+    fecha_inicio = fields.Date(
+        string='Fecha Inicio Real',
+        required=False,
+        readonly=False,
+    )
+    fecha_fin = fields.Date(
+        string='Fecha Fin Real',
+        required=False,
+        readonly=False,
+    )
+    terminado = fields.Boolean(
+        string='Terminado',
+        required=False,
+        track_visibility='onchange',
+        help='''La tarea fue marcada como terminada''',
+        default=False,
+    )
+    attachment_ids = fields.One2many(
+        string="Adjuntos",
+        comodel_name='ir.attachment',
+        inverse_name='res_id',
+        domain=lambda self: [('res_model', '=', self._name)],
+        auto_join=True,
+    )
     # -------------------
     # methods
     # -------------------
@@ -1318,13 +1649,6 @@ class project_task_registro_progreso(models.Model):
     def _check_fecha_aprobacion(self):
         if self.fecha_aprobacion and self.fecha_aprobacion < self.fecha:
             raise ValidationError('La fecha de aprobación no puede ser anterior a la fecha de corte del progreso')
-
-
-    @api.one
-    @api.constrains('task_id')
-    def _check_task_id(self):
-        if self.task_id and self.task_id.terminado:
-            raise ValidationError('La tarea ya ha sido marcada como terminada no puede adicionar o editar registros de progreso')
 
     @api.one
     @api.constrains('porcentaje')
@@ -1458,15 +1782,17 @@ class project_task_pendiente(models.Model):
 class project_predecesor(models.Model):
     _name = 'project.predecesor'
     _description = 'Relacion de Precedencia entre Tarea/EDT'
+    _map_model = {'t': 'project.task', 'e': 'project.edt'}
 
     # -------------------
     # Fields
     # -------------------
     name = fields.Char(
         string='Nombre',
-        required=True,
+        required=False,
         size=255,
         compute='_compute_name',
+        store=True,
     )
     progreso = fields.Integer(
         string='Progreso',
@@ -1477,8 +1803,8 @@ class project_predecesor(models.Model):
         string='Origen Modelo',
         required=True,
         selection=[
-            ('tarea', 'tarea'),
-            ('edt', 'edt'),
+            ('t', 'Tarea'),
+            ('e', 'EDT'),
         ],
     )
     origen_res_id = fields.Integer(
@@ -1489,8 +1815,8 @@ class project_predecesor(models.Model):
         string='Destino Modelo',
         required=True,
         selection=[
-            ('tarea', 'tarea'),
-            ('edt', 'edt'),
+            ('t', 'Tarea'),
+            ('e', 'EDT'),
         ],
     )
     destino_res_id = fields.Integer(
@@ -1501,12 +1827,17 @@ class project_predecesor(models.Model):
         string='Tipo',
         required=True,
         selection=[
-            ('e_s', 'e_s'),
-            ('s_s', 's_s'),
-            ('e_e', 'e_e'),
-            ('s_e', 's_e'),
+            ('FS', 'Fin -> Inicio'),
+            ('SS', 'Inicio -> Inicio'),
+            ('FF', 'Fin -> Fin'),
+            ('SF', 'Inicio -> Fin'),
         ],
-        default='e_s',
+        default='FS',
+    )
+    lag = fields.Char(
+        string='Lag',
+        required=False,
+        size=50,
     )
 
     # -------------------
@@ -1514,17 +1845,140 @@ class project_predecesor(models.Model):
     # -------------------
 
     @api.one
-    @api.depends('origen_res_id', 'origen_res_model')
+    @api.depends('destino_res_id', 'origen_res_id', 'tipo','destino_res_model', 'origen_res_model')
     def _compute_name(self):
-        self.name = "Nulla quasi qui autem id."
+        if self.origen_res_model and self.destino_res_model:
+            map_model = self._map_model
+            origen = self.env[map_model[self.origen_res_model]].browse(self.origen_res_id)
+            destino = self.env[map_model[self.destino_res_model]].browse(self.destino_res_id)
+            self.name = "{0} {1} -> {2} {3} ({4} - {5})".format(
+                origen.numero, origen.name,
+                destino.numero, destino.name,
+                self.tipo, self.lag,
+            )
+        else:
+            self.name = 'por definir'
 
     @api.one
     def _compute_progreso(self):
-        self.progreso = 48482016.1052
+        map_model = self._map_model
+        if self.origen_res_id and self.origen_res_model:
+            origen = self.env[map_model[self.origen_res_model]].browse(self.origen_res_id)
+            self.progreso = origen.progreso
+        else:
+            self.progreso = 0
+
+    def get_fechas_reprogramacion_sucesora(relacion, tarea_origen=None, tarea=None):
+        """Retorna las fechas para reprogramar la 'tarea' sucesora basado en los datos de la 'tarea origen' (predecesora) y la 'relacion'(project.predecesor)'
+        FS -> fecha_final (+1 si la siguiente no es milestone - duración 0) es colocada como fecha inicial de la tarea relacionada y se calcula fecha final
+        SS -> Fecha Inicial es colocada como fecha inicial de la tarea relacionada y se calcula la fecha final
+        FF -> Fecha Final es Colocada como Fecha Final y se calcula la fecha Inicial
+        SF -> Fecha Inicial es Colocada como fecha Final de la tarea relacionada y la fecha Inicial es calculada
+        """
+        if tarea == None:
+            tarea = relacion.get_destino_object()
+        if tarea_origen == None:
+            tarea_origen = relacion.get_origen_object()
+
+        duracion_dias = tarea_origen.duracion_dias
+        fecha_inicio = fields.Date.from_string(tarea_origen.fecha_inicio)
+        fecha_final = fields.Date.from_string(tarea_origen.fecha_fin)
+
+        cal = Colombia()
+        lag_en_dias = relacion._calcular_lag_en_dias(tarea.duracion_dias)
+        tmp_fecha_inicial = None
+        tmp_fecha_fin = None
+        duracion_en_dias_a_sumar = tarea.duracion_dias - 1 # la duración de las tareas incluye la fecha de inicio, no desde el siguiente
+        if duracion_en_dias_a_sumar < 0:
+            duracion_en_dias_a_sumar = 0
+        if relacion.tipo == 'FS':
+            iniciar_en_dias = 1 # Indica debe iniciar la tarea sucesora un dia despues (valor por defecto)
+            if tarea.duracion_dias == 0: # Si sucesora es un milestone no arranca al siguiente dia
+                iniciar_en_dias = 0
+                if lag_en_dias < 0:
+                    lag_en_dias += 1 # un milestone al regresar en el tiempo descuenta un dia
+            iniciar_en_dias += lag_en_dias
+            tmp_fecha_inicial = cal.add_working_days(fecha_final, iniciar_en_dias)
+            tmp_fecha_fin = cal.add_working_days(tmp_fecha_inicial, duracion_en_dias_a_sumar)
+        elif relacion.tipo == 'SS':
+            iniciar_en_dias = 0 # Indica debe iniciar la tarea sucesora un dia despues (valor por defecto)
+            if duracion_dias == 0 and tarea.duracion_dias > 0:
+                iniciar_en_dias = 1 # Si la predecesora es un milestone (hora es al final del dia) la tarea regular no puede iniciar sino al siguiente dia
+            if tarea.duracion_dias == 0:
+                if lag_en_dias > 0 and duracion_dias > 0:
+                    lag_en_dias -= 1 # al ser milestone el dia de comienzo ya esta incluido
+                if lag_en_dias < 0 and duracion_dias == 0:
+                    lag_en_dias += 1 # al ser milestone la predecesora y la sucesora el dia de comienzo ya esta incluido
+            iniciar_en_dias += lag_en_dias
+            tmp_fecha_inicial = cal.add_working_days(fecha_inicio, iniciar_en_dias)
+            tmp_fecha_fin = cal.add_working_days(tmp_fecha_inicial, duracion_en_dias_a_sumar)
+        elif relacion.tipo == 'FF':
+            tmp_fecha_fin = cal.add_working_days(fecha_final, lag_en_dias)
+            tmp_fecha_inicial = cal.sub_working_days(tmp_fecha_fin, duracion_en_dias_a_sumar)
+        elif relacion.tipo == 'SF':
+            finalizar_en_dias = 0
+            duracion_en_dias_a_sumar = tarea.duracion_dias
+            if tarea.duracion_dias > 0 and duracion_dias > 0 and lag_en_dias > 0:
+                lag_en_dias -= 1
+                duracion_en_dias_a_sumar -= 1
+            if tarea.duracion_dias == 0 and duracion_dias > 0 and lag_en_dias > 0:
+                lag_en_dias -= 1
+            if duracion_dias == 0 and tarea.duracion_dias > 0:
+                duracion_en_dias_a_sumar -= 1
+            if duracion_dias == 0 and lag_en_dias < 0:
+                lag_en_dias += 1
+                duracion_en_dias_a_sumar = tarea.duracion_dias
+            finalizar_en_dias += lag_en_dias
+            tmp_fecha_fin = cal.add_working_days(fecha_inicio, finalizar_en_dias)
+            tmp_fecha_inicial = cal.sub_working_days(tmp_fecha_fin, duracion_en_dias_a_sumar)
+        else:
+            raise Exception('Tipo "{}" no reconocido para reprogramación[{}]: {}'.format(
+                relacion.tipo, relacion.id, relacion.name,
+            ))
+        return tmp_fecha_inicial, tmp_fecha_fin
+
+    @api.multi
+    def _calcular_lag_en_dias(self, duracion=None):
+        """Convierte el lag a dias tomando o valor en dias 0.0d o un porcentaje 0.0%
+        duracion es la duración de la tarea sobre la cual se va a calcular el porcentaje.
+        El resultado es un valor en dias enteros.
+        """
+        self.ensure_one()
+        lag = self.lag
+        if lag.find('d') > 0:
+            return int(round(float(lag[:-1]),0))
+        elif lag.find('%') > 0:
+            numerador = duracion * float(lag[:-1])
+            return int(round(numerador/100))
+        else:
+            raise Exception('Solo se reconoce lag en dias o porcentaje no "{}" para predecesor []: {}'.format(
+                lag, self.id, self.name
+            ))
+
+    @api.model
+    def get_origen_object(self):
+        self.ensure_one()
+        # Retorna el objeto origen, basado en el ID y el modelo
+        modelo = self._map_model.get(self.origen_res_model)
+        obj = self.env[modelo].browse(self.origen_res_id)
+        return obj
+
+    @api.model
+    def get_destino_object(self):
+        self.ensure_one()
+        # Retorna el objeto origen, basado en el ID y el modelo
+        modelo = self._map_model.get(self.destino_res_model)
+        obj = self.env[modelo].browse(self.destino_res_id)
+        return obj
+
+    # TODO: Evitar dependencias circulares
+    #@api.one
+    #@api.constrains('origen_res_id', 'origen_res_model', 'xxxx')
+    #def _check_no_circular()
 
 class project_task_reporte_avance(models.Model):
     _name = 'project.task.reporte_avance'
-    _description = 'Reporte de Avance de Tareas'
+    _description = 'Reportar Avance de Tareas'
     _inherit = ['mail.thread', 'models.soft_delete.mixin']
 
     # -------------------
@@ -1603,12 +2057,14 @@ class project_task_reporte_avance(models.Model):
     # -------------------
     @api.model
     def dominio_tareas_a_reportar(self, project_id, user_id):
-      return [
-          ('project_id', '=', project_id),
-          ('user_id', '=', user_id),
-          ('progreso_metodo', '=','manual'),
-          ('terminado', '=', False),
-          ('fecha_inicio','<',fields.Date.today())
+        return [
+            '|',
+                ('user_id', '=', user_id),
+                ('edt_id.user_id', '=', user_id),
+            ('project_id', '=', project_id),
+            ('progreso_metodo', '=','manual'),
+            ('date_end', '!=', False),
+            ('fecha_inicio','<',fields.Date.today())
       ]
 
     @api.model

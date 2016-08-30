@@ -1,3 +1,6 @@
 import importar_mpp
 import registrar_progreso_tarea
+import reprogramar_tarea
 import fecha_estado
+import actualizar_responsable_tareas
+import actualizar_responsable_edt

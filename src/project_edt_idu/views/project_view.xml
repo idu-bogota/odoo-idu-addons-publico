@@ -39,24 +39,29 @@
                 <field name="user_id" />
                 <field name="state" />
                 <filter name="filtro_state_abierto"
-                    string="abierto"
+                    string="Abiertas"
                     help="Filtrar Estado abierto"
                     domain="[('state', '=', 'abierto')]"
                 />
                 <filter name="filtro_state_cerrado"
-                    string="cerrado"
+                    string="Cerradas"
                     help="Filtrar Estado cerrado"
                     domain="[('state', '=', 'cerrado')]"
                 />
                 <filter name="filtro_state_cancelado"
-                    string="cancelado"
+                    string="Canceladas"
                     help="Filtrar Estado cancelado"
                     domain="[('state', '=', 'cancelado')]"
                 />
                 <filter name="filtro_state_aplazado"
-                    string="aplazado"
+                    string="Aplazadas"
                     help="Filtrar Estado aplazado"
                     domain="[('state', '=', 'aplazado')]"
+                />
+                <filter name="filtro_no_planeacion"
+                    string="Sin fechas planeadas"
+                    help="Filtrar las que no tienen fecha planeada inicial o final"
+                    domain="['|',('fecha_planeada_inicio', '=', False),('fecha_planeada_fin', '=', False)]"
                 />
                 <field name="project_id" />
                 <field name="project_manager_id" />
@@ -88,22 +93,33 @@
                     <div class="oe_title">
                         <h1 class="o_row">
                             <field name="numero" />.
-                            <field name="name"/>
+                            <field name="name"
+                                attrs="{'readonly': [('usuario_actual_puede_reprogramar','=',False)]}"
+                            />
                         </h1>
                     </div>
+                    <field name="usuario_actual_puede_reprogramar" invisible="1" />
                     <field name="company_id" invisible="1" />
                     <field name="currency_id" invisible="1" />
                     <group col="4">
                         <group col="2">
-                            <field name="user_id" />
-                            <field name="programador_id" />
-                            <field name="project_id" />
-                            <field name="parent_id" />
+                            <field name="user_id"
+                                attrs="{'readonly': [('usuario_actual_puede_reprogramar','=',False)]}"
+                            />
+                            <field name="programador_id"
+                                attrs="{'readonly': [('usuario_actual_puede_reprogramar','=',False)]}"
+                            />
+                            <field name="project_id"
+                                attrs="{'readonly': [('usuario_actual_puede_reprogramar','=',False)]}"
+                            />
+                            <field name="parent_id"
+                                attrs="{'readonly': [('usuario_actual_puede_reprogramar','=',False)]}"
+                            />
                         </group>
                         <group col="2">
                             <field name="progreso" widget="progressbar" />
                             <field name="progreso_aprobado" widget="progressbar" />
-                            <field name="fecha_estado" />
+                            <field name="fecha_estado" readonly="1"/>
                             <field name="retraso" widget="progressbar" />
                         </group>
                     </group>
@@ -111,21 +127,25 @@
                         <page string='Detalles'>
                             <group col="4">
                                 <group string="Fechas" col="2">
-                                    <field name="fecha_planeada_inicio" />
-                                    <field name="fecha_planeada_fin" />
-                                    <field name="fecha_inicio" />
-                                    <field name="fecha_fin" />
+                                    <field name="fecha_planeada_inicio" readonly="1"/>
+                                    <field name="fecha_planeada_fin" readonly="1"/>
+                                    <field name="fecha_inicio" readonly="1"/>
+                                    <field name="fecha_fin" readonly="1"/>
+                                    />
                                 </group>
                                 <group string="Costos" col="2">
-                                    <field name="costo_planeado" />
-                                    <field name="costo" />
-                                    <field name="costo_planeado_fecha"/>
+                                    <field name="costo_planeado" readonly="1"/>
+                                    <field name="costo" readonly="1"/>
+                                    <field name="costo_planeado_fecha" readonly="1"/>
                                 </group>
                             </group>
                         </page>
                         <page string='Tareas'>
                             <group>
-                                <field name="task_ids" nolabel="1" context="{'project_id': project_id, 'edt_id': active_id}">
+                                <field name="task_ids" nolabel="1"
+                                    context="{'project_id': project_id, 'edt_id': active_id}"
+                                    attrs="{'readonly': [('usuario_actual_puede_reprogramar','=',False)]}"
+                                >
                                     <tree>
                                         <field name="sequence" widget="handle" />
                                         <field name="numero" />
@@ -140,6 +160,8 @@
                         <page string='EDT Hijas'>
                             <group>
                                 <field name="child_ids" nolabel="1"
+
+                                    attrs="{'readonly': [('usuario_actual_puede_reprogramar','=',False)]}"
                                     context="{'project_id': project_id, 'parent_id': active_id, 'programador_id': programador_id}"
                                 >
                                     <tree>
@@ -182,7 +204,7 @@
     <record model="ir.actions.act_window" id="edt_action">
         <field name="name">Mis EDTs</field>
         <field name="res_model">project.edt</field>
-        <field name="domain">['|',('user_id', '=', uid),('programador_id', '=', uid)]</field>
+        <field name="domain">[('project_id.active','=',True),'|',('user_id', '=', uid),('programador_id', '=', uid)]</field>
         <field name="view_mode">tree,form</field>
     </record>
     <menuitem id="edt_menu"
@@ -219,7 +241,7 @@
         <field name="view_id" ref="arbol_edt_tree"/>
     </record>
     <menuitem id="tree_admin_edt_menu"
-        parent="base_idu.proyectos_conf_menu"
+        parent="project_edt_idu.project_edt_idu_admin_menu"
         sequence="10"
         name="EDT - Árbol" action="tree_admin_edt_action"
     />
@@ -245,7 +267,7 @@
         <field name="view_mode">tree,form</field>
     </record>
     <menuitem id="list_admin_edt_menu"
-        parent="base_idu.proyectos_conf_menu"
+        parent="project_edt_idu.project_edt_idu_admin_menu"
         sequence="10"
         name="EDT - Listado" action="list_admin_edt_action"
     />
@@ -274,14 +296,17 @@
                     domain="[('progreso_metodo', '=', 'pendientes')]"
                 />
                 <field name="numero" />
-                <field name="terminado" />
+                <filter name="filtro_terminado"
+                    string="Terminado"
+                    help="Tareas Terminadas"
+                    domain="[('date_end', '!=', False)]"
+                />
             </field>
             <group position="inside">
                 <filter string="EDT" context="{'group_by':'edt_id'}"/>
                 <filter string="Forma de cálculo del progreso" context="{'group_by':'progreso_metodo'}"/>
                 <filter string="Fecha de Inicio Planeada" context="{'group_by':'fecha_planeada_inicio'}"/>
                 <filter string="Fecha de Finalización Planeada" context="{'group_by':'fecha_planeada_fin'}"/>
-                <filter string="Terminado" context="{'group_by':'terminado'}"/>
             </group>
         </field>
     </record>
@@ -294,20 +319,38 @@
                 <page string="Programación">
                     <group col="4">
                         <group col="2">
-                            <field name="edt_id" />
-                            <field name="fecha_planeada_inicio" />
-                            <field name="fecha_planeada_fin" />
-                            <field name="fecha_inicio" />
-                            <field name="fecha_fin" />
+                            <field name="edt_id"
+                                attrs="{'readonly': [('usuario_actual_puede_reprogramar','=',False)]}"
+                            />
+                            <field name="fecha_planeada_inicio" readonly="1"/>
+                            <field name="fecha_planeada_fin" readonly="1"/>
+                            <field name="fecha_inicio" readonly="1"/>
+                            <field name="fecha_fin" readonly="1"/>
+                            <field name="duracion_dias" readonly="1"/>
+                            <field name="date_start"
+                                attrs="{
+                                   'readonly': [('usuario_actual_puede_reprogramar','=',False)],
+                                   'invisible': [('date_start','=',False)]
+                                }"
+                            />
+                            <field name="date_end"
+                                attrs="{
+                                   'readonly': [('usuario_actual_puede_reprogramar','=',False)],
+                                   'invisible': [('date_end','=',False)]
+                                }"
+                            />
+                            <field name="requiere_adjunto"
+                                attrs="{'readonly': [('usuario_actual_puede_reprogramar','=',False)]}"
+                            />
                         </group>
                         <group col="2">
-                            <field name="costo_planeado" />
+                            <field name="costo_planeado" readonly="1"/>
                             <field name="currency_id" invisible="1" />
-                            <field name="costo" />
-                            <field name="costo_planeado_fecha" />
-                            <field name="product_id" />
-                            <field name="cantidad_planeada" />
-                            <field name="cantidad" />
+                            <field name="costo" readonly="1"/>
+                            <field name="costo_planeado_fecha" readonly="1"/>
+                            <field name="product_id" readonly="1"/>
+                            <field name="cantidad_planeada" readonly="1"/>
+                            <field name="cantidad" readonly="1"/>
                         </group>
                     </group>
                 </page>
@@ -315,7 +358,7 @@
                     <group>
                         <field name="progreso_metodo" readonly="1"/>
                     </group>
-                    <group string="Listado de Pendientes">
+                    <group string="Listado de Pendientes" invisible="1">
                         <field name="pendiente_ids" nolabel="1" context="{'fecha_limite': fecha_fin}">
                             <tree editable="top">
                                 <field name="sequence" widget="handle" />
@@ -335,32 +378,64 @@
                         <field name="registro_progreso_ids" readonly="1" nolabel="1"/>
                     </group>
                 </page>
+                <page string="Relaciones">
+                    <group string="Precesoras">
+                        <field name="predecesor_ids" nolabel="1" readonly="1"/>
+                    </group>
+                    <group string="Sucesoras">
+                        <field name="sucesor_ids" nolabel="1" readonly="1"/>
+                    </group>
+                </page>
             </notebook>
             <field name="name" position="before">
                 <field name="numero" />.
             </field>
-            <field name="name" position="after">
-                <field name="terminado" widget="toggle_button"/>
+            <field name="name" position="attributes">
+                <attribute name="attrs">{'readonly': [('usuario_actual_puede_reprogramar','=',False)]}</attribute>
             </field>
             <field name="user_id" position="after">
-                <field name="revisor_id" readonly="1" />
+                <field name="revisor_id"
+                    attrs="{'readonly': [('usuario_actual_puede_reprogramar','=',False)]}"
+                />
             </field>
             <field name="date_deadline" position="replace">
                 <field name="progreso" widget="progressbar" />
-                <field name="fecha_estado" />
+                <field name="fecha_estado" readonly="1" />
                 <field name="retraso" widget="progressbar"/>
                 <field name="progreso_aprobado" widget="progressbar"
                     attrs="{
                        'invisible': [('revisor_id','=',False)]
                     }"
+                    invisible="1"
                 />
+                <field name="usuario_actual_puede_reprogramar" invisible="1"/>
             </field>
+            <field name="project_id" position="attributes">
+                <attribute name="attrs">{'readonly': [('usuario_actual_puede_reprogramar','=',False)]}</attribute>
+            </field>
+            <xpath expr='//notebook/page[2]' position="attributes"><!-- Extra Info Page -->
+                <attribute name="groups">base.group_no_one</attribute>
+            </xpath>
             <button name="toggle_active" position="before">
                 <button name="registrar_avance_wizard_button" type="object"
                     icon="fa-tasks" class="oe_stat_button"
                     string="Registrar Avance"
                     attrs="{
-                        'invisible': ['|',('progreso_metodo','!=','manual'),('terminado','=',True)]
+                        'invisible': ['|','|','|',('progreso_metodo','!=','manual'),('date_end','!=',False),('date_start','=',False)]
+                    }"
+                />
+                <button name="registrar_hoy_inicio_tarea_button" type="object"
+                    icon="fa-tasks" class="oe_stat_button"
+                    string="Iniciar Tarea"
+                    attrs="{
+                        'invisible': [('date_start','!=',False)]
+                    }"
+                />
+                <button name="reprogramar_tarea_wizard_button" type="object"
+                    icon="fa-tasks" class="oe_stat_button"
+                    string="Reprogramar Tarea"
+                    attrs="{
+                        'invisible': ['|',('date_end','!=',False),('usuario_actual_puede_reprogramar','=',False)],
                     }"
                 />
             </button>
@@ -376,6 +451,10 @@
         <field name="model">project.task</field>
         <field name="inherit_id" ref="project.view_task_tree2" />
         <field name="arch" type="xml">
+            <field name="name" position="after">
+                <field name="fecha_planeada_inicio" string="Inicio Planeado" />
+                <field name="fecha_planeada_fin" string="Fin Planeado" />
+            </field>
             <field name="name" position="before">
                 <field name="numero" />
             </field>
@@ -390,7 +469,8 @@
     <record model="ir.actions.act_window" id="task_action">
         <field name="name">Mis Tareas</field>
         <field name="res_model">project.task</field>
-        <field name="domain">[('user_id', '=', uid)]</field>
+        <field name="domain">[('user_id', '=', uid),('project_id.active', '=', True)]</field>
+        <field name="context">{'display_parent_name': True}</field>
         <field name="view_mode">tree,form,calendar,pivot,graph,kanban</field>
     </record>
     <menuitem id="task_menu"
@@ -412,6 +492,19 @@
             <field name="name" position="after">
                 <field name="edt_raiz_id" />
             </field>
+            <div class="o_kanban_card_manage_section o_kanban_manage_reports" position="replace">
+                <div class="o_kanban_card_manage_section o_kanban_manage_reports">
+                    <div>
+                        <a type="open">Abrir</a>
+                    </div>
+                    <div>
+                        <a name="%(project.action_project_task_user_tree_filtered)d" type="action">Tareas</a>
+                    </div>
+                    <div t-if="record.edt_raiz_id.raw_value" >
+                        <a name="edt_arbol_view_button" type="object">EDT</a>
+                    </div>
+                </div>
+            </div>
             <div class="o_project_kanban_boxes" position="inside">
                 <a t-if="record.edt_raiz_id.raw_value" class="o_project_kanban_box" name="edt_arbol_view_button" type="object">
                     <span class="o_label">EDT</span>
@@ -429,6 +522,7 @@
                 <field name="programador_id" />
                 <field name="reportar_costo" />
                 <field name="reportar_cantidad" />
+                <field name="reprogramar_tareas_automaticamente" />
             </field>
             <group position="inside">
                 <filter string="EDT" context="{'group_by':'edt_raiz_id'}"/>
@@ -437,6 +531,7 @@
                 <filter string="Programador del Proyecto" context="{'group_by':'programador_id'}"/>
                 <filter string="En Reporte de Avance incluir Costo de la Tarea" context="{'group_by':'reportar_costo'}"/>
                 <filter string="En Reporte de Avance incluir Cantidades" context="{'group_by':'reportar_cantidad'}"/>
+                <filter string="Reprogramar Tareas Automáticamente" context="{'group_by':'reprogramar_tareas_automaticamente'}"/>
             </group>
         </field>
     </record>
@@ -446,17 +541,16 @@
         <field name="inherit_id" ref="project.edit_project" />
         <field name="arch" type="xml">
             <div name="button_box" position="inside">
+                <button name="registrar_fecha_estado_wizard_button" type="object"
+                    icon="fa-magic" class="oe_stat_button"
+                    string="Registrar Fecha Estado"
+                    attrs="{'invisible':[('edt_raiz_id','=', False)]}"
+                />
                 <button attrs="{'invisible':[('edt_raiz_id','=', False)]}"
                     class="oe_stat_button" type="object"
                     icon="fa-tasks" name="edt_arbol_view_button" string="EDT"
                 />
             </div>
-            <button name="edt_arbol_view_button" position="before">
-                <button name="registrar_fecha_estado_wizard_button" type="object"
-                    icon="fa-tasks" class="oe_stat_button"
-                    string="Registrar Fecha Estado"
-                />
-            </button>
             <field name="sequence" position="after">
                 <field name="privacy_visibility" />
                 <field name="partner_id" />
@@ -476,6 +570,7 @@
                 <field name="programador_id" />
                 <field name="fecha_planeada_inicio" />
                 <field name="fecha_planeada_fin" />
+                <field name="fecha_estado" readonly="1" />
             </field>
             <notebook position="inside">
                 <page string="EDT" groups="base.group_no_one">
@@ -485,6 +580,7 @@
                     <group>
                         <field name="reportar_costo" />
                         <field name="reportar_cantidad" />
+                        <field name="reprogramar_tareas_automaticamente" />
                     </group>
                     <field name="reporte_avance_tarea_ids"/>
                 </page>
@@ -518,6 +614,7 @@
         <field name="name">Mis Proyectos</field>
         <field name="res_model">project.project</field>
         <field name="view_mode">kanban,form</field>
+        <field name="context">{'display_parent_name': True}</field>
         <field name="domain">['|','|',('user_id','=',uid),('programador_id','=',uid),('message_is_follower','=',True)]</field>
     </record>
     <menuitem id="project_menu"
@@ -583,32 +680,45 @@
                 </header>
                 <sheet>
                     <group>
+                        <field name="task_id" />
                         <field name="name" />
                         <field name="fecha" />
-                        <field name="task_id" />
-                        <field name="porcentaje" />
-                        <field name="company_id" invisible="1" />
-                        <field name="currency_id" invisible="1" />
-                        <field name="costo" />
-                        <field name="fecha_aprobacion"
-            attrs="{
-                'invisible': [('fecha_aprobacion', '=', 'CHANGE ME')],
-                'required': [('fecha_aprobacion', '=', 'CHANGE ME')],
-                'readonly': [('fecha_aprobacion', '=', 'CHANGE ME')],
-            }"
-        />
-                        <field name="revisor_id"
-            attrs="{
-                'invisible': [('revisor_id', '=', 'CHANGE ME')],
-                'required': [('revisor_id', '=', 'CHANGE ME')],
-                'readonly': [('revisor_id', '=', 'CHANGE ME')],
-            }"
-        />
-                        <field name="nivel_alerta" />
-                        <field name="novedad" />
-                        <field name="cantidad" />
                     </group>
                     <notebook>
+                        <page string="Detalles">
+                            <group>
+                                <field name="porcentaje" />
+                                <field name="company_id" invisible="1" />
+                                <field name="currency_id" invisible="1" />
+                                <field name="costo" />
+                                <field name="fecha_aprobacion"
+                                    attrs="{
+                                        'invisible': [('fecha_aprobacion', '!=', False)],
+                                    }"
+                                />
+                                <field name="revisor_id"
+                                    attrs="{
+                                        'invisible': [('revisor_id', '!=', False)],
+                                    }"
+                                />
+                                <field name="cantidad" />
+                            </group>
+                        </page>
+                        <page string="Adjuntos">
+                            <field name="attachment_ids">
+                                <tree>
+                                    <field name="name" />
+                                    <field name="create_date" />
+                                    <field name="datas" />
+                                </tree>
+                            </field>
+                        </page>
+                        <page string="Novedades">
+                            <group>
+                                <field name="nivel_alerta" />
+                                <field name="novedad" />
+                            </group>
+                        </page>
                     </notebook>
                 </sheet>
                 <div class="oe_chatter">
@@ -738,7 +848,7 @@
         <field name="view_mode">tree,form</field>
     </record>
     <menuitem id="task_pendiente_menu"
-        parent="base_idu.proyectos_menu"
+        parent="project_edt_idu_admin_menu"
         sequence="10"
         name="Mis Pendientes" action="task_pendiente_action"
     />
@@ -819,16 +929,13 @@
                 </header>
                 <sheet>
                     <group>
-                        <field name="name" />
-                        <field name="progreso" />
+                        <field name="tipo" />
                         <field name="origen_res_model" />
                         <field name="origen_res_id" />
                         <field name="destino_res_model" />
                         <field name="destino_res_id" />
-                        <field name="tipo" />
+                        <field name="progreso" />
                     </group>
-                    <notebook>
-                    </notebook>
                 </sheet>
             </form>
         </field>
@@ -951,13 +1058,7 @@
         <field name="arch" type="xml">
             <tree>
                 <field name="fecha" />
-                <field name="project_id"
-            attrs="{
-                'invisible': [('project_id', '=', 'CHANGE ME')],
-                'required': [('project_id', '=', 'CHANGE ME')],
-                'readonly': [('project_id', '=', 'CHANGE ME')],
-            }"
-        />
+                <field name="project_id" />
                 <field name="user_id" />
                 <field name="state" />
                 <field name="avances_por_revisar" />

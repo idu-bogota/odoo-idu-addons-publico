@@ -1,0 +1,67 @@
+<?xml version="1.0"?>
+<openerp>
+<data>
+    <record id="adjunto_requerido_en_tarea_server_action" model="ir.actions.server">
+        <field name="sequence" eval="5"/>
+        <field name="type">ir.actions.server</field>
+        <field name="state">object_write</field>
+        <field name="use_write">current</field>
+        <field name="model_id" ref="project.model_project_task"/>
+        <field name="condition">object.usuario_actual_puede_reprogramar</field>
+        <field name="name">Requiere adjunto para terminar tarea</field>
+        <field name="fields_lines"
+            eval="[
+                (0, 0, {
+                    'col1': ref('project_edt_idu.field_project_task_requiere_adjunto'),
+                    'type': 'value',
+                    'value': True
+                })
+            ]"
+        />
+    </record>
+    <record id="adjunto_requerido_en_tarea_menu" model="ir.values">
+        <field eval="'client_action_multi'" name="key2"/>
+        <field eval="'project.task'" name="model"/>
+        <field name="name">Marcar que requiere adjunto para finalizar</field>
+        <field eval="'ir.actions.server,%d'%adjunto_requerido_en_tarea_server_action" name="value"/>
+    </record>
+</data>
+<data noupdate="1">
+    <!-- Template de Email para notificar inicio de tarea -->
+    <record id="notificacion_tarea_puede_iniciar" model="mail.template">
+        <field name="name">Notificación Tarea Puede Iniciar</field>
+        <field name="subject">[ZIPA] Puede iniciar la tarea: ${object.numero} ${object.name}</field>
+        <field name="email_from">Notificación ZIPA&lt;adminerp@idu.gov.co&gt;</field>
+        <field name="email_to">${object.user_id.email}</field>
+        <field name="partner_to">${object.user_id.partner_id.id or ''}</field>
+        <field name="lang">${object.user_id.partner_id and object.user_id.partner_id.lang or ''}</field>
+        <field name="model_id" ref="project.model_project_task"/>
+        <field name="user_signature" eval="0"/>
+        <field name="body_html"><![CDATA[<p>Cordial saludo ${object.user_id.nombres or ''},</p>
+
+<p>La Tarea <strong>${object.numero} ${object.name}</strong> del proyecto <strong>${object.project_id.name}</strong> ya puede iniciar, ya que la tarea predecesora ha finalizado.</p>
+<p><br/><br/></p>
+<p>ZIPA: Sistema de Gestión Integral de Proyectos<br/>
+<a href="http://openerp.idu.gov.co/zipa">http://openerp.idu.gov.co/zipa</a>
+Instituto de Desarrollo Urbano IDU<br/>
+</p>
+
+<p><strong>Nota:</strong> Mensaje enviado automáticamente por el Sistema ZIPA, por favor no responder ya que el buzón de correo no es monitoreado.</p>
+]]></field>
+    </record>
+
+    <record forcecreate="True" id="ir_cron_actualizar_fecha_estado_diario" model="ir.cron">
+        <field name="name">Actualizar la fecha de estado de los proyectos abiertos</field>
+        <field eval="True" name="active"/>
+        <field name="user_id" ref="base.user_root"/>
+        <field name="interval_number">1</field>
+        <field name="interval_type">days</field>
+        <field name="numbercall">-1</field>
+        <field eval="False" name="doall"/>
+        <field eval="'project.edt.wizard.fecha_estado'" name="model"/>
+        <field eval="'actualizar_fecha_estado_open_projects'" name="function"/>
+        <field eval="'()'" name="args"/>
+        <field eval="'2016-01-01 23:00:00'" name="nextcall"/>
+    </record>
+</data>
+</openerp>

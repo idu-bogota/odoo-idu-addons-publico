@@ -23,6 +23,7 @@
 
 from openerp import models, fields, api
 from openerp.exceptions import ValidationError
+from openerp.addons.base_idu.models.filtros_mixin import adiciona_keywords_en_search
 
 
 class project_programa(models.Model):
@@ -642,6 +643,13 @@ class project_project(models.Model):
     # -------------------
     # Fields
     # -------------------
+    project_padre_id = fields.Many2one(
+        string='Proyecto Padre',
+        required=False,
+        track_visibility='onchange',
+        comodel_name='project.project',
+        ondelete='restrict',
+    )
     dependencia_id = fields.Many2one(
         string='Dependencia',
         required=False,
@@ -664,12 +672,12 @@ class project_project(models.Model):
         required=True,
         track_visibility='onchange',
         selection=[
-            ('obra', 'obra'),
-            ('obra_etapa', 'obra_etapa'),
-            ('obra_componente', 'obra_componente'),
-            ('funcionamiento', 'funcionamiento'),
-            ('plan_mejoramiento', 'plan_mejoramiento'),
-            ('plan_accion', 'plan_accion'),
+            ('obra', 'Obra'),
+            ('obra_etapa', 'Etapa de Obra'),
+            ('obra_componente', 'Obra Componente'),
+            ('funcionamiento', 'Funcionamiento/Apoyo'),
+            ('plan_mejoramiento', 'Plan Mejoramiento'),
+            ('plan_accion', 'Plan Acción'),
         ],
         default='funcionamiento',
     )
@@ -741,20 +749,12 @@ class project_project(models.Model):
     # methods
     # -------------------
     def search(self, cr, uid, args, offset=0, limit=None, order=None, context=None, count=False, xtra=None):
-        user = self.pool.get('res.users').browse(cr, uid, uid, context=context)
-        new_args = []
-        for arg in args:
-            if type(arg) is not tuple and type(arg) is not list:
-                new_args += arg
-                continue
-            if arg[2] == 'USER_DEPARTMENT_ID':
-                new_args += [(arg[0], arg[1], user.department_id.id)]
-            else:
-                new_args += [arg]
+        new_args = adiciona_keywords_en_search(self, cr, uid, args, offset, limit, order, context, count, xtra)
         return super(project_project, self).search(cr, uid, new_args, offset, limit, order, context, count)
 
     @api.multi
     def crear_linea_base(self, nombre):
+        self.ensure_one()
         linea_base_model = self.env['project.linea_base']
         vals = {
             'name': nombre,
@@ -769,6 +769,7 @@ class project_project(models.Model):
 
     @api.multi
     def crear_snapshot(self, nombre):
+        self.ensure_one()
         linea_base_model = self.env['project.linea_base']
         vals = {
             'name': nombre,
@@ -778,6 +779,42 @@ class project_project(models.Model):
         linea_base = linea_base_model.create(vals)
         linea_base.linea_raiz_id = self.edt_raiz_id.crear_snapshot_linea(linea_base.id).id
         return linea_base
+
+    def name_get(self, cr, uid, ids, context=None):
+        """ Retorna el nombre del padre si se indica en el contexto display_parent_name
+        """
+        if not isinstance(ids, list):
+            ids = [ids]
+        if context is None:
+            context = {}
+
+        if not context.get('display_parent_name', False):
+            return super(project_project, self).name_get(cr, uid, ids, context=context)
+
+        res = []
+        for project in self.browse(cr, uid, ids, context=context):
+            names = []
+            current = project
+            while current:
+                names.append(current.name)
+                current = current.project_padre_id
+            res.append((project.id, ' / '.join(reversed(names))))
+        return res
+
+    @api.multi
+    def usuario_actual_actua_como_gerente(self):
+        """Retorna True a los usuarios que pueden acceder a las funcionalidades que requieren un perfil de gerente para el proyecto"""
+        res = super(project_project, self).usuario_actual_actua_como_gerente()
+        if res:
+            return res
+        autorizado_ids = []
+        user_id = self.env.user.id
+        autorizado_ids.append(self.dependencia_id.manager_id.user_id.id)
+        autorizado_ids.append(self.dependencia_id.proyecto_gerente_id.id)
+        autorizado_ids.append(self.dependencia_id.proyecto_programador_id.id)
+        if user_id and user_id in autorizado_ids:
+            return True
+        return False
 
 
 class project_financiacion(models.Model):
@@ -815,6 +852,7 @@ class project_financiacion(models.Model):
         track_visibility='onchange',
         comodel_name='project.project',
         ondelete='restrict',
+        default=lambda self: self._context.get('project_id', None),
     )
     fuente_financiacion_id = fields.Many2one(
         string='Fuente de financiación',
@@ -905,6 +943,7 @@ class project_meta(models.Model):
         required=True,
         comodel_name='project.project',
         ondelete='restrict',
+        default=lambda self: self._context.get('project_id', None),
     )
     tipo_id = fields.Many2one(
         string='Tipo',

@@ -92,7 +92,10 @@
         <field name="name">project.group_project_user project.task.reporte_avance Read</field>
         <field name="model_id" ref="project_edt_idu.model_project_task_reporte_avance"/>
         <field name="domain_force">[
-'|','|','|',
+'|','|','|','|','|','|',
+('project_id.dependencia_id.manager_id.user_id', '=', user.id),
+('project_id.dependencia_id.proyecto_gerente_id', '=', user.id),
+('project_id.dependencia_id.proyecto_programador_id', '=', user.id),
 ('project_id.user_id', '=', user.id),
 ('project_id.programador_id', '=', user.id),
 ('message_partner_ids', 'in', [user.partner_id.id]),
@@ -118,7 +121,10 @@
         <field name="name">project.group_project_user project.task.reporte_avance Write</field>
         <field name="model_id" ref="project_edt_idu.model_project_task_reporte_avance"/>
         <field name="domain_force">[
-'|','|',
+'|','|','|','|','|',
+('project_id.dependencia_id.manager_id.user_id', '=', user.id),
+('project_id.dependencia_id.proyecto_gerente_id', '=', user.id),
+('project_id.dependencia_id.proyecto_programador_id', '=', user.id),
 ('user_id','=',user.id),
 ('project_id.user_id','=',user.id),
 ('project_id.programador_id','=',user.id),

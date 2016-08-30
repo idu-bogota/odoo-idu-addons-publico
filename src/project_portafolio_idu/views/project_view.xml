@@ -23,7 +23,7 @@
         sequence="100"
      />
      <menuitem id="project_portafolio_idu_dependencia_admin_menu" parent="base_idu.proyectos_nav"
-        name="Administración Portafolio Proyectos"
+        name="Portafolio Dependencia"
         groups="project_portafolio_idu.group_project_dependencia_admin"
         sequence="40"
      />
@@ -585,11 +585,13 @@
                 />
                 <field name="programa_id" />
                 <field name="portafolio_ids" />
+                <field name="project_padre_id" />
             </field>
             <group position="inside">
                 <filter string="Dependencia" context="{'group_by':'dependencia_id'}"/>
                 <filter string="Tipo de Proyecto" context="{'group_by':'proyecto_tipo'}"/>
                 <filter string="Programa" context="{'group_by':'programa_id'}"/>
+                <filter string="Proyecto Padre" context="{'group_by':'project_padre_id'}"/>
             </group>
         </field>
     </record>
@@ -615,6 +617,7 @@
             </div>
             <field name="sequence" position="after">
                 <field name="proyecto_tipo" />
+                <field name="project_padre_id" />
             </field>
             <notebook position="inside">
                 <page string="Alcance y Notas">
@@ -625,19 +628,19 @@
                         <field name="notas" nolabel="1" />
                     </group>
                 </page>
-                <page string="Portafolio">
+                <page string="Portafolio" groups="base.group_no_one">
                     <field name="portafolio_ids" />
                 </page>
-                <page string="Metas">
+                <page string="Metas" groups="base.group_no_one">
                     <field name="meta_ids" />
                 </page>
-                <page string="Financiación">
+                <page string="Financiación" groups="base.group_no_one">
                     <field name="financiacion_ids" />
                 </page>
-                <page string="Solicitudes de Cambio">
+                <page string="Solicitudes de Cambio" groups="base.group_no_one">
                     <field name="solicitud_cambio_ids" />
                 </page>
-                <page string="Reportes de Desempeño">
+                <page string="Reportes de Desempeño" groups="base.group_no_one">
                     <field name="reporte_desempeno_ids" />
                 </page>
                 <page string="Líneas Base">
@@ -657,12 +660,28 @@
         <field name="inherit_id" ref="project.view_project" />
         <field name="arch" type="xml">
             <field name="partner_id" position="replace" />
+            <field name="name" position="before">
+                <field name="project_padre_id" />
+            </field>
             <field name="name" position="after">
                 <field name="dependencia_id" />
                 <field name="proyecto_tipo" />
                 <field name="programa_id" />
                 <field name="privacy_visibility" />
             </field>
+        </field>
+    </record>
+    <record model="ir.ui.view" id="view_project_kanban">
+        <field name="name">project.project.kanban.portafolio</field>
+        <field name="model">project.project</field>
+        <field name="inherit_id" ref="project.view_project_kanban" />
+        <field name="arch" type="xml">
+            <field name="name" position="after">
+                <field name="project_padre_id" />
+            </field>
+            <div class="o_primary" position="inside">
+                <field name="project_padre_id" />
+            </div>
         </field>
     </record>
     <record model="ir.actions.act_window" id="admin_project_action">
@@ -717,10 +736,10 @@
                 </header>
                 <sheet>
                     <group>
-                        <field name="name" />
-                        <field name="project_id" />
+                        <field name="project_id" readonly="1" />
                         <field name="fuente_financiacion_id" />
                         <field name="valor" />
+                        <field name="name" />
                     </group>
                     <notebook>
                     </notebook>
@@ -850,7 +869,7 @@
         <field name="view_mode">tree,form</field>
     </record>
     <menuitem id="solicitud_cambio_menu"
-        parent="base_idu.proyectos_conf_menu"
+        parent="project_portafolio_idu_dependencia_admin_menu"
         sequence="10"
         name="Solicitudes de Cambio" action="solicitud_cambio_action"
     />
@@ -924,7 +943,7 @@
                 </header>
                 <sheet>
                     <group>
-                        <field name="project_id" />
+                        <field name="project_id" readonly="1"/>
                         <field name="tipo_id" />
                         <field name="cantidad" />
                         <field name="edt_id" />

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+<data>
+    <record model="ir.ui.view" id="edt_wizard_reprogramar_tarea_form">
+        <field name="name">project.edt.wizard.reprogramar_tarea.form</field>
+        <field name="model">project.edt.wizard.reprogramar_tarea</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <field name="tipo_agendamiento" />
+                        <field name="task_id"/>
+                        <field name="fecha_inicio"
+                            attrs="{
+                               'readonly': [('tipo_agendamiento','=','fecha_inicio')],
+                            }"
+                        />
+                        <field name="duracion_dias"
+                            attrs="{
+                               'readonly': [('tipo_agendamiento','=','duracion_dias')],
+                            }"
+                        />
+                        <field name="fecha_fin"
+                            attrs="{
+                               'readonly': [('tipo_agendamiento','=','fecha_fin')],
+                            }"
+                        />
+                    </group>
+                    <footer>
+                        <button name="reprogramar" string="Reprogramar Tarea y Sucesoras" type="object" class="oe_highlight" /> o
+                        <button string="Cancelar" class="oe_link" special="cancel" />
+                    </footer>
+                </sheet>
+            </form>
+        </field>
+    </record>
+</data>
+</openerp>

@@ -56,8 +56,8 @@ class Task(object):
         predecesores = task.getPredecessors()
         if predecesores:
             for predecesor in predecesores:
-                predecesor_id = predecesor.getSourceTask().getGUID().toString()
-                predecesores_lista.append({'guid': predecesor_id, 'tipo': predecesor.getType().toString()})
+                predecesor_id = predecesor.getTargetTask().getGUID().toString()
+                predecesores_lista.append({'guid': predecesor_id, 'tipo': predecesor.getType().toString(), 'lag': predecesor.getLag().toString()})
         self.predecesor = predecesores_lista
         self.resources = []
         assignments = task.getResourceAssignments()

@@ -44,9 +44,9 @@
 '|','|','|','|',
 ('reporte_id.project_id.user_id','=',user.id),
 ('reporte_id.project_id.programador_id','=',user.id),
-('reporte_id.project_id.dependencia_id.proyecto_gerente_id','=',user.id),
-('reporte_id.project_id.dependencia_id.proyecto_programador_id','=',user.id),
-('reporte_id.project_id.dependencia_id.manager_id','=',user.id),
+('reporte_id.project_id.dependencia_id.proyecto_gerente_id.user_id','=',user.id),
+('reporte_id.project_id.dependencia_id.proyecto_programador_id.user_id','=',user.id),
+('reporte_id.project_id.dependencia_id.manager_id.user_id','=',user.id),
 ]</field>
         <field name="groups" eval="[(4, ref('project.group_project_user'))]"/>
         <field name="perm_read" eval="False"/>
@@ -61,9 +61,9 @@
 '|','|','|','|',
 ('reporte_id.project_id.user_id','=',user.id),
 ('reporte_id.project_id.programador_id','=',user.id),
-('reporte_id.project_id.dependencia_id.proyecto_gerente_id','=',user.id),
-('reporte_id.project_id.dependencia_id.proyecto_programador_id','=',user.id),
-('reporte_id.project_id.dependencia_id.manager_id','=',user.id),
+('reporte_id.project_id.dependencia_id.proyecto_gerente_id.user_id','=',user.id),
+('reporte_id.project_id.dependencia_id.proyecto_programador_id.user_id','=',user.id),
+('reporte_id.project_id.dependencia_id.manager_id.user_id','=',user.id),
 ]</field>
         <field name="groups" eval="[(4, ref('project.group_project_user'))]"/>
         <field name="perm_read" eval="False"/>
@@ -78,9 +78,9 @@
 '|','|','|','|',
 ('project_id.user_id','=',user.id),
 ('project_id.programador_id','=',user.id),
-('project_id.dependencia_id.proyecto_gerente_id','=',user.id),
-('project_id.dependencia_id.proyecto_programador_id','=',user.id),
-('project_id.dependencia_id.manager_id','=',user.id),
+('project_id.dependencia_id.proyecto_gerente_id.user_id','=',user.id),
+('project_id.dependencia_id.proyecto_programador_id.user_id','=',user.id),
+('project_id.dependencia_id.manager_id.user_id','=',user.id),
 ]</field>
         <field name="groups" eval="[(4, ref('project.group_project_user'))]"/>
         <field name="perm_read" eval="False"/>
@@ -95,9 +95,9 @@
 '|','|','|','|',
 ('project_id.user_id','=',user.id),
 ('project_id.programador_id','=',user.id),
-('project_id.dependencia_id.proyecto_gerente_id','=',user.id),
-('project_id.dependencia_id.proyecto_programador_id','=',user.id),
-('project_id.dependencia_id.manager_id','=',user.id),
+('project_id.dependencia_id.proyecto_gerente_id.user_id','=',user.id),
+('project_id.dependencia_id.proyecto_programador_id.user_id','=',user.id),
+('project_id.dependencia_id.manager_id.user_id','=',user.id),
 ]</field>
         <field name="groups" eval="[(4, ref('project.group_project_user'))]"/>
         <field name="perm_read" eval="False"/>
@@ -124,9 +124,9 @@
 '|','|','|','|',
 ('project_id.user_id','=',user.id),
 ('project_id.programador_id','=',user.id),
-('project_id.dependencia_id.proyecto_gerente_id','=',user.id),
-('project_id.dependencia_id.proyecto_programador_id','=',user.id),
-('project_id.dependencia_id.manager_id','=',user.id),
+('project_id.dependencia_id.proyecto_gerente_id.user_id','=',user.id),
+('project_id.dependencia_id.proyecto_programador_id.user_id','=',user.id),
+('project_id.dependencia_id.manager_id.user_id','=',user.id),
 ]</field>
         <field name="groups" eval="[(4, ref('project.group_project_user'))]"/>
         <field name="perm_read" eval="False"/>
@@ -141,9 +141,9 @@
 '|','|','|','|',
 ('project_id.user_id','=',user.id),
 ('project_id.programador_id','=',user.id),
-('project_id.dependencia_id.proyecto_gerente_id','=',user.id),
-('project_id.dependencia_id.proyecto_programador_id','=',user.id),
-('project_id.dependencia_id.manager_id','=',user.id),
+('project_id.dependencia_id.proyecto_gerente_id.user_id','=',user.id),
+('project_id.dependencia_id.proyecto_programador_id.user_id','=',user.id),
+('project_id.dependencia_id.manager_id.user_id','=',user.id),
 ]</field>
         <field name="groups" eval="[(4, ref('project.group_project_user'))]"/>
         <field name="perm_read" eval="False"/>
@@ -158,9 +158,9 @@
 '|','|','|','|',
 ('linea_base_id.project_id.user_id','=',user.id),
 ('linea_base_id.project_id.programador_id','=',user.id),
-('linea_base_id.project_id.dependencia_id.proyecto_gerente_id','=',user.id),
-('linea_base_id.project_id.dependencia_id.proyecto_programador_id','=',user.id),
-('linea_base_id.project_id.dependencia_id.manager_id','=',user.id),
+('linea_base_id.project_id.dependencia_id.proyecto_gerente_id.user_id','=',user.id),
+('linea_base_id.project_id.dependencia_id.proyecto_programador_id.user_id','=',user.id),
+('linea_base_id.project_id.dependencia_id.manager_id.user_id','=',user.id),
 ]</field>
         <field name="groups" eval="[(4, ref('project.group_project_user'))]"/>
         <field name="perm_read" eval="False"/>
@@ -175,9 +175,9 @@
 '|','|','|','|',
 ('linea_base_id.project_id.user_id','=',user.id),
 ('linea_base_id.project_id.programador_id','=',user.id),
-('linea_base_id.project_id.dependencia_id.proyecto_gerente_id','=',user.id),
-('linea_base_id.project_id.dependencia_id.proyecto_programador_id','=',user.id),
-('linea_base_id.project_id.dependencia_id.manager_id','=',user.id),
+('linea_base_id.project_id.dependencia_id.proyecto_gerente_id.user_id','=',user.id),
+('linea_base_id.project_id.dependencia_id.proyecto_programador_id.user_id','=',user.id),
+('linea_base_id.project_id.dependencia_id.manager_id.user_id','=',user.id),
 ]</field>
         <field name="groups" eval="[(4, ref('project.group_project_user'))]"/>
         <field name="perm_read" eval="False"/>
@@ -192,9 +192,9 @@
 '|','|','|','|',
 ('project_id.user_id','=',user.id),
 ('project_id.programador_id','=',user.id),
-('project_id.dependencia_id.proyecto_gerente_id','=',user.id),
-('project_id.dependencia_id.proyecto_programador_id','=',user.id),
-('project_id.dependencia_id.manager_id','=',user.id),
+('project_id.dependencia_id.proyecto_gerente_id.user_id','=',user.id),
+('project_id.dependencia_id.proyecto_programador_id.user_id','=',user.id),
+('project_id.dependencia_id.manager_id.user_id','=',user.id),
 ]</field>
         <field name="groups" eval="[(4, ref('project.group_project_user'))]"/>
         <field name="perm_read" eval="False"/>
@@ -209,9 +209,9 @@
 '|','|','|','|',
 ('project_id.user_id','=',user.id),
 ('project_id.programador_id','=',user.id),
-('project_id.dependencia_id.proyecto_gerente_id','=',user.id),
-('project_id.dependencia_id.proyecto_programador_id','=',user.id),
-('project_id.dependencia_id.manager_id','=',user.id),
+('project_id.dependencia_id.proyecto_gerente_id.user_id','=',user.id),
+('project_id.dependencia_id.proyecto_programador_id.user_id','=',user.id),
+('project_id.dependencia_id.manager_id.user_id','=',user.id),
 ]</field>
         <field name="groups" eval="[(4, ref('project.group_project_user'))]"/>
         <field name="perm_read" eval="False"/>
@@ -228,9 +228,9 @@
 ('project_id.programador_id','=',user.id),
 ('edt_id.user_id','=',user.id),
 ('edt_id.programador_id','=',user.id),
-('project_id.dependencia_id.proyecto_gerente_id','=',user.id),
-('project_id.dependencia_id.proyecto_programador_id','=',user.id),
-('project_id.dependencia_id.manager_id','=',user.id),
+('project_id.dependencia_id.proyecto_gerente_id.user_id','=',user.id),
+('project_id.dependencia_id.proyecto_programador_id.user_id','=',user.id),
+('project_id.dependencia_id.manager_id.user_id','=',user.id),
 ]</field>
         <field name="groups" eval="[(4, ref('project.group_project_user'))]"/>
         <field name="perm_read" eval="False"/>
@@ -249,9 +249,9 @@
 ('edt_id.user_id','=',user.id),
 ('edt_id.programador_id','=',user.id),
 ('revisor_id','=',user.id),
-('project_id.dependencia_id.proyecto_gerente_id','=',user.id),
-('project_id.dependencia_id.proyecto_programador_id','=',user.id),
-('project_id.dependencia_id.manager_id','=',user.id),
+('project_id.dependencia_id.proyecto_gerente_id.user_id','=',user.id),
+('project_id.dependencia_id.proyecto_programador_id.user_id','=',user.id),
+('project_id.dependencia_id.manager_id.user_id','=',user.id),
 ]</field>
         <field name="groups" eval="[(4, ref('project.group_project_user'))]"/>
         <field name="perm_read" eval="False"/>
@@ -268,9 +268,9 @@
 ('project_id.programador_id','=',user.id),
 ('edt_id.user_id','=',user.id),
 ('edt_id.programador_id','=',user.id),
-('project_id.dependencia_id.proyecto_gerente_id','=',user.id),
-('project_id.dependencia_id.proyecto_programador_id','=',user.id),
-('project_id.dependencia_id.manager_id','=',user.id),
+('project_id.dependencia_id.proyecto_gerente_id.user_id','=',user.id),
+('project_id.dependencia_id.proyecto_programador_id.user_id','=',user.id),
+('project_id.dependencia_id.manager_id.user_id','=',user.id),
 ]</field>
         <field name="groups" eval="[(4, ref('project.group_project_user'))]"/>
         <field name="perm_read" eval="False"/>
@@ -284,9 +284,9 @@
         <field name="domain_force">[
 '|','|','|',
 ('message_partner_ids', 'in', [user.partner_id.id]),
-('project_id.dependencia_id.proyecto_gerente_id','=',user.id),
-('project_id.dependencia_id.proyecto_programador_id','=',user.id),
-('project_id.dependencia_id.manager_id','=',user.id),
+('project_id.dependencia_id.proyecto_gerente_id.user_id','=',user.id),
+('project_id.dependencia_id.proyecto_programador_id.user_id','=',user.id),
+('project_id.dependencia_id.manager_id.user_id','=',user.id),
 ]</field>
         <field name="groups" eval="[(4, ref('project.group_project_user'))]"/>
         <field name="perm_read" eval="True"/>
@@ -301,9 +301,9 @@
 '|','|','|','|',
 ('project_id.user_id','=',user.id),
 ('project_id.programador_id','=',user.id),
-('project_id.dependencia_id.proyecto_gerente_id','=',user.id),
-('project_id.dependencia_id.proyecto_programador_id','=',user.id),
-('project_id.dependencia_id.manager_id','=',user.id),
+('project_id.dependencia_id.proyecto_gerente_id.user_id','=',user.id),
+('project_id.dependencia_id.proyecto_programador_id.user_id','=',user.id),
+('project_id.dependencia_id.manager_id.user_id','=',user.id),
 ]</field>
         <field name="groups" eval="[(4, ref('project.group_project_user'))]"/>
         <field name="perm_read" eval="False"/>
@@ -318,9 +318,9 @@
 '|','|','|','|',
 ('project_id.user_id','=',user.id),
 ('project_id.programador_id','=',user.id),
-('project_id.dependencia_id.proyecto_gerente_id','=',user.id),
-('project_id.dependencia_id.proyecto_programador_id','=',user.id),
-('project_id.dependencia_id.manager_id','=',user.id),
+('project_id.dependencia_id.proyecto_gerente_id.user_id','=',user.id),
+('project_id.dependencia_id.proyecto_programador_id.user_id','=',user.id),
+('project_id.dependencia_id.manager_id.user_id','=',user.id),
 ]</field>
         <field name="groups" eval="[(4, ref('project.group_project_user'))]"/>
         <field name="perm_read" eval="False"/>
@@ -1278,9 +1278,9 @@
         <field name="domain_force">[
 '|','|','|',
 ('message_partner_ids', 'in', [user.partner_id.id]),
-('dependencia_id.proyecto_gerente_id','=',user.id),
-('dependencia_id.proyecto_programador_id','=',user.id),
-('dependencia_id.manager_id','=',user.id),
+('dependencia_id.proyecto_gerente_id.user_id','=',user.id),
+('dependencia_id.proyecto_programador_id.user_id','=',user.id),
+('dependencia_id.manager_id.user_id','=',user.id),
 ]</field>
         <field name="groups" eval="[(4, ref('project_portafolio_idu.group_project_dependencia_admin'))]"/>
         <field name="perm_read" eval="True"/>
@@ -1293,9 +1293,9 @@
         <field name="model_id" ref="project_portafolio_idu.model_project_project"/>
         <field name="domain_force">[
 '|','|',
-('dependencia_id.proyecto_gerente_id','=',user.id),
-('dependencia_id.proyecto_programador_id','=',user.id),
-('dependencia_id.manager_id','=',user.id),
+('dependencia_id.proyecto_gerente_id.user_id','=',user.id),
+('dependencia_id.proyecto_programador_id.user_id','=',user.id),
+('dependencia_id.manager_id.user_id','=',user.id),
 ]</field>
         <field name="groups" eval="[(4, ref('project_portafolio_idu.group_project_dependencia_admin'))]"/>
         <field name="perm_read" eval="False"/>
@@ -1314,9 +1314,9 @@
 ('project_id.programador_id','=',user.id),
 ('parent_id.user_id','=',user.id),
 ('parent_id.programador_id','=',user.id),
-('project_id.dependencia_id.proyecto_gerente_id','=',user.id),
-('project_id.dependencia_id.proyecto_programador_id','=',user.id),
-('project_id.dependencia_id.manager_id','=',user.id),
+('project_id.dependencia_id.proyecto_gerente_id.user_id','=',user.id),
+('project_id.dependencia_id.proyecto_programador_id.user_id','=',user.id),
+('project_id.dependencia_id.manager_id.user_id','=',user.id),
 ]</field>
         <field name="groups" eval="[(4, ref('project_portafolio_idu.group_project_dependencia_admin'))]"/>
         <field name="perm_read" eval="False"/>
@@ -1335,9 +1335,9 @@
 ('project_id.programador_id','=',user.id),
 ('parent_id.user_id','=',user.id),
 ('parent_id.programador_id','=',user.id),
-('project_id.dependencia_id.proyecto_gerente_id','=',user.id),
-('project_id.dependencia_id.proyecto_programador_id','=',user.id),
-('project_id.dependencia_id.manager_id','=',user.id),
+('project_id.dependencia_id.proyecto_gerente_id.user_id','=',user.id),
+('project_id.dependencia_id.proyecto_programador_id.user_id','=',user.id),
+('project_id.dependencia_id.manager_id.user_id','=',user.id),
 ]</field>
         <field name="groups" eval="[(4, ref('project_portafolio_idu.group_project_dependencia_admin'))]"/>
         <field name="perm_read" eval="False"/>
@@ -1356,9 +1356,9 @@
 ('project_id.programador_id','=',user.id),
 ('parent_id.user_id','=',user.id),
 ('parent_id.programador_id','=',user.id),
-('project_id.dependencia_id.proyecto_gerente_id','=',user.id),
-('project_id.dependencia_id.proyecto_programador_id','=',user.id),
-('project_id.dependencia_id.manager_id','=',user.id),
+('project_id.dependencia_id.proyecto_gerente_id.user_id','=',user.id),
+('project_id.dependencia_id.proyecto_programador_id.user_id','=',user.id),
+('project_id.dependencia_id.manager_id.user_id','=',user.id),
 ]</field>
         <field name="groups" eval="[(4, ref('project_portafolio_idu.group_project_dependencia_admin'))]"/>
         <field name="perm_read" eval="False"/>

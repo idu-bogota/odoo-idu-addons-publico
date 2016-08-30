@@ -47,16 +47,41 @@ class project_portafolio_crear_linea_base(models.TransientModel):
 
     @api.multi
     def crear_linea_base(self):
-        project_model = self.env['project.project']
+        edt_model = self.env['project.edt']
+        task_model = self.env['project.task']
         for form in self:
+            if not form.project_id.usuario_actual_actua_como_gerente():
+                raise Warning('No tiene permisos para ejecutar esta acción')
+
+            edt_error_cnt = edt_model.search_count([
+                ('project_id','=',form.project_id.id),
+                '|',
+                    ('fecha_planeada_inicio','=',False),
+                    ('fecha_planeada_fin','=',False),
+            ])
+            task_error_cnt = task_model.search_count([
+                ('project_id','=',form.project_id.id),
+                '|',
+                    ('fecha_planeada_inicio','=',False),
+                    ('fecha_planeada_fin','=',False),
+            ])
+            if task_error_cnt or edt_error_cnt:
+                raise Warning(
+                    'No se puede crear una línea base ya que hay {} sin fechas planeadas asignadas'.format(
+                        (edt_error_cnt and '{} EDT'.format(edt_error_cnt)) or
+                        (task_error_cnt and  '{} Tarea(s)'.format(task_error_cnt))
+                    )
+                )
             form.project_id.crear_linea_base(form.name)
 
         return {'type': 'ir.actions.act_window_close'}
 
     @api.multi
     def crear_snapshot(self):
-        project_model = self.env['project.project']
         for form in self:
+            if not form.project_id.usuario_actual_actua_como_gerente():
+                raise Warning('No tiene permisos para ejecutar esta acción')
+
             form.project_id.crear_snapshot(form.name)
 
         return {'type': 'ir.actions.act_window_close'}

@@ -87,17 +87,26 @@ class Test_project_edt(common.TransactionCase):
     def test_calcular_duracion_dias(self):
         from openerp.addons.project_edt_idu.models.project import calcular_duracion_en_dias
         from openerp.addons.project_edt_idu.models.project import calcular_duracion_en_dias_fecha_estado
-        self.assertEqual(calcular_duracion_en_dias('2016-01-01', '2016-02-10'), 29)
-        self.assertEqual(calcular_duracion_en_dias('2016-01-01', '2016-01-09'), 6) # Sabado
-        self.assertEqual(calcular_duracion_en_dias('2016-01-01', '2016-01-10'), 6) # Domingo
-        self.assertEqual(calcular_duracion_en_dias('2016-01-01', '2016-01-08'), 6) # Viernes
-        self.assertEqual(calcular_duracion_en_dias('2016-01-01', '2016-01-11'), 7) # Lunes
-        self.assertEqual(calcular_duracion_en_dias('2016-01-01', '2016-01-12'), 8) # Martes
+        # Dias festivos intermedios
+        self.assertEqual(calcular_duracion_en_dias('2016-01-04', '2016-02-01'), 20)
+        self.assertEqual(calcular_duracion_en_dias('2016-01-04', '2016-01-15'), 9) # Viernes
+        self.assertEqual(calcular_duracion_en_dias('2016-01-04', '2016-01-16'), 10) # Sabado
+        self.assertEqual(calcular_duracion_en_dias('2016-01-04', '2016-01-17'), 10) # Domingo
+        self.assertEqual(calcular_duracion_en_dias('2016-01-04', '2016-01-18'), 10) # Lunes
+        self.assertEqual(calcular_duracion_en_dias('2016-01-04', '2016-01-19'), 11) # Martes
+        # Semana normal
+        self.assertEqual(calcular_duracion_en_dias('2016-01-25', '2016-01-28'), 4) # Jueves
+        self.assertEqual(calcular_duracion_en_dias('2016-01-25', '2016-01-29'), 5) # Viernes
+        self.assertEqual(calcular_duracion_en_dias('2016-01-25', '2016-01-30'), 6) # Sabado
+        self.assertEqual(calcular_duracion_en_dias('2016-01-25', '2016-01-31'), 6) # Domingo
+        self.assertEqual(calcular_duracion_en_dias('2016-01-25', '2016-02-01'), 6) # Lunes
 
-        self.assertEqual(calcular_duracion_en_dias_fecha_estado('2016-01-01', '2016-01-10'), 6) # Domingo
-        self.assertEqual(calcular_duracion_en_dias_fecha_estado('2016-01-01', '2016-01-08'), 5) # Viernes
-        self.assertEqual(calcular_duracion_en_dias_fecha_estado('2016-01-01', '2016-01-11'), 6) # Lunes
-        self.assertEqual(calcular_duracion_en_dias_fecha_estado('2016-01-01', '2016-01-12'), 7) # Martes
+        self.assertEqual(calcular_duracion_en_dias_fecha_estado('2016-01-04', '2016-01-15'), 8) # Viernes
+        self.assertEqual(calcular_duracion_en_dias_fecha_estado('2016-01-04', '2016-01-16'), 9) # Sabado
+        self.assertEqual(calcular_duracion_en_dias_fecha_estado('2016-01-04', '2016-01-17'), 9) # Domingo
+        self.assertEqual(calcular_duracion_en_dias_fecha_estado('2016-01-04', '2016-01-18'), 9) # Lunes
+        self.assertEqual(calcular_duracion_en_dias_fecha_estado('2016-01-04', '2016-01-11'), 5) # Lunes Festivo
+        self.assertEqual(calcular_duracion_en_dias_fecha_estado('2016-01-04', '2016-01-19'), 10) # Martes
 
     def test_generacion_numero(self):
         return # FIXME: Ajustar la prueba
@@ -284,6 +293,7 @@ class Test_project_edt(common.TransactionCase):
         })
         wizard.actualizar_fecha_estado()
 
+        self.assertEqual(task.costo_planeado_fecha, 210)
         self.assertEqual(edt_1.costo_planeado_fecha, 210)
         self.assertEqual(edt_1_4.costo_planeado_fecha, 210)
         self.assertEqual(edt_1_4_1.costo_planeado_fecha, 210)
@@ -291,7 +301,6 @@ class Test_project_edt(common.TransactionCase):
         self.assertEqual(edt_1_4_1_2.costo_planeado_fecha, 0)
         self.assertEqual(edt_1_4_1_3.costo_planeado_fecha, 0)
         self.assertEqual(edt_1_4_1_4.costo_planeado_fecha, 210)
-        self.assertEqual(task.costo_planeado_fecha, 210)
 
     def test_calculo_retraso(self):
         # Condiciones iniciales
@@ -386,18 +395,19 @@ class Test_project_edt(common.TransactionCase):
         self.assertEqual(edt_1_4_1_4.fecha_fin, '2016-11-11')
         self.assertEqual(edt_1_4_1_4.fecha_planeada_inicio, '2016-01-01')
         self.assertEqual(edt_1_4_1_4.fecha_planeada_fin, '2016-12-31')
-        self.assertEqual(edt_1_4_1_4.duracion_dias, 226)
-        self.assertEqual(edt_1_4_1_4.duracion_planeada_dias, 261)
-        self.assertEqual(task_1_4_1_4_t1.duracion_dias, 29)
-        self.assertEqual(task_1_4_1_4_t1.duracion_planeada_dias, 29)
-        self.assertEqual(task_1_4_1_4_t2.duracion_dias, 44)
-        self.assertEqual(task_1_4_1_4_t2.duracion_planeada_dias, 44)
-        self.assertEqual(task_1_4_1_4_t3.duracion_dias, 14)
-        self.assertEqual(task_1_4_1_4_t3.duracion_planeada_dias, 14)
-        self.assertEqual(task_1_4_1_4_t4.duracion_dias, 43)
-        self.assertEqual(task_1_4_1_4_t4.duracion_planeada_dias, 43)
-        self.assertEqual(task_1_4_1_4_t5.duracion_dias, 205)
-        self.assertEqual(task_1_4_1_4_t5.duracion_planeada_dias, 205)
+        self.assertEqual(edt_1_4_1_4.duracion_dias, 214)
+        self.assertEqual(edt_1_4_1_4.duracion_planeada_dias, 248)
+
+        self.assertEqual(task_1_4_1_4_t1.duracion_dias, 28)
+        self.assertEqual(task_1_4_1_4_t1.duracion_planeada_dias, 28)
+        self.assertEqual(task_1_4_1_4_t2.duracion_dias, 42)
+        self.assertEqual(task_1_4_1_4_t2.duracion_planeada_dias, 42)
+        self.assertEqual(task_1_4_1_4_t3.duracion_dias, 11)
+        self.assertEqual(task_1_4_1_4_t3.duracion_planeada_dias, 11)
+        self.assertEqual(task_1_4_1_4_t4.duracion_dias, 42)
+        self.assertEqual(task_1_4_1_4_t4.duracion_planeada_dias, 42)
+        self.assertEqual(task_1_4_1_4_t5.duracion_dias, 194)
+        self.assertEqual(task_1_4_1_4_t5.duracion_planeada_dias, 194)
 
         task_1_4_1_4_t4.fecha_fin = '2017-02-01'
         self.assertEqual(edt_1_4_1_4.fecha_inicio, '2016-01-01')

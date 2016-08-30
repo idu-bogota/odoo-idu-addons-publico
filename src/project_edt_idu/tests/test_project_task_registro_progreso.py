@@ -126,15 +126,6 @@ class Test_project_task_registro_progreso(common.TransactionCase):
         self.assertEqual(task.progreso, 90)
         self.assertEqual(len(task.registro_progreso_ids), 4)
 
-        # Probar que tarea terminada no se puede colocar mas progresos
-        task.terminado = True
-        try:
-            task.progreso = 98
-        except ValidationError, e:
-            pass
-        else:
-            self.fail('No se generó exception de validación para "porcentaje"')
-
 
 if __name__ == '__main__':
     unittest2.main()

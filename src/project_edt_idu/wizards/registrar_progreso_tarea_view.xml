@@ -32,8 +32,27 @@
                                 'invisible': [('project_reportar_cantidad','=',False)],
                             }"
                         />
+                        <field name="fecha_inicio" invisible="1"/>
+                        <field name="fecha_fin" invisible="1"/>
                         <field name="company_id" invisible="1" />
                         <field name="currency_id" invisible="1" />
+                        <field name="task_requiere_adjunto"/>
+                        <field name="terminado" />
+                        <field name="adjunto_nombre" invisible="1" />
+                        <field widget="binary" height="64" name="adjunto"
+                            filename="adjunto_nombre"
+                            attrs="{
+                               'invisible':['|',('task_requiere_adjunto','=',False),('terminado','=',False)],
+                               'required':[('task_requiere_adjunto','=',True),('terminado','=',True)],
+                            }"
+                        />
+                    </group>
+                    <group string="Registrar Novedad">
+                        <p colspan="4">
+                            Si desea registrar alguna novedad que ha impedido o conoce de antemando que afecta el avance en la ejecución de la tarea,
+                            por favor indique el nivel de alerta y la novedad que desea comunicar
+                        </p>
+                        <separator colspan="4" />
                         <field name="nivel_alerta" />
                         <field name="novedad"
                             attrs="{

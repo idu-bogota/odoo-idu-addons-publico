@@ -127,8 +127,16 @@ class project_edt_wizard_importar_mpp(models.TransientModel):
         jython, mpp2csv_path, temp_folder = self._settings()
 
         for form in self:
-            archivo_csv = self.mpp2csv(form, jython, mpp2csv_path, temp_folder)
-            _logger.info('Creado archivo {0}'.format(archivo_csv))
+            if form.archivo_nombre.lower().endswith('.csv'): # Si es CSV importar directamente
+                archivo_csv = '{0}{1}-{2}-{3}'.format(temp_folder, fields.datetime.now(), form.id, form.archivo_nombre) # Se supone que es un archivo válido generado por el comando mpp2csv
+                archivo = base64.decodestring(form.archivo)
+                binario = open(archivo_csv, 'wb')
+                binario.write(archivo)
+                binario.close()
+                _logger.info('Importando directamente archivo CSV: {0}'.format(archivo_csv))
+            else:
+                archivo_csv = self.mpp2csv(form, jython, mpp2csv_path, temp_folder)
+                _logger.info('Creado archivo {0}'.format(archivo_csv))
             with open(archivo_csv, 'rb') as f:
                 recursos = self.get_recursos_asignados(form, csv.DictReader(f))
                 f.seek(0)
@@ -146,7 +154,7 @@ class project_edt_wizard_importar_mpp(models.TransientModel):
                     if form.programador_id and not vals.get('programador_id', False):
                         vals['programador_id'] = form.programador_id.id
                     edt = edt_model.with_context(ctx).create(vals)
-                    indice_objetos[vals['ms_project_guid']] = edt.id
+                    indice_objetos[vals['ms_project_guid']] = ('e', edt.id, edt)
                     if not form.project_id.edt_raiz_id:
                         form.project_id.edt_raiz_id = edt.id
                 _logger.info('{} líneas de EDT creadas'.format(len(indice_objetos)))
@@ -163,20 +171,18 @@ class project_edt_wizard_importar_mpp(models.TransientModel):
                         vals['user_id'] = form.user_id.id
                     if form.revisor_id and not vals.get('revisor_id', False):
                         vals['revisor_id'] = form.revisor_id.id
-                    if vals.get('progreso') == 100:
-                        vals['terminado'] = True
                     if vals.get('raw_edt_id'):
-                        vals['edt_id'] = indice_objetos.get(vals['raw_edt_id'])
+                        vals['edt_id'] = indice_objetos.get(vals['raw_edt_id'])[1]
                         del vals['raw_edt_id']
                     # task = task_model.with_context(ctx).create(vals)
                     params['cnt'] += 1
                     task_id = self.insert_task(vals, form, params)
-                    indice_objetos[vals['ms_project_guid']] = task_id
+                    indice_objetos[vals['ms_project_guid']] = ('t', task_id)
                 _logger.info('{} Tareas creadas'.format(params['cnt']))
                 f.seek(0)
                 self.asociar_edts(form, csv.DictReader(f), datos_edt, indice_objetos)
                 f.seek(0)
-                self.asociar_tareas(form, csv.DictReader(f), datos_tareas, indice_objetos)
+                self.crear_dependencias(form, csv.DictReader(f), indice_objetos)
 
         return {'type': 'ir.actions.act_window_close'}
 
@@ -192,58 +198,63 @@ class project_edt_wizard_importar_mpp(models.TransientModel):
             "kanban_state", "numero", "costo_planeado",
             "fecha_planeada_inicio", "active", "name",
             "stage_id", "progreso_metodo", "ms_project_guid",
-            "fecha_fin", "costo", "terminado",
+            "fecha_fin", "costo", "date_end",
             "revisor_id", "create_uid", "write_uid",
-            "create_date", "write_date"
+            "create_date", "write_date",
+            "duracion_dias","duracion_dias_manual"
         )
         VALUES(
             nextval('project_task_id_seq'), %s, (now() at time zone 'UTC'), --"id", "sequence", "date_last_stage_update",
             %s, NULL, %s, -- "progreso_aprobado", "partner_id", "user_id",
-            %s, %s, NULL, -- "progreso", "fecha_planeada_fin", "date_start",
+            %s, %s, %s, -- "progreso", "fecha_planeada_fin", "date_start",
             %s, '0', %s, -- "company_id", "priority", "fecha_inicio",
             %s, %s, (now() at time zone 'UTC'), -- "edt_id", "project_id", "date_assign",
             'normal', %s, %s, -- "kanban_state", "numero", "costo_planeado",
             %s, true, %s, -- "fecha_planeada_inicio", "active", "name",
             %s, 'manual', %s, -- "stage_id", "progreso_metodo", "ms_project_guid",
-            %s, %s, %s, -- "fecha_fin", "costo", "terminado",
+            %s, %s, %s, -- "fecha_fin", "costo", "date_end",
             %s, %s, %s, -- "revisor_id", "create_uid", "write_uid",
-            (now() at time zone 'UTC'), (now() at time zone 'UTC') -- "create_date", "write_date"
+            (now() at time zone 'UTC'), (now() at time zone 'UTC'), -- "create_date", "write_date"
+            %s, %s -- "duracion_dias", "duracion_dias_manual"
         ) RETURNING id"""
         self.env.cr.execute(sql_task, (
             params['cnt'],
             0.0, vals.get('user_id'),
-            vals.get('progreso', 0), vals.get('fecha_planeada_fin'),
+            vals.get('progreso', 0), vals.get('fecha_planeada_fin'), vals.get('date_start'),
             params['company_id'], vals.get('fecha_inicio'),
             vals.get('edt_id'), form.project_id.id,
             vals.get('numero'), vals.get('costo_planeado', 0),
             vals.get('fecha_planeada_inicio'), vals.get('name')[:127],
             params['stage_id'], vals.get('ms_project_guid'),
-            vals.get('fecha_fin'), vals.get('costo', 0), vals.get('terminado', False),
+            vals.get('fecha_fin'), vals.get('costo', 0), vals.get('date_end'),
             vals.get('revisor_id'), self.env.uid, self.env.uid,
+            vals.get('duracion_dias'), vals.get('duracion_dias'),
         ))
         task_id = self.env.cr.fetchone()[0]
 
-        sql_progreso = """INSERT INTO "project_task_registro_progreso"(
-            "id", "nivel_alerta", "task_id",
-            "name", "cantidad", "fecha",
-            "company_id", "costo", "porcentaje",
-            "active", "create_uid", "write_uid",
-            "create_date", "write_date"
-        )
-        VALUES(
-            nextval('project_task_registro_progreso_id_seq'), 'ninguno', %s, -- "id", "nivel_alerta", "task_id",
-            %s, %s, %s, -- "name", "cantidad", "fecha",
-            %s, %s, %s, -- "company_id", "costo", "porcentaje",
-            true, %s, %s, -- "active", "create_uid", "write_uid",
-            (now() at time zone 'UTC'), (now() at time zone 'UTC') -- "create_date", "write_date"
-        ) RETURNING id"""
+        if vals.get('cantidad') or vals.get('costo') or vals.get('progreso'):
+            sql_progreso = """INSERT INTO "project_task_registro_progreso"(
+                "id", "nivel_alerta", "task_id",
+                "name", "cantidad", "fecha",
+                "company_id", "costo", "porcentaje",
+                "active", "create_uid", "write_uid",
+                "create_date", "write_date"
+            )
+            VALUES(
+                nextval('project_task_registro_progreso_id_seq'), 'ninguno', %s, -- "id", "nivel_alerta", "task_id",
+                %s, %s, %s, -- "name", "cantidad", "fecha",
+                %s, %s, %s, -- "company_id", "costo", "porcentaje",
+                true, %s, %s, -- "active", "create_uid", "write_uid",
+                (now() at time zone 'UTC'), (now() at time zone 'UTC') -- "create_date", "write_date"
+            ) RETURNING id"""
 
-        self.env.cr.execute(sql_progreso, (
-            task_id,
-            params['nombre_progreso'], vals.get('cantidad',0), params['fecha_corte'],
-            params['company_id'], vals.get('costo', 0), vals.get('progreso', 0),
-            self.env.uid, self.env.uid,
-        ))
+            self.env.cr.execute(sql_progreso, (
+                task_id,
+                params['nombre_progreso'], vals.get('cantidad',0), params['fecha_corte'],
+                params['company_id'], vals.get('costo', 0), vals.get('progreso', 0),
+                self.env.uid, self.env.uid,
+            ))
+
         return task_id
 
 
@@ -276,6 +287,7 @@ class project_edt_wizard_importar_mpp(models.TransientModel):
                 '-f', archivo_mpp,
                 '-o', archivo_csv,
             ]
+            _logger.info("command to run '{}' ".format(' '.join(command)))
             subprocess.check_output(
                 command,
                 stderr=subprocess.STDOUT,
@@ -298,9 +310,9 @@ class project_edt_wizard_importar_mpp(models.TransientModel):
             for r in recursos:
                 email = r.get('email', False)
                 if email and not email in res:
-                    user = users_model.search(['|',('email','=',email),('login','=',email)])
+                    user = users_model.search(['|',('email','=',email),('login','=',email)], order='id DESC')
                     if user:
-                        res[email] = user.id
+                        res[email] = user[0].id # Si hay varios ie un pxxx y otro cxxxx toma el usuario más reciente basado en el ID
                     else:
                         e = Warning('No se encontró el usuario "{0}" para ser asignado a la tarea No "{1}"'.format(
                             email, row['outline_number']
@@ -316,6 +328,7 @@ class project_edt_wizard_importar_mpp(models.TransientModel):
         time_zone = pytz.timezone(time_zone)
         utc = pytz.utc
         fmt_in = '%Y-%m-%d %H:%M:%S'
+        fmt_out_time = '%Y-%m-%d %H:%M:%S'
         fmt_out = '%Y-%m-%d'
         incluir_leaves = False
         if form.metodo == 'hojas_son_paquetes_trabajo':
@@ -343,13 +356,15 @@ class project_edt_wizard_importar_mpp(models.TransientModel):
                 fecha = time_zone.localize(fecha)
                 data['fecha_planeada_fin'] = fecha.astimezone(utc).strftime(fmt_out)
             if row['actual_date_start']:
-                fecha = datetime.strptime(row['date_start'], fmt_in)
+                fecha = datetime.strptime(row['actual_date_start'], fmt_in)
                 fecha = time_zone.localize(fecha)
                 data['fecha_inicio'] = fecha.astimezone(utc).strftime(fmt_out)
+                data['date_start'] = fecha.astimezone(utc).strftime(fmt_out_time)
             if row['actual_date_end']:
-                fecha = datetime.strptime(row['date_end'], fmt_in)
+                fecha = datetime.strptime(row['actual_date_end'], fmt_in)
                 fecha = time_zone.localize(fecha)
                 data['fecha_fin'] = fecha.astimezone(utc).strftime(fmt_out)
+                data['date_end'] = fecha.astimezone(utc).strftime(fmt_out_time)
             else:
                 data['fecha_fin'] = data['fecha_planeada_fin']
 
@@ -399,15 +414,20 @@ class project_edt_wizard_importar_mpp(models.TransientModel):
                 fecha = time_zone.localize(fecha)
                 data['fecha_planeada_fin'] = fecha.astimezone(utc).strftime(fmt_out)
             if row['actual_date_start']:
-                fecha = datetime.strptime(row['date_start'], fmt_in)
+                fecha = datetime.strptime(row['actual_date_start'], fmt_in)
                 fecha = time_zone.localize(fecha)
                 data['fecha_inicio'] = fecha.astimezone(utc).strftime(fmt_out)
             if row['actual_date_end']:
-                fecha = datetime.strptime(row['date_end'], fmt_in)
+                fecha = datetime.strptime(row['actual_date_end'], fmt_in)
                 fecha = time_zone.localize(fecha)
                 data['fecha_fin'] = fecha.astimezone(utc).strftime(fmt_out)
             else:
                 data['fecha_fin'] = data['fecha_planeada_fin']
+
+            if row['actual_date_end']:
+                data['duracion_dias'] = int(float(row.get('actual_duration','0').split('.')[0])) # Valor viene de esta forma: '33.0d' y lo dejamos 33
+            else: # Si no hay actual date end se toma la duración planeada, porque de otra forma viene con valor 0 el actual_duration.
+                data['duracion_dias'] = int(float(row.get('duration','0').split('.')[0])) # Valor viene de esta forma: '33.0d' y lo dejamos 33
 
             if form.asignar_recursos_mpp:
                 recursos = json.loads(row['resources'])
@@ -422,7 +442,7 @@ class project_edt_wizard_importar_mpp(models.TransientModel):
 
 
     def asociar_edts(self, form, archivo_csv, datos_edt, indice_objetos):
-        """Crear las relaciones de dependencia y agregación entre edts"""
+        """Crear las relaciones de agregación entre edts"""
         edt_model = self.env['project.edt']
         incluir_leaves = False
         if form.metodo == 'hojas_son_paquetes_trabajo':
@@ -433,8 +453,8 @@ class project_edt_wizard_importar_mpp(models.TransientModel):
             if not incluir_leaves and row['is_leaf'] == 'True':
                 continue
 
-            edt_id = indice_objetos.get(row['guid'])
-            edt_padre_id = indice_objetos.get(row['parent_id'])
+            edt_id = indice_objetos.get(row['guid'])[1]
+            edt_padre_id = indice_objetos.get(row['parent_id'], (None, None))[1]
             if edt_padre_id:
                 if not edt_padre_id in by_parent:
                     by_parent[edt_padre_id] = []
@@ -446,29 +466,32 @@ class project_edt_wizard_importar_mpp(models.TransientModel):
         # Dependencia
 
 
-
-    def asociar_tareas(self, form, archivo_csv, datos_tareas, indice_objetos):
-        """Crear las relaciones de dependencia y agregación entre tareas"""
-        if form.metodo == 'hojas_son_paquetes_trabajo':
-            return # No hay que crear tasks
-
-        task_model = self.env['project.task']
-
-        # Padre - Hijo
-        #by_parent = {}
-        #for row in archivo_csv:
-            #if row['is_leaf'] == 'False': # Solo las hojas crean tasks
-                #continue
-
-            #task_id = indice_objetos.get(row['guid'])
-            #edt_padre_id = indice_objetos.get(row['parent_id'])
-            #if edt_padre_id:
-                #if not edt_padre_id in by_parent:
-                    #by_parent[edt_padre_id] = []
-                #by_parent[edt_padre_id].append(task_id)
-            #else:
-                #_logger.warning('No se encontró EDT padre {} para tarea {}'.format(row['parent_id'], row['guid']))
-        #ctx = {'carga_masiva': True, 'mail_notrack': True, 'mail_create_nosubscribe': True, 'tracking_disable': True}
-        #for parent_id, children_ids in by_parent.iteritems():
-            #task_model.browse(children_ids).with_context(ctx).write({'edt_id': parent_id})
-
+    def crear_dependencias(self, form, archivo_csv, indice_objetos):
+        """Crear las relaciones de dependencia y agregación para tareas y EDTs"""
+        predecesor_model = self.env['project.predecesor']
+        edt_error_msg = '''Como buena práctica no deben crearse relaciones de dependencia con paquetes de trabajo,
+                           por favor cree relaciones de dependencia solo entre tareas. Debe modificar el archivo en la EDT
+                           {} {} y modificar la relación {}'''
+        for row in archivo_csv:
+            if row['predecesor'] != "[]": # Hay predecesores
+                row_model = indice_objetos[row['guid']][0]
+                row_id = indice_objetos[row['guid']][1]
+                predecesores = json.loads(row['predecesor'])
+                for p in predecesores:
+                    # p = [{"guid": "5ab07020-0b7d-4f22-b0bf-191a77bf00e9", "tipo": "FS"}]
+                    record = indice_objetos[p['guid']]
+                    vals = {
+                        'origen_res_model': record[0],
+                        'origen_res_id': record[1],
+                        'destino_res_model': row_model,
+                        'destino_res_id': row_id,
+                        'tipo': p['tipo'],
+                        'lag': p['lag'],
+                    }
+                    if vals['origen_res_model'] == 'e':
+                        edt = record[2]
+                        raise Warning(edt_error_msg.format(edt.numero, edt.name, 'sucesora'))
+                    if  vals['destino_res_model'] == 'e':
+                        edt = indice_objetos[row['guid']][2]
+                        raise Warning(edt_error_msg.format(edt.numero, edt.name, 'predecesora'))
+                    predecesor_model.create(vals)
