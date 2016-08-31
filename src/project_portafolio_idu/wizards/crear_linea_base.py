@@ -44,6 +44,11 @@ class project_portafolio_crear_linea_base(models.TransientModel):
         ondelete='restrict',
         default=lambda self: self._context.get('project_id', False),
     )
+    programacion_actual_es_linea_base = fields.Boolean(
+        string='Toma fechas actuales programadas y sobre escribe las planeadas',
+        help="Indica si las fechas programadas deben pasar a ser linea base, de lo contrario toma las fechas planeadas actuales",
+        default=True,
+    )
 
     @api.multi
     def crear_linea_base(self):
@@ -53,6 +58,8 @@ class project_portafolio_crear_linea_base(models.TransientModel):
             if not form.project_id.usuario_actual_actua_como_gerente():
                 raise Warning('No tiene permisos para ejecutar esta acción')
 
+            if form.programacion_actual_es_linea_base:
+                form.project_id.aplicar_fechas_a_fechas_planeadas()
             edt_error_cnt = edt_model.search_count([
                 ('project_id','=',form.project_id.id),
                 '|',

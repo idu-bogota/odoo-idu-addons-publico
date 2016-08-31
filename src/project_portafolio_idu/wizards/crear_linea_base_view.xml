@@ -14,6 +14,7 @@
                     <group>
                         <field name="name"/>
                         <field name="project_id"/>
+                        <field name="programacion_actual_es_linea_base"/>
                     </group>
                     <footer>
                         <button name="crear_linea_base" string="Crear Línea Base" type="object" class="oe_highlight" /> o

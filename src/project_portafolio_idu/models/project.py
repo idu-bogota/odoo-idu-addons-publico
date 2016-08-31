@@ -686,6 +686,7 @@ class project_project(models.Model):
         required=False,
         comodel_name='project.linea_base',
         ondelete='restrict',
+        track_visibility='onchange',
     )
     linea_base_ids = fields.One2many(
         string='Líneas Base',
@@ -779,6 +780,24 @@ class project_project(models.Model):
         linea_base = linea_base_model.create(vals)
         linea_base.linea_raiz_id = self.edt_raiz_id.crear_snapshot_linea(linea_base.id).id
         return linea_base
+
+    @api.multi
+    def aplicar_fechas_a_fechas_planeadas(self):
+        self.ensure_one()
+        edt_model = self.env['project.edt']
+        if self.edt_raiz_id:
+            # Asigna recursivamente de hojas a raiz las fechas para que los cálculos
+            # se hagan de manera correcta, ya que los valores dependen de valores
+            # en los elementos hijos
+            for obj in edt_model._recorrer_arbol_postorder(self.edt_raiz_id, []):
+                if obj._name == 'project.task':
+                    for t in obj:
+                        t.with_context(tracking_disable=True).write({
+                            'fecha_planeada_inicio': t.fecha_inicio,
+                            'fecha_planeada_fin': t.fecha_fin,
+                        })
+                elif obj._name == 'project.edt':
+                    obj._compute_fechas_planeadas()
 
     def name_get(self, cr, uid, ids, context=None):
         """ Retorna el nombre del padre si se indica en el contexto display_parent_name

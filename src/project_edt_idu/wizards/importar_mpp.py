@@ -201,7 +201,7 @@ class project_edt_wizard_importar_mpp(models.TransientModel):
             "fecha_fin", "costo", "date_end",
             "revisor_id", "create_uid", "write_uid",
             "create_date", "write_date",
-            "duracion_dias","duracion_dias_manual"
+            "duracion_dias","duracion_dias_manual","duracion_planeada_dias"
         )
         VALUES(
             nextval('project_task_id_seq'), %s, (now() at time zone 'UTC'), --"id", "sequence", "date_last_stage_update",
@@ -215,7 +215,7 @@ class project_edt_wizard_importar_mpp(models.TransientModel):
             %s, %s, %s, -- "fecha_fin", "costo", "date_end",
             %s, %s, %s, -- "revisor_id", "create_uid", "write_uid",
             (now() at time zone 'UTC'), (now() at time zone 'UTC'), -- "create_date", "write_date"
-            %s, %s -- "duracion_dias", "duracion_dias_manual"
+            %s, %s, %s -- "duracion_dias", "duracion_dias_manual", "duracion_planeada_dias"
         ) RETURNING id"""
         self.env.cr.execute(sql_task, (
             params['cnt'],
@@ -228,7 +228,7 @@ class project_edt_wizard_importar_mpp(models.TransientModel):
             params['stage_id'], vals.get('ms_project_guid'),
             vals.get('fecha_fin'), vals.get('costo', 0), vals.get('date_end'),
             vals.get('revisor_id'), self.env.uid, self.env.uid,
-            vals.get('duracion_dias'), vals.get('duracion_dias'),
+            vals.get('duracion_dias'), vals.get('duracion_dias'), vals.get('duracion_dias'),
         ))
         task_id = self.env.cr.fetchone()[0]
 

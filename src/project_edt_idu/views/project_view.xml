@@ -282,20 +282,11 @@
         <field name="model">project.task</field>
         <field name="inherit_id" ref="project.view_task_search_form" />
         <field name="arch" type="xml">
-            <field name="project_id" position="after">
-                <field name="edt_id" />
-                <field name="progreso_metodo" />
-                <filter name="filtro_progreso_metodo_manual"
-                    string="manual"
-                    help="Filtrar Forma de cálculo del progreso manual"
-                    domain="[('progreso_metodo', '=', 'manual')]"
-                />
-                <filter name="filtro_progreso_metodo_pendientes"
-                    string="pendientes"
-                    help="Filtrar Forma de cálculo del progreso pendientes"
-                    domain="[('progreso_metodo', '=', 'pendientes')]"
-                />
+            <field name="name" position="before">
                 <field name="numero" />
+            </field>
+            <field name="name" position="after">
+                <field name="edt_id" />
                 <filter name="filtro_terminado"
                     string="Terminado"
                     help="Tareas Terminadas"
@@ -451,6 +442,12 @@
         <field name="model">project.task</field>
         <field name="inherit_id" ref="project.view_task_tree2" />
         <field name="arch" type="xml">
+            <xpath expr="//tree" position="attributes">
+                <attribute name="decoration-warning">retraso &gt; 5 and retraso &lt; 50</attribute>
+                <attribute name="decoration-danger">retraso >= 50</attribute>
+                <attribute name="decoration-bf">retraso &gt; 33</attribute>
+                <attribute name="decoration-muted">progreso == 100</attribute>
+            </xpath>
             <field name="name" position="after">
                 <field name="fecha_planeada_inicio" string="Inicio Planeado" />
                 <field name="fecha_planeada_fin" string="Fin Planeado" />

@@ -22,6 +22,7 @@
 ##############################################################################
 
 from openerp import models, fields, api
+from openerp.osv import fields as fields_v7
 from openerp.exceptions import ValidationError
 from datetime import datetime, timedelta, date
 from workalendar.america import Colombia
@@ -390,7 +391,7 @@ class project_edt(models.Model):
         if(self.fecha_planeada_inicio and self.fecha_planeada_fin and
            self.fecha_planeada_inicio > self.fecha_planeada_fin
             ):
-            raise ValidationError("Fecha de inicio no puede ser posterior a la de finalización")
+            raise ValidationError("Fecha de inicio no puede ser posterior a la de finalización {} {}".format(self.numero, self.name))
 
     @api.one
     @api.constrains('fecha_inicio')
@@ -407,7 +408,7 @@ class project_edt(models.Model):
         if(self.fecha_inicio and self.fecha_fin and
            self.fecha_inicio > self.fecha_fin
             ):
-            raise ValidationError("Fecha de inicio no puede ser posterior a la de finalización")
+            raise ValidationError("Fecha de inicio no puede ser posterior a la de finalización {} {}".format(self.numero, self.name))
 
     @api.onchange('fecha_planeada_inicio')
     def _onchange_fecha_planeada_inicio(self):
@@ -522,62 +523,95 @@ class project_edt(models.Model):
         # print '_compute_duracion_planeada', self._name, self.id, self.numero
         self.duracion_planeada_dias = calcular_duracion_en_dias(self.fecha_planeada_inicio, self.fecha_planeada_fin)
 
+    def compute_duracion_planeada(self):
+        # print '_compute_duracion_planeada', self._name, self.id, self.numero
+        self.duracion_planeada_dias = calcular_duracion_en_dias(self.fecha_planeada_inicio, self.fecha_planeada_fin)
+
     @api.one
     @api.depends('fecha_inicio', 'fecha_fin')
     def _compute_duracion_dias(self):
         # print '_compute_duracion_dias', self._name, self.id, self.numero
         self.duracion_dias = calcular_duracion_en_dias(self.fecha_inicio, self.fecha_fin)
 
+    def _compute_fechas_helper(self, planeadas):
+        (edt_inicio, edt_fin) = self._obtener_rango_fecha_edt(planeadas)
+        (task_start, task_end) = self._obtener_rango_fecha_tareas(planeadas)
+        if not edt_inicio and not edt_fin and not task_start and not task_end:
+            return
+        fecha_inicio = False
+        fecha_fin = False
+        duracion_dias = 0
+
+        if task_start and task_end and not edt_inicio and not edt_fin:
+            fecha_inicio = fields.Date.to_string(task_start)
+            fecha_fin = fields.Date.to_string(task_end)
+        elif edt_inicio and edt_fin and not task_start and not task_end:
+            if task_start or edt_inicio:
+                fecha_inicio = fields.Date.to_string(edt_inicio)
+            if task_end or edt_fin:
+                fecha_fin = fields.Date.to_string(edt_fin)
+        else:
+            if task_start < edt_inicio:
+                fecha_inicio = fields.Date.to_string(task_start)
+            else:
+                fecha_inicio = fields.Date.to_string(edt_inicio)
+            if task_end > edt_fin:
+                fecha_fin = fields.Date.to_string(task_end)
+            else:
+                fecha_fin = fields.Date.to_string(edt_fin)
+
+        if fecha_inicio and fecha_fin:
+            duracion_dias = calcular_duracion_en_dias(fecha_inicio, fecha_fin)
+        return fecha_inicio, fecha_fin, duracion_dias
+
     @api.one
     def _compute_fechas(self):
         # print '_compute_fechas', self._name, self.id, self.numero
         # print 'Calculando {} {} {} {}'.format(self.numero, self.fecha_inicio, self.fecha_fin, self.id)
+        fecha_inicio, fecha_fin, duracion_dias = self._compute_fechas_helper(False)
         vals = {
-            'fecha_inicio': False,
-            'fecha_fin': False,
-            'duracion_dias': 0,
+            'fecha_inicio': fecha_inicio,
+            'fecha_fin': fecha_fin,
+            'duracion_dias': duracion_dias,
         }
-        (edt_inicio, edt_fin) = self._obtener_rango_fecha_edt()
-        (task_start, task_end) = self._obtener_rango_fecha_tareas()
-        if not edt_inicio and not edt_fin and not task_start and not task_end:
-            return
-        if task_start and task_end and not edt_inicio and not edt_fin:
-            vals['fecha_inicio'] = fields.Date.to_string(task_start)
-            vals['fecha_fin'] = fields.Date.to_string(task_end)
-        elif edt_inicio and edt_fin and not task_start and not task_end:
-            if task_start or edt_inicio:
-                vals['fecha_inicio'] = fields.Date.to_string(edt_inicio)
-            if task_end or edt_fin:
-                vals['fecha_fin'] = fields.Date.to_string(edt_fin)
-        else:
-            if task_start < edt_inicio:
-                vals['fecha_inicio'] = fields.Date.to_string(task_start)
-            else:
-                vals['fecha_inicio'] = fields.Date.to_string(edt_inicio)
-            if task_end > edt_fin:
-                vals['fecha_fin'] = fields.Date.to_string(task_end)
-            else:
-                vals['fecha_fin'] = fields.Date.to_string(edt_fin)
-
-        if vals['fecha_inicio'] and vals['fecha_fin']:
-            vals['duracion_dias'] = calcular_duracion_en_dias(vals['fecha_inicio'], vals['fecha_fin'])
         self.write(vals)
 
-    def _obtener_rango_fecha_tareas(self):
+    @api.one
+    def _compute_fechas_planeadas(self):
+        fecha_inicio, fecha_fin, duracion_dias = self._compute_fechas_helper(True)
+        vals = {
+            'fecha_planeada_inicio': fecha_inicio,
+            'fecha_planeada_fin': fecha_fin,
+            'duracion_planeada_dias': duracion_dias,
+        }
+        self.write(vals)
+
+    def _obtener_rango_fecha_tareas(self, planeadas=False):
         if isinstance(self.id, models.NewId):
             return False, False
         self.ensure_one()
         fecha_inicio = False
         fecha_fin = False
-        self.env.cr.execute("""
-            SELECT
-                MIN(fecha_inicio), MAX(fecha_fin)
-            FROM
-                project_task
-            WHERE
-                edt_id = %s
-            """, (self.id, )
-        )
+        if planeadas:
+            self.env.cr.execute("""
+                SELECT
+                    MIN(fecha_planeada_inicio), MAX(fecha_planeada_fin)
+                FROM
+                    project_task
+                WHERE
+                    edt_id = %s
+                """, (self.id, )
+            )
+        else:
+            self.env.cr.execute("""
+                SELECT
+                    MIN(fecha_inicio), MAX(fecha_fin)
+                FROM
+                    project_task
+                WHERE
+                    edt_id = %s
+                """, (self.id, )
+            )
         result = self.env.cr.fetchall()
         if len(result):
             if result[0][0]:
@@ -586,21 +620,32 @@ class project_edt(models.Model):
                 fecha_fin = datetime.strptime(result[0][1], '%Y-%m-%d').date()
         return (fecha_inicio, fecha_fin)
 
-    def _obtener_rango_fecha_edt(self):
+    def _obtener_rango_fecha_edt(self, planeadas=False):
         if isinstance(self.id, models.NewId):
             return False, False
         self.ensure_one()
         fecha_inicio = False
         fecha_fin = False
-        self.env.cr.execute("""
-            SELECT
-                MIN(fecha_inicio), MAX(fecha_fin)
-            FROM
-                project_edt
-            WHERE
-                parent_id = %s
-            """, (self.id,)
-        )
+        if planeadas:
+            self.env.cr.execute("""
+                SELECT
+                    MIN(fecha_planeada_inicio), MAX(fecha_planeada_fin)
+                FROM
+                    project_edt
+                WHERE
+                    parent_id = %s
+                """, (self.id,)
+            )
+        else:
+            self.env.cr.execute("""
+                SELECT
+                    MIN(fecha_inicio), MAX(fecha_fin)
+                FROM
+                    project_edt
+                WHERE
+                    parent_id = %s
+                """, (self.id,)
+            )
         result = self.env.cr.fetchall()
         if len(result):
             if result[0][0]:
@@ -629,12 +674,14 @@ class project_edt(models.Model):
         tomando como base los valores ya calculados por objeto
         """
         # print '_compute_ejecucion_esperada_a_fecha_estado', self._name, self.id, self.numero
-        if not self.duracion_planeada_dias:
-            return 0,0
         costo = 0
         costo_planeado_fecha = 0
         progreso_esperado = 0
-        progreso_diario = 100/float(self.duracion_planeada_dias)
+        progreso_diario = None
+        if not self.duracion_planeada_dias:
+            progreso_diario = 100
+        else:
+            progreso_diario = 100/float(self.duracion_planeada_dias)
         dias_esperados = calcular_duracion_en_dias_fecha_estado(self.fecha_planeada_inicio, self.fecha_estado)
         if dias_esperados < 0:
             dias_esperados = 0
@@ -1033,7 +1080,7 @@ class project_task(models.Model):
         if(self.fecha_planeada_inicio and self.fecha_planeada_fin and
            self.fecha_planeada_inicio > self.fecha_planeada_fin
             ):
-            raise ValidationError("Fecha de inicio no puede ser posterior a la de finalización")
+            raise ValidationError("Fecha de inicio no puede ser posterior a la de finalización {} {}".format(self.numero, self.name))
 
     @api.onchange('fecha_planeada_inicio')
     def _onchange_fecha_planeada_inicio(self):
@@ -1079,6 +1126,15 @@ class project_task(models.Model):
                 self.fecha_inicio, self.fecha_fin, self.duracion_dias
             ),
         )
+
+    @api.one
+    def ajustar_planeado_button(self):
+        self.write({
+            'fecha_planeada_fin': self.fecha_fin,
+            'fecha_planeada_inicio': self.fecha_inicio,
+        })
+        self._compute_progreso()
+        return True
 
     @api.multi
     def reprogramar_tarea_wizard_button(self):
@@ -1294,10 +1350,12 @@ class project_task(models.Model):
         self.costo_planeado_fecha = costo_planeado_fecha
 
     def _compute_progreso_esperado(self, fecha_estado):
-        if not self.duracion_planeada_dias:
-            return 0,0
         progreso_esperado = 0
-        progreso_diario = 100/float(self.duracion_planeada_dias)
+        progreso_diario = None
+        if not self.duracion_planeada_dias:
+            progreso_diario = 100
+        else:
+            progreso_diario = 100/float(self.duracion_planeada_dias)
         dias_esperados = calcular_duracion_en_dias_fecha_estado(self.fecha_planeada_inicio, fecha_estado)
         if dias_esperados < 0:
             dias_esperados = 0
@@ -1418,6 +1476,21 @@ class project_project(models.Model):
         required=False,
         default=True,
     )
+    # -------------------
+    # Sobreescribe campos y metodos de modulo original del odoo
+    # -------------------
+    def _get_attached_docs(self, cr, uid, ids, field_name, arg, context):
+        res = {}
+        attachment = self.pool.get('ir.attachment')
+        for id in ids:
+            res[id] = attachment.search(cr, uid, self._get_document_domain(cr, uid, ids, context), context=context, count=True)
+        return res
+
+    _columns = {
+        'doc_count': fields_v7.function(
+            _get_attached_docs, string="Number of documents attached", type='integer'
+        )
+    }
 
     # -------------------
     # methods
@@ -1495,6 +1568,38 @@ class project_project(models.Model):
             'views': [(view.id, 'form'),
                     (False, 'form')],
         }
+
+    def _get_document_domain(self, cr, uid, ids, context):
+        task_ids = self.pool.get('project.task').search(cr, uid, [('project_id', 'in', ids)])
+        registro_ids = self.pool.get('project.task.registro_progreso').search(cr, uid, [('task_id', 'in', task_ids)])
+        edt_ids = self.pool.get('project.edt').search(cr, uid, [('project_id', 'in', ids)])
+        return [
+             '|','|','|',
+             '&', ('res_model', '=', 'project.project'), ('res_id', 'in', ids),
+             '&', ('res_model', '=', 'project.task'), ('res_id', 'in', task_ids),
+             '&', ('res_model', '=', 'project.edt'), ('res_id', 'in', edt_ids),
+             '&', ('res_model', '=', 'project.task.registro_progreso'), ('res_id', 'in', registro_ids),
+        ]
+
+    # Sobreescribe el método en el modulo project original de odoo
+    def attachment_tree_view(self, cr, uid, ids, context):
+        domain = self._get_document_domain(cr, uid, ids, context)
+        res_id = ids and ids[0] or False
+        return {
+            'name': 'Adjuntos',
+            'domain': domain,
+            'res_model': 'ir.attachment',
+            'type': 'ir.actions.act_window',
+            'view_id': False,
+            'view_mode': 'kanban,tree,form',
+            'view_type': 'form',
+            'help': '''<p class="oe_view_nocontent_create">
+                        Se listan Documentos que son parte de las tareas y EDTs del proyecto.
+                    </p>''',
+            'limit': 80,
+            'context': "{'default_res_model': '%s','default_res_id': %d}" % (self._name, res_id)
+        }
+
 
 class project_task_registro_progreso(models.Model):
     _name = 'project.task.registro_progreso'

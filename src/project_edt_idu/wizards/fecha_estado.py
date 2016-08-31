@@ -90,7 +90,7 @@ class project_edt_wizard_fecha_estado(models.TransientModel):
         wizard_model = self.env['project.edt.wizard.fecha_estado']
         for p in project_model.search([('state','=','open')]):
             try:
-                wizard_model.create({'project_id': p.id}).actualizar_fecha_estado()
+                wizard_model.with_context(tracking_disable=True).create({'project_id': p.id}).actualizar_fecha_estado()
             except Exception:
                 pass
         return True
