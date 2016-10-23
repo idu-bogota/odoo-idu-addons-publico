@@ -18,5 +18,17 @@
         <field eval="'notificar_expiracion_cuenta_cron'" name="function"/>
         <field eval="'()'" name="args"/>
     </record>
+    <record forcecreate="True" id="ir_cron_syc_res_users_ldap" model="ir.cron">
+        <field name="name">Activa/Desactiva Usuarios y Actualiza Dependencias con LDAP</field>
+        <field eval="True" name="active"/>
+        <field name="user_id" ref="base.user_root"/>
+        <field name="interval_number">1</field>
+        <field name="interval_type">days</field>
+        <field name="numbercall">-1</field>
+        <field eval="False" name="doall"/>
+        <field eval="'res.users'" name="model"/>
+        <field eval="'actualizar_listado_usuarios_cron'" name="function"/>
+        <field eval="'()'" name="args"/>
+    </record>
 </data>
 </openerp>

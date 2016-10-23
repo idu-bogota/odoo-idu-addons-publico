@@ -7,7 +7,7 @@ import re, json
 import logging
 _logger = logging.getLogger(__name__)
 
-def geocodificar(direccion, srid, uri = '', zone = 1100100): #Default = Bogota
+def geocodificar(direccion, srid, uri = '', zone = 1100100, url_2 = ''): #Default = Bogota
     """
     Geolocalización utilizando el servicio disponible en el SIGIDU
     Parameters :
@@ -16,8 +16,37 @@ def geocodificar(direccion, srid, uri = '', zone = 1100100): #Default = Bogota
     uri = Dirección del servicio web del SIGIDU, for idu = http://gi03cc01/ArcGIS/rest/services/GeocodeIDU/GeocodeServer/findAddressCandidates?
     zone = Código de la ciudad - Bogota = 1100100
     REST POST Example http://gi03cc01/ArcGIS/rest/services/GeocodeIDU/GeocodeServer/findAddressCandidates?Street=cra+82+a+6+37&Zone=Bogot%C3%A1+D.C.&outFields=&outSR=&f=html
+    ejemplo=http://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?singleLine=cl+89+b+116+A+30,Bogota,colombia&outFields=City,Country&maxLocations=1&f=pjson
     """
     #return '{"type":"Point","coordinates":[-8246435.141098299995065,512561.201248599973042]}';
+    punto_encontrado = False
+    try:
+        direccion = direccion.encode('utf8')
+        if punto_encontrado == False:
+            if not url_2:
+                raise Warning('Por favor configure el parametro de sistema llamado pqrs.esri_geocodificador_url.')
+            url_2 = "{}singleLine={},Bogota,colombia&outFields=City,Country&maxLocations=1&f=pjson".format(url_2, direccion)
+            _logger.info("URL: {0}".format(url_2))
+            jsonstr = urllib.urlopen(url_2).read()
+            vals = json.loads(jsonstr)
+            if (len(vals) >= 2):
+                candidates = vals['candidates']
+                _logger.info("candidates: {0}".format(candidates))
+                for candidate in candidates :
+                    if candidate['address'] != 'Bogotá, D.C.':
+                        location = candidate['location']
+                        x = location['x']
+                        y = location['y']
+                        punto = {
+                            'type': "Point",
+                            'coordinates': [x, y]
+                        }
+                        punto_encontrado = True
+                        return punto
+    except Exception as e:
+        _logger.error(str(e))
+        return False
+
     try:
         direccion = direccion.encode('utf8')
         url = "{0}Street={1}&Zone={2}&outSR={3}&f=pjson".format(uri, direccion, zone, 4326) #Convertir las coordenadas a geográficas
@@ -26,16 +55,17 @@ def geocodificar(direccion, srid, uri = '', zone = 1100100): #Default = Bogota
         vals = json.loads(jsonstr)
         if (len(vals) >= 2):
             candidates = vals['candidates']
-            _logger.info("candidates: {0}".format(candidates))
-            for candidate in candidates :
-                location = candidate['location']
-                x = location['x']
-                y = location['y']
-                punto = {
-                    'type': "Point",
-                    'coordinates': [x, y]
-                }
-                return punto
+            if candidates:
+                _logger.info("candidates: {0}".format(candidates))
+                for candidate in candidates :
+                    location = candidate['location']
+                    x = location['x']
+                    y = location['y']
+                    punto = {
+                        'type': "Point",
+                        'coordinates': [x, y]
+                    }
+                    return punto
     except Exception as e:
         _logger.error(str(e))
         return False

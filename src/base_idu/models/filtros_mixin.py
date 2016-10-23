@@ -26,6 +26,7 @@ def adiciona_keywords_en_search(self, cr, uid, args, offset=0, limit=None, order
     sirve para hacer más dinámicos los filtros en la vista tree. Ejemplo
 
     Extender el modelo:
+    from openerp.addons.base_idu.models.filtros_mixin import adiciona_keywords_en_search
 
     class project_project(models.Model):
         _name = 'project.project'

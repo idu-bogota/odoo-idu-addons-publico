@@ -35,5 +35,7 @@ class base_idu_wizard_registrar_mensaje(models.TransientModel):
         }).id
         record = self.env[context.get('active_model')].browse(context.get('registro_id'))
         if context.get('signal'):
+            if context.get('reset') == True:
+                record.create_workflow()
             record.signal_workflow(context.get('signal'))
         return {'type': 'ir.actions.act_window_close'}

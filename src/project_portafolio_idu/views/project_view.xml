@@ -718,11 +718,9 @@
             <search>
                 <field name="name" />
                 <field name="project_id" />
-                <field name="fuente_financiacion_id" />
                 <field name="valor" />
                 <group string="Agrupar por...">
                     <filter string="Proyecto" context="{'group_by':'project_id'}"/>
-                    <filter string="Fuente de financiación" context="{'group_by':'fuente_financiacion_id'}"/>
                 </group>
             </search>
         </field>
@@ -737,7 +735,6 @@
                 <sheet>
                     <group>
                         <field name="project_id" readonly="1" />
-                        <field name="fuente_financiacion_id" />
                         <field name="valor" />
                         <field name="name" />
                     </group>
@@ -754,7 +751,6 @@
             <tree>
                 <field name="name" />
                 <field name="project_id" />
-                <field name="fuente_financiacion_id" />
                 <field name="valor" />
             </tree>
         </field>

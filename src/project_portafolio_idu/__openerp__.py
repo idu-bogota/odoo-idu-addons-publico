@@ -6,7 +6,6 @@
         'base_idu',
         'model_security',
         'project_edt_idu',
-        'stone_erp_idu',
         'hr',
     ],
     'author': "Grupo de Investigación, Desarrollo e Innovación - STRT - IDU",

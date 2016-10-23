@@ -2,9 +2,13 @@
 
 from openerp import models, fields, api, tools
 from openerp.exceptions import ValidationError,AccessDenied,Warning
+from openerp.addons.base_idu.models.create_user import find_area
 import re
 from datetime import timedelta, date, datetime
 import logging
+import ldap
+from ldap.filter import filter_format
+
 _logger = logging.getLogger(__name__)
 
 
@@ -56,6 +60,7 @@ class res_partner(models.Model):
         compute='compute_es_funcionario_idu',
         store=True,
     )
+    id_portal_idu = fields.Integer('ID del usuario en el Portal del IDU')
 
     @api.depends('email')
     @api.one
@@ -142,6 +147,7 @@ class res_partner(models.Model):
     def create(self, vals):
         """Calcula el nombre si es persona natural a partir de nombres y apellidos
            Persona Natural siempre es una compañia
+           Limpia puntos del campo identificacion_numero si es que trae.
         """
         if vals.get('tipo_persona', 'jur') == 'jur':
             vals['is_company'] = True
@@ -153,6 +159,10 @@ class res_partner(models.Model):
         if vals.get('tipo_persona') == 'nat' and (vals.get('nombres') or vals.get('apellidos')):
             fullname = '{0} {1}'.format(vals.get('nombres',''), vals.get('apellidos',''))
             vals['name'] = fullname.strip()
+        identificacion_numero = vals.get('identificacion_numero',False)
+        if (identificacion_numero and isinstance(identificacion_numero, basestring)):
+            vals['identificacion_numero'] = identificacion_numero.strip().replace('.','')
+
         return super(res_partner, self).create(vals)
 
 
@@ -160,6 +170,7 @@ class res_partner(models.Model):
     def write(self, vals):
         """Calcula el nombre si es persona natural a partir de nombres y apellidos
            Persona Natural siempre es una compañia
+           Limpia puntos del campo identificacion_numero si es que trae.
         """
         if vals.get('tipo_persona', 'jur') == 'jur':
             vals['is_company'] = True
@@ -175,6 +186,10 @@ class res_partner(models.Model):
             ):
                 fullname = '{0} {1}'.format(vals.get('nombres', self.nombres), vals.get('apellidos',self.apellidos))
                 vals['name'] = fullname.strip()
+
+        identificacion_numero = vals.get('identificacion_numero',False)
+        if (identificacion_numero and isinstance(identificacion_numero, basestring)):
+            vals['identificacion_numero'] = identificacion_numero.strip().replace('.','')
 
         return super(res_partner, self).write(vals)
 
@@ -203,6 +218,50 @@ class res_partner(models.Model):
         if self.env.context.get('mail_create_nolog', False):
             return True
         return super(res_partner, self)._notify_by_email(message, force_send, user_signature)
+
+    @api.model
+    def buscar_o_crear_partner_desde_portal(self, nombre, identificacion_numero, email, id_portal_idu):
+        """Crea un res.partner utilizando los que vienen desde el portal del IDU en liferay"""
+        contacto = self.search([
+            ('id_portal_idu', '=', id_portal_idu)
+        ])
+        if not contacto:
+            contacto = self.search([
+                ('identificacion_numero', '=', identificacion_numero)
+            ])
+            if contacto:
+                contacto.id_portal_idu = id_portal_idu
+        if not contacto:
+            contacto = self.search([
+                ('email', '=', email)
+            ])
+            if contacto:
+                contacto.id_portal_idu = id_portal_idu
+
+        if not contacto:
+            partes = nombre.split(' ')
+            nombres = ''
+            apellidos = ''
+            if len(partes) == 2:
+                nombres = partes[0]
+                apellidos = partes[1]
+            elif len(partes) >= 3:
+                nombres = partes[:2]
+                apellidos = partes[2:]
+            else:
+                raise ValidationError('Debe ingresar nombre y apellido completo, se recibió: {}'.format(nombre))
+
+            contacto = self.create({
+                'nombres': ' '.join(nombres),
+                'apellidos': ' '.join(apellidos),
+                'tipo_persona': 'nat',
+                'identificacion_numero': identificacion_numero,
+                'identificacion_tipo': 'CC',
+                'email': email,
+                'id_portal_idu': id_portal_idu,
+            })
+
+        return contacto
 
     _sql_constraints = [
         ('unique_email','unique(email)','Este correo electrónico ya está registrado.'),
@@ -305,7 +364,7 @@ class res_users(models.Model):
 
     def check_credentials(self, cr, uid, password):
         super(res_users, self).check_credentials(cr, uid, password)
-        cr.execute('SELECT login,fecha_expiracion FROM res_users WHERE id=%s AND active=TRUE AND (fecha_expiracion IS NULL OR fecha_expiracion >= now())',
+        cr.execute('SELECT login,fecha_expiracion FROM res_users WHERE id=%s AND active=TRUE AND (fecha_expiracion IS NULL OR fecha_expiracion >= now()::DATE)',
             (int(uid),)
         )
         res = cr.fetchone()
@@ -397,6 +456,58 @@ class res_users(models.Model):
             self._signup_create_user(cr, uid, values, context=context)
 
         return (cr.dbname, values.get('login'), values.get('password'))
+
+    @api.model
+    def actualizar_listado_usuarios_cron(self):
+        ldap_obj = self.env['res.company.ldap']
+        conf = ldap_obj.get_ldap_dicts(ids=None)
+        if not conf:
+            return False
+        conf = conf[0]
+        users = self.with_context(active_test=False).search([('es_funcionario_idu','=',True),('login','not in',['admin', 'formulario_web']),('login','not like','CTO%')])
+        _logger.info('Ejecutando actualizar_listado_usuarios para {} usuarios'.format(len(users)))
+        for user in users:
+            _logger.debug('Evaluando {} {}'.format(user.login, user.name))
+            try:
+                ldap_filter = filter_format(conf['ldap_filter'], (user.login,))
+            except TypeError, e:
+                _logger.warning('Could not format LDAP filter. Your filter should contain one \'%s\'.')
+                return False
+            try:
+                results = ldap_obj.query(conf, ldap_filter.encode('utf-8'))
+                # Get rid of (None, attrs) for searchResultReference replies
+                results = [i for i in results if i[0]]
+                if results and len(results) == 1:
+                    if 'department' in results[0][1]:
+                        dependencia = results[0][1]['department'][0]
+                        if dependencia != user.employee_id.department_id.abreviatura:
+                            _logger.info('Actualizando dependencia: {} {} {}'.format(user.login, user.name, dependencia))
+                            area_id = find_area(self, dependencia, user.name)
+                            user.employee_id.write({ 'department_id': area_id })
+                    else:
+                        _logger.warning('No hay registrada dependencia para: {} {}'.format(user.login, user.name))
+
+                    if not user.active:
+                        _logger.info('Activando usuario: {} {}'.format(user.login, user.name))
+                        user.active = True
+                        try:
+                            user.employee_id.active = True
+                        except Exception, e:
+                            _logger.exception(e)
+
+                elif user.active:
+                    _logger.info('Desactivando usuario: {} {}'.format(user.login, user.name))
+                    user.active = False
+                    try:
+                        user.employee_id.active = False
+                    except Exception, e:
+                        _logger.exception(e)
+            except ldap.LDAPError, e:
+                _logger.error('An LDAP exception occurred:')
+                _logger.exception(e)
+            except Exception, e:
+                _logger.exception(e)
+        return True
 
 
 class res_company_location(models.Model):

@@ -35,27 +35,27 @@ _logger = logging.getLogger('create_user')
 # -------------------
 
 def find_area(odoo, name_area, name_user):
-    area = odoo.env['hr.department'].search([
+    area = odoo.env['hr.department'].sudo().search([
         ('abreviatura','=',name_area.strip())
     ])
     if area is None:
-        _logger.warning("EL Area: " + name_area + " No se encuentar definida en la BD. Usuario: " + name_user)
+        _logger.warning("El área: '" + name_area + "' no se encuentra definida en la BD. Usuario: " + name_user)
         return None
     else:
         return area.id
 
 def requires_name_update(odoo, name):
-    numero_espacions = name.find(" ")
-    if numero_espacions >= 2:
+    numero_espacios = name.find(" ")
+    if numero_espacios >= 2:
         return False
     else:
         return True
 
-def update_user_searching(odoo, nombres, apellidos, partner_id, search_login=None, search_id_use=None):
+def update_user_searching(odoo, nombres, apellidos, partner_id, search_login=None, search_id_user=None):
     if not search_login and not search_id_use:
-        _logger.warning("Debe ingresar algunos de estos dos parametros: search_login, search_id_use")
+        _logger.warning("Debe ingresar algunos de estos dos parametros: search_login, search_id_user")
 
-    grups_employee = odoo.env['res.groups'].search([
+    grups_employee = odoo.env['res.groups'].sudo().search([
         ('name','=','Employee')
     ])
 
@@ -64,12 +64,14 @@ def update_user_searching(odoo, nombres, apellidos, partner_id, search_login=Non
         usuario = usuario_obj.sudo().search([('login','=',search_login)])
     elif search_id_use:
         usuario_obj = odoo.env['res.users']
-        usuario = usuario_obj.sudo().search([('id','=',search_id_use)])
+        usuario = usuario_obj.sudo().search([('id','=',search_id_user)])
 
     if usuario:
         usuario.sudo().write(
         {
             'name': '{} {}'.format(nombres, apellidos),
+            'nombres': nombres,
+            'apellidos': apellidos,
             'tz': 'America/Bogota',
             'partner_id': partner_id,
             'groups_id': [(4,grups_employee.id)],
@@ -81,9 +83,11 @@ def update_user(odoo, nombres, apellidos, partner_id, object_user):
     new_user = object_user.sudo().write(
         {
             'name': '{} {}'.format(nombres, apellidos),
+            'nombres': nombres,
+            'apellidos': apellidos,
             'tz': 'America/Bogota',
             'partner_id': partner_id,
-            'groups_id': [(4,groups_employe.id)],
+            'groups_id': [(4, groups_employe.id)],
         })
 
 def create_user(odoo, nombres, apellidos, partner_id, login):
@@ -92,6 +96,8 @@ def create_user(odoo, nombres, apellidos, partner_id, login):
     new_user = usuario_obj.sudo().create(
     {
         'name': '{} {}'.format(nombres, apellidos),
+        'nombres': nombres,
+        'apellidos': apellidos,
         'login': login,
         'groups_id': [(4,groups_employe.id)],
         'lang': 'es_CO',
@@ -101,7 +107,7 @@ def create_user(odoo, nombres, apellidos, partner_id, login):
     return new_user
 
 def update_partner(odoo, nombres, apellidos, email, usuario_id, object_partner):
-    object_partner.write({
+    object_partner.sudo().write({
         'email': email,
         'tipo_persona': 'nat',
         'nombres': nombres,

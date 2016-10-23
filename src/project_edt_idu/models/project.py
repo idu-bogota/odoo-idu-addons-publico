@@ -155,18 +155,18 @@ class project_edt(models.Model):
         default='abierto',
     )
     fecha_planeada_inicio = fields.Date(
-        string='Fecha Planeada de Inicio',
+        string='Fecha Planeada de Inicio (Línea Base)',
         required=False,
         readonly=True,
         track_visibility='onchange',
     )
     fecha_planeada_fin = fields.Date(
-        string='Fecha Planeada de Finalización',
+        string='Fecha Planeada de Finalización (Línea Base)',
         required=False,
         readonly=True,
     )
     duracion_planeada_dias = fields.Integer(
-        string='Duración Planeada',
+        string='Duración Planeada (Línea Base)',
         help='Duración Planeada en Días',
         required=False,
         compute='_compute_duracion_planeada',
@@ -537,7 +537,7 @@ class project_edt(models.Model):
         (edt_inicio, edt_fin) = self._obtener_rango_fecha_edt(planeadas)
         (task_start, task_end) = self._obtener_rango_fecha_tareas(planeadas)
         if not edt_inicio and not edt_fin and not task_start and not task_end:
-            return
+            return self.fecha_planeada_inicio, self.fecha_planeada_fin, calcular_duracion_en_dias(self.fecha_planeada_inicio, self.fecha_planeada_fin)
         fecha_inicio = False
         fecha_fin = False
         duracion_dias = 0
@@ -578,6 +578,7 @@ class project_edt(models.Model):
 
     @api.one
     def _compute_fechas_planeadas(self):
+        print self.id
         fecha_inicio, fecha_fin, duracion_dias = self._compute_fechas_helper(True)
         vals = {
             'fecha_planeada_inicio': fecha_inicio,
@@ -682,7 +683,10 @@ class project_edt(models.Model):
             progreso_diario = 100
         else:
             progreso_diario = 100/float(self.duracion_planeada_dias)
-        dias_esperados = calcular_duracion_en_dias_fecha_estado(self.fecha_planeada_inicio, self.fecha_estado)
+        dias_esperados = 0
+        if self.fecha_planeada_inicio:
+            dias_esperados = calcular_duracion_en_dias_fecha_estado(self.fecha_planeada_inicio, self.fecha_estado)
+
         if dias_esperados < 0:
             dias_esperados = 0
 
@@ -821,23 +825,23 @@ class project_task(models.Model):
         ],
     )
     fecha_planeada_inicio = fields.Date(
-        string='Fecha de Inicio Planeada',
+        string='Fecha de Inicio Planeada (Línea Base)',
         required=False,
         readonly=True,
         track_visibility='onchange',
     )
     fecha_planeada_fin = fields.Date(
-        string='Fecha de Finalización Planeada',
+        string='Fecha de Finalización Planeada (Línea Base)',
         required=False,
         readonly=True,
         track_visibility='onchange',
     )
     date_start = fields.Datetime(
-        string='Fecha y hora real de inicio',
+        string='Fecha y Hora Real de Inicio',
         readonly=False,
     )
     date_end = fields.Datetime(
-        string='Fecha y hora real de finalización',
+        string='Fecha y Hora Real de Finalización',
         readonly=False,
     )
     fecha_inicio = fields.Date(
@@ -855,7 +859,7 @@ class project_task(models.Model):
         help='Fecha de finalización proyectada basado en fecha inicial y duración en días',
     )
     duracion_planeada_dias = fields.Integer(
-        string='Duración Planeada',
+        string='Duración Planeada (Línea Base)',
         help='Duración Planeada en Días',
         required=False,
         compute='_compute_duracion_planeada',
@@ -1096,6 +1100,43 @@ class project_task(models.Model):
     def _onchange_fecha_planeada_fin(self):
         try:
             self._check_fecha_planeada_fin()
+        except Exception as e:
+            return {
+                'title': "Error de Validación",
+                'warning': {'message': e.name}
+            }
+
+    @api.one
+    @api.constrains('fecha_inicio')
+    def _check_fecha_inicio(self):
+        self._check_fechas()
+
+    @api.one
+    @api.constrains('fecha_fin')
+    def _check_fecha_fin(self):
+        self._check_fechas()
+
+    @api.one
+    def _check_fechas(self):
+        if(self.fecha_inicio and self.fecha_fin and
+           self.fecha_inicio > self.fecha_fin
+            ):
+            raise ValidationError("Fecha de inicio no puede ser posterior a la de finalización {} {}".format(self.numero, self.name))
+
+    @api.onchange('fecha_inicio')
+    def _onchange_fecha_inicio(self):
+        try:
+            self._check_fecha_inicio()
+        except Exception as e:
+            return {
+                'title': "Error de Validación",
+                'warning': {'message': e.name}
+            }
+
+    @api.onchange('fecha_fin')
+    def _onchange_fecha_fin(self):
+        try:
+            self._check_fecha_fin()
         except Exception as e:
             return {
                 'title': "Error de Validación",
@@ -1544,6 +1585,9 @@ class project_project(models.Model):
     @api.multi
     def usuario_actual_actua_como_gerente(self):
         """Retorna True a los usuarios que pueden acceder a las funcionalidades que requieren un perfil de gerente para el proyecto"""
+        if self.env.user.has_group('project.group_project_manager'):
+            return True
+
         self.ensure_one()
         autorizado_ids = []
         user_id = self.env.user.id

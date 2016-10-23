@@ -873,13 +873,6 @@ class project_financiacion(models.Model):
         ondelete='restrict',
         default=lambda self: self._context.get('project_id', None),
     )
-    fuente_financiacion_id = fields.Many2one(
-        string='Fuente de financiación',
-        required=True,
-        track_visibility='onchange',
-        comodel_name='stone_erp.fuente',
-        ondelete='restrict',
-    )
     valor = fields.Monetary(
         string='Valor',
         required=True,
