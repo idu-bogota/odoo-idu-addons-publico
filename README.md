@@ -33,7 +33,7 @@ Debido al interés de las diferentes entidades del distrito en la utilización d
 
 El desarrollo ha sido realizado por la Subdirección de Recursos Tecnológicos del Instituto de Desarrollo Urbano IDU, los derechos de autor son propiedad del IDU. Sin embargo los desarrolladores que han participado en la construcción y mantenimiento del código fuente aquí publicado son:
 
-- José Javier Vargas
+- [José Javier Vargas](https://jotavargas.github.io/)
 - Luz Yamile Reyes
 - Pablo Riaño
 - Cinxgler Mariaca
